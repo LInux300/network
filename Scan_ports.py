@@ -47,8 +47,23 @@ def getHostPorts():
       host = raw_input("\t Enter the IP Address to scan: ")
     else:
       print "Wrong input"
-  startPort = int(raw_input("\t Enter the start port number\t"))
-  endPort = int (raw_input("\t Enter the last port number\t"))
+  while True:
+    try: 
+      startPort = int(raw_input("\t Enter the start port number\t"))
+      assert 0 <= startPort <= 255, "must be between 0 and 255 (inclusive)"
+    except ValueError:
+      print("Please write the number")
+    except AssertionError, e:
+      print e
+
+  while True:
+    try: 
+      endPort = int (raw_input("\t Enter the last port number\t"))
+      assert 0 <= endPort <= 255, "must be between 0 and 255 (inclusive)"
+    except ValueError:
+      print("Please write the number")
+    except AssertionError, e:
+      print e
   return host, startPort, endPort
 
 def getTimeout():
