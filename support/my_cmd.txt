@@ -1,0 +1,1990 @@
+:set background=dark
+
+#======================================================================================================================================
+#   zmena uzivatele v C
+#======================================================================================================================================
+gvim /tmp/uid.c
+# s timhle obsahem
+main()
+{
+  setuid(501);
+  seteuid(501);
+  system("/usr/bin/id");
+}
+#=================
+vim
+cc /tmp/uid.c -o tmp/uid               # kontroluje kde je syntakticka chyba v programu, a vytvori object --> vytvori /tmp/uid a /tmp/.uid
+chmod u+s uid
+vim uid.c
+# pak se prihlasim jako root
+/tmp/uid                               # prava sou zmenena                          
+
+
+
+/usr/bin/id                 # vrati info, pod jakym uzivatelem, skupinou beha
+
+
+/tmp/uid                    # je zkompilovana verze make, spusti program /usr/bin/id pod jinyma pravama uzivatele
+
+
+#======================================================================================================================================
+#   PYTHON
+#======================================================================================================================================
+p = os.popen('ls')
+for line in p.readlines():
+     print p
+
+
+#/n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#//
+#//    #shell - commands
+#//----------------------------------------------------------------------------------------------------------------------------------------------------------
+# zjisteni hardwarovych prostredku linux
+df                # sjisteni velikosti
+dmidecode --type 39        # type cislo uvadi co potrebuju zjistit, jesltli memory, processor, atd... http://www.cyberciti.biz/tips/querying-dumping-bios-from-linux-command-prompt.html
+
+# all shell scripts begin with #!/bin/bash to specity that the bash shell should be used to run the script
+# # you can run shell scripts by running /bin/bash_script_file_name or by adding the execute permission to the script file.
+
+# bash profile
+# so se kdy spousti
+# 1. /etc/profile
+# 2. .bashrc --> kdyz je non-login bash  nebo .bash-profile - .profile - ./bash_login
+
+PATH=$PATH:~/temp                     # prida cestu ~/temp to ypur system's PATH environment variable.
+    echo $PATH                            # env $PATH  --> zobrazi cesty
+
+/usr/bin/system-config-packages
+
+# run bash script
+/bin/bash ~/myscript                                                         # spusteni skriptu
+chmod u+x ~/myscript, then enter myscript at the sheel promt                 # takto spustim script
+
+
+/tail/var/log/firewall 1 > jmeno_souboru_pro_zapis 2>&1     # do souboru se zapise standart output and the standart error
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ethernet
+# SOURCE: http://www.linuxexpres.cz/praxe/domaci-pocitacova-sit-2
+# Pocitacove site
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+ethtool eth0                # ethtool <nazev_karty> zjisti info o karte
+lspci                        # zjisti co je pripojeno na sbernici a jakou rychlosti se tam pohybuje
+
+/sbin/ifconfig -i            #            
+/sbin/ifconfig -a            # zviditelni vsechna zarizeni i ta, ktera zrovna nejsou aktivni
+
+# zapojeni pres switch
+# MDI/MDI-X                    # switch, kteremu je jedno jestli mu leze primej nebo krizenej kabel, --> MDI-X --> zarizeni vyzaduje krizenej kabel
+# zdirka na switchi Up-link         # je to zdirka ktera slouzi k propojeni s dalsim switchem --> Pokud je celkový poèet portù na vašem switchi lichý, pak se jedná právì o „UP-Link“.
+
+# nastaveni "IP adresy" pomoci IP programu, IP je mladsi program nez ifconfig
+# Na prvním poèítaèi bude IP adresa 192.168.1.1, na druhém 192.168.1.2 a na tøetím 192.168.1.3. Protože používáme masku 255.255.255.0, mùžeme tímto zpùsobem pokraèovat až do adresy 192.168.1.254. Adresa 192.168.1.255 je pak broadcastem celé sítì.
+# Adresa 192.168.1.1 s maskou 255.255.255.0 se pak zapíše jednoduše jako 192.168.1.1/24, kde „/24“ je prefix, který nám oznaèuje velikost daného subnetu. Z IP adresy a prefixu jsme pak schopni dopoèítat další potøebné údaje jako je „network“ èi „broadcast“.
+
+# ip je lepsi nez ifconfig
+
+1.     ifconfig eth0 192.168.1.1 netmask 255.255.255.0 up                # nastaveni ip adresy pomoci ifconfig na zarizeni eth0
+    ip addr add 192.168.1.1/24 brd + dev eth0                        # nastaveni IP adresy pomoci ip na zarizeni eth0
+    ip addr del 192.168.1.1/24 dev eth0                                # jestli jsem se pri nastavovani spletl muzu napsat tohle a to smaze
+    ip addr show eth0                                                # vypise aktualni IP adresy na rozhrani na a
+2.     ip link set eth0 up                                                #ifconfig parametr up, je potøeba øíct programu IP, aby linku zaktivoval.Pro aktivaci napište do konzole pøíkaz ip link set eth0 up
+    ip link set eth0 down                                            # schodime linku
+    ip link set eth0 name nove_jmeno                                # vlastni pojmenovani linky
+
+3. nastavim tak u vsech pocitacu a pak spojeni otestuju prikazem ping   
+
+4.    arping 192.168.1.100 -c 2                                        # Pokud si pøi instalaci nové sítì opíšeme MAC adresy všech PC, budeme moc zjistit, které poèítaèe mají stejnou IP adresu. K tomu, abychom „záškodníky“ našli, nám poslouží pøíkaz arping, který vysílá ARP requesty na okolní poèítaèe. Do shellu zadáme pouze arping a IP adresu poèítaèe. V pøípadì, že je vše v poøádku, odpoví nám program jednou IP adresou a jednou MAC adresou.
+                # jestlize najde vic jak dva dotazy tak neco neni v poradku a minimalne dve zarizeni maji stejnou ip adresu
+# problemy s nastavenim
+5. nmap -sP 192.168.1.0/24                                            # sesbiram vsechny MAC adresy moji site, nevim moc mi to nefungovalo
+                # v rozsahu 192.168.1.0/24    = 192.168.1.0    az 192.168.1.255
+adresa bitù prefix maska            
+1   0  /32    255.255.255.255
+2   1  /31    255.255.255.254
+4   2  /30    255.255.255.252
+8   3  /29    255.255.255.248
+16   4  /28    255.255.255.240
+32   5  /27    255.255.255.224
+64   6  /26    255.255.255.192
+128   7  /25    255.255.255.128
+256   8  /24    255.255.255   
+512   9  /23    255.255.254   
+1 K  10  /22    255.255.252   
+2 K  11  /21    255.255.248   
+4 K  12  /20    255.255.240   
+8 K  13  /19    255.255.224   
+16 K  14  /18    255.255.192   
+32 K  15  /17    255.255.128   
+64 K  16  /16    255.255       
+128 K  17  /15    255.254       
+256 K  18  /14    255.252       
+512 K  19  /13    255.248       
+1 M  20  /12    255.240       
+2 M  21  /11    255.224       
+4 M  22  /10    255.192       
+8 M  23  /9     255.128       
+16 M  24  /8     255           
+32 M  25  /7     254           
+64 M  26  /6     252           
+128 M  27  /5     248           
+256 M  28  /4     240           
+512 M  29  /3     224           
+1024 M  30  /2     192 
+# Vìtšina menších providerù používá obvykle pouze prefixy /24, /30 a /32.
+
+6.    ethtool -s eth0 duplex full speed 100                            # Prvním z nich je ethtool. Nastavení zaøízení eth0 pro plný duplex na 100Mbit by vypadalo následovnì
+            # mii-tool -F 100baseT-FD eth0                            # timhle prikazem dosahnu stejneho efektu
+            # u starsich zarizeni lze si vybrat z vice moznosti     # U nìkterých historických kombo karet (karty které obsahují nìkolik typù sí ových rozhraní) je potøeba urèit, pøes který konektor data poteèou. Vìtšinou je na výbìr ze tøí rozhraní. Pro konektor TP napíšeme
+            # ethtool -s eth0 port tp duplex full speed 100
+            # analogicky to platí pro port AUI a BNC:
+            # ethtool -s eth0 port aui duplex full speed 100
+            # ethtool -s eth0 port bnc duplex full speed 100        # tohle je pripojeni pomoci koaxialniho kabelu, ale to se uz dlouho nepouziva
+
+# broadcastová adresa                                                # Jedná se o poslední adresu v dané èásti sítì. estliže na tuto adresu dorazí paket, rozešle se všem uzlùm v dotyèném segmentu. Broadcastovou adresu zjistíme tak, že v IP adrese (jejím binárním tvaru) opíšeme celou èást „sítì“ a èást „stroje“ nahradíme samými jednièkami.
+
+
+#
+# Domácí poèítaèová sí - Nastavni site
+# SOURCE: http://www.linuxexpres.cz/praxe/domaci-pocitacova-sit-7
+#
+
+1.    /etc/network/interfaces                            # Pro nastavení sítì pøes providerùv DHCP server staèí mít v tomto souboru pouze následující tøi øádky:
+        # vse co potrebuji k nastaveni DHCP serv
+        auto lo eth0                            # První øádek nám oznaèuje, která zaøízení budou po startu aktivní.
+        iface lo inet loopback                    # Na druhém øádku je definice speciálního rozhraní loopback
+        iface eth0 inet dhcp                    # Tøetí øádek definuje, že na rozhraní eth0 bude IP adresa pøidìlena z DHCP serveru
+
+2. /etc/hostname                    # V nìm by mìlo být uvedeno FQDN stroje. Pokud tomu tak není, uèiòte tak napøíklad pøíkazem --> echo gateway.hodza.net > /etc/hostname
+                                                           
+3. Instalace kešovacího DNS serveru
+# DNS (Domain Name System)  --> distribuovaná databáze sí ových informací
+apt-get install bind            # na bind servry jsou utoky --> proto zpoustet v chrootovanem prostredi
+    3.a Jak zpustit bind v chrootovacim rezimu
+    3.b    /etc/init.d/bind9 stop            # zastavinm BIND
+    3.c    vim /etc/default/bind9            # upravime:
+                                            OPTIONS="-u bind"
+                                            # Set RESOLVCONF=no to not run resolvconf
+                                            RESOLVCONF=yes
+                                          na -->
+                                            OPTIONS="-u bind -t /var/lib/named"
+                                            # Set RESOLVCONF=no to not run resolvconf
+                                            RESOLVCONF=yes
+                                            # t --> znamená, že budeme BIND spouštìt v chrootovaném prostøedí, a to konkrétnì z adresáøe /var/lib/named.
+
+        # vytvorim adresar, protoze nema existovat.
+    3.d    mkdir -p /var/lib/named/etc
+        mkdir /var/lib/named/dev
+        mkdir -p /var/lib/named/var/cache/bind
+        mkdir -p /var/lib/named/var/run/bind/run
+       
+    3.e    #     Co nám v adresáøové struktuøe chybí, je hlavní konfiguraèní soubor. Ten pøesuneme z pùvodního místa do nového prostøedí. Abychom si ulehèili v budoucnu konfiguraci, udìláme si na nìj zpìt symbolický link.
+        mv /etc/bind /var/lib/named/etc
+        ln -s /var/lib/named/etc/bind /etc/bind
+   
+    3.f # Pro správný chod nameserveru je nutné mít vytvoøené zaøízení /dev/null a /dev/random. Tato zaøízení si mùžeme vyrobit pomocí pøíkazu mknod:
+        mknod /var/lib/named/dev/null c 1 3
+        mknod /var/lib/named/dev/random c 1 8
+    3.g # Protože jsme vše dìlali pod superuživatelským úètem, je ještì potøeba nastavit správná práva na patøièné soubory a adresáøe.
+        chmod 666 /var/lib/named/dev/null
+        chmod 666 /var/lib/named/dev/random
+        chown -R bind:bind /var/lib/named/var/*
+        chown -R bind:bind /var/lib/named/etc/bind
+    4.h DNS server máme úspìšnì nastavený. Zbývá poslední krok – musíme donutit systémový logovací program, aby z nìj pøijímal chybové hlášení. O "monitoring" systému se stará démon syslogd. Jeho parametry ke spuštìní jsou opìt v adresáøi /etc/default, a to konkrétnì v souboru syslogd. Pøi jeho zkoumání narazíte na øádek SYSLOGD="", který znaèí, že je syslogd spouštìn bez jakýchkoliv parametrù. To hned napravíme – øetìzec zeditujeme tak, aby vypadal následovnì:
+        SYSLOGD="-a /var/lib/named/dev/log"
+    4.i    Parametr -a udává, že má BIND naslouchat na dalším socketu – v našem pøípadì konkrétnì na /var/lib/named/dev/log. Aby se zmìny projevily, musíme oba démony restartovat. Zaèneme nejdøíve syslogem a poté restartujeme bind.
+        /etc/init.d/sysklogd restart
+        /etc/init.d/bind9 start
+    4.j # Funkènost DNS serveru mùžeme lehce ovìøit. Nejprve zjistíme, zda-li démon naslouchá na lokálních adresách. Použijeme k tomu program netstat. Pøíkaz k otestování je netstat -ta.
+        netstat -ta
+
+4.    Instalace poštovního serveru
+    4.1    apt-get install postfix
+        #Systém se taktéž dotáže na naše poštovní jméno. Já použiji stejné, jako je název poèítaèe – v mém pøípadì tedy gateway.hodza.net.
+    4.2 apt-get install telnet                        # abych zjistil zda je system funkcni
+                    # Je-li poštovní systém v poøádku, mìl by naslouchat na portu 25. Vyzkoušíme tedy pøíkaz telnet localhost 25. Jako odpovìï bychom mìli dostat
+                    # Server nyní oèekává, že se mu pøedstavíme. Uèiníme tak napsáním øetìzce helo localhost. Protože je náš poš ák slušnì vychovaný, mìl by odpovìdìt 250 gateway.hodza.net, èímž zároveò oznámí, že je ochotný s námi komunikovat.
+                    # Zkusíme pøes nìj tedy poslat nìjaký e-mail. Nejprve mu øekneme, kdo zprávu posílá. Píšu mail from: kozak@fofrnet.cz. Opìt bychom mìli získat odpovìï 250 2.1.0 Ok. Pokraèujeme v psaní e-mailu – zadáme, komu chceme email poslat, a to pomocí pøíkazu rcpt to: kozak@fofrnet.cz. Nepøekvapí nás hlášení 250 2.1.5 Ok, a tak pokraèujeme dále pøíkazem data. Pokud je systém pøipraven pro psaní samotného obsahu zprávy, vypíše hlášení 354 End data with ..
+                    mail from: kozak@fofrnet.cz                # napise ok, odesilatel
+                    rcpt to: kozak@fofrnet.cz                # prijemnce
+                    data                                    # Pokud je systém pøipraven pro psaní samotného obsahu zprávy, vypíše hlášení 354 End data with ..
+                        Subject:                                #Jestliže chceme, aby zpráva mìla subjekt, napíšeme Subject: pøedmìt subjektu. Dále pak pokraèujeme, jako bychom psali v bìžném editoru. Já do testovacích zpráv dávám alespoò datum a èas odeslání zprávy, abych pak mohl snadnìji hledat chybu. Jakmile nás to pøestane bavit, zmáèkneme klávesu [Enter]. Na nový øádek napíšeme teèku a opìt odentrujeme. Tím dáváme poš ákovi jasnì najevo, že jsme již e-mail dopsali a chceme ho odeslat.
+                                                                #
+                    [ENTER]
+                    .
+                    [ENTER]                                        # Tím dáváme poš ákovi jasnì najevo, že jsme již e-mail dopsali a chceme ho odeslat. Jako odpovìï bychom mìli dostat hlášení 250 2.0.0 Ok: queued as 451613540B3. Po nìkolika vteøinách nalezneme ve svém mailboxu onu testovací zprávu.
+                        chyba >                                    # var/log/mail.log, /var/log/mail.err a /var/log/daemon.log
+
+5. Seøizujeme èas
+    # Pro tento úèel si mùžeme do systému nainstalovat NTP server a klienta ntp-date
+    5.1     apt-get install ntp ntpdate   
+    # spusti se a zacne synchronizovat, ale trva dlouho, proto -->
+    Proto je dobré na chvíli server vypnout (/etc/init.d/ntp stop), následnì èas ruènì sesynchronizovat pøíkazem ntpdate ntp.cesnet.cz a nakonec server opìt spustit (/etc/init.d/ntp start)
+    /etc/init.d/ntp stop
+    ntpdate ntp.cesnet.cz
+    /etc/init.d/ntp start
+
+
+6. mysql
+    # SOURCE: http://www.linuxexpres.cz/praxe/domaci-pocitacova-sit-8
+    6.1    apt-get install mysql-server mysql-client libmysqlclient15-dev
+    6.2    mozne problemy s MySQl
+        chown mysql:root /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld/*
+        chown mysql:mysql /var/lib/mysql && chown -R mysql:mysql /var/lib/mysql/*
+        apt-get --purge remove libdbd-mysql-perl libmysqlclient15-dev libmysqlclient15off mysql-client mysql-client-5.0 mysql-common mysql-server mysql-server-5.0
+            apt-get install mysql-server mysql-client libmysqlclient15-dev        # pak znovu nainstaluju
+           
+    6.3 mysql_secure_installation            # Posledním krokem pøi instalaci MySQL serveru je konfigurace databáze. Tu provedeme pomocí mysql_secure_installation. Vzhledem k tomu, že detailní popis tohoto programu vyšel v minulém èísle èasopisu LinuxEXPRES pod názvem MySQL pro zelenáèe, je celkem zbyteèné ho zde opakovat.
+       
+       
+
+
+7. Monitoring s MRTG  _-> monitoring sitoveho pripojeni, vypadky, atd.
+    # SOURCE: http://www.linuxexpres.cz/praxe/domaci-pocitacova-sit-8
+    7.1    apt-get install mrtg                #øi instalaci budeme dotázáni, zda-li má být jeho hlavní konfiguraèní soubor vytvoøen pouze s právy uživatele MRTG. Tuto volbu potvrdíme stiskem tlaèítka Ano, nebo konfiguraèní soubor bude pozdìji obsahovat citlivé údaje
+        # po instalaci se vytvori adresar:
+        /var/www/ adresáø mrtg            # do kterého bude program ukládat veškerá svá data vèetnì vygenerovaných grafù
+    7.2    /usr/local/bin                        # si vytvorim spustitelný skript, pomocí nìhož se budeme dotazovat na dostupnost nìjaké adresy
+        touch /usr/local/bin/mrtg_ping.sh
+        chmod +x /usr/local/bin/mrtg_ping.sh
+        s obsahem:
+            #!/bin/bash
+            PING="/bin/ping"
+            ADDR="$1"
+            DATA=`$PING -c 15 -s 500 $ADDR -q `
+            LOSS=`echo $DATA | awk '{ lost=gensub("^.* ([0-9]+)% packet loss.*$","\\\\1","g"); print lost; }'`
+            echo $LOSS
+            if [ $LOSS == "100" ];
+            then        echo 0
+            else        echo $DATA | awk -F/ '{print $5 }'
+            fi
+            # Na zaèátku definujeme pøíkazový interpreter, pøes který skript pobìží (v našem pøípadì /bin/bash) a dále pak cestu k binárnímu souboru ping. Øádkem zaèínajícím slovem DATA urèujeme parametry pingu. V tomto pøípadì se provede 15 pingù o velikosti 500 bajtù. Parametr -q znaèí, že ping nebude „ukecaný“. Ostatní øádky se postarají o to, aby byl zobrazen pouze výsledek (nebo 0 v pøípadì neúspìchu). Za povšimnutí stojí program awk, který se stará o filtraci dat. Ten totiž v systému ještì nemáme, což se však dá velice rychle napravit (apt-get install gawk). Jakmile máte skript vytvoøený, otestujte ho napsáním /usr/local/bin/mrtg_ping.sh www.google.com . Odpovìï skriptu musí být dvì èísla pod sebou. V opaèném pøípadì jste skript špatnì opsali nebo nejste funkènì pøipojeni do internetu. 
+    7.3    Jakmile máme odladìno, pokraèujeme dalším krokem, což je editace hlavního konfiguraèního souboru MRTG (/etc/mrtg.cfg). Jeho veškerý obsah vymažeme a vložíme do nìj následující text.
+        vim /etc/mrtg.cfg
+
+    7.4 abychom si data mohli dobre prohlizet, nainstalujem indexovou stranku
+        /usr/bin/indexmaker --output=/var/www/mrtg/index.html --title="Statistiky site" /etc/mrtg.cfg        # Tímto povelem MRTG naète ze svého konfiguraèního souboru (/etc/mrtg.cfg) podstatné informace a vygeneruje statickou HTML stránku, kterou umístí do adresáøe /var/www/mrtg. Vygenerovaná stránka obsahuje rùzné statistické údaje, popisky a hlavnì grafy RTT
+    7.5 http://gateway.hodza.net/mrtg
+   
+       
+       
+       
+   
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# smtp
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+# SMTP is used between servers, SMTP provides to transfer mail to the destination
+# The host which generates the email uses a different protocol - POP
+# POP  -supports remote accesses the mail server and requests mail delivery. Desktop hosts use POP, rather than fully functional SMTp, to access mail servers. POP --> only used by hosts accessing mail servers!!!
+       
+                                           
+# IMAP
+
+
+# POSTFIX
+# An important security protection available on Unix systems is the ability to chroot applications.
+# A chroot establishes a new root directory for a running application such as /var/spool/postfix.
+# When that program runs, its view of the filesystem is limited to the subtree below /var/spool/postfix
+
+man mailq                                            #
+
+# TELNET example
+# Example 2-2. Email message delivery
+#===============================================================================================================================================
+$ telnet mail.example.com 25
+Trying 10.232.45.151
+Connected to mail.example.com.
+Escape character is '^]'.
+220 mail.example.com ESMTP Postfix
+HELO mail.oreilly.com                                # After receiving the welcome banner, introduce yourself with the HELO command. The hostname after the HELO command should be the name of the system you're connecting from:
+250 mail.oreilly.com
+MAIL FROM:<info@oreilly.com>                          # Indicate who the message is from with the MAIL FROM command:
+250 Ok
+RCPT TO:<kdent@example.com>                             # Indicate who the message is to with the RCPT TO command:
+250 Ok
+DATA                                                 # The DATA command tells the server that you have an RFC 2822 message ready to transfer:
+354 End data with <CR><LF>.<CR><LF>
+
+Date: Mon, 8 Apr 2003 15:38:21 -0500
+From: Customer Service <info@oreilly.com>
+To: <kdent@example.com>
+Reply-To: <service@oreilly.com>
+Message-ID: <01a4e2238200842@mail.oreilly.com>
+Subject: Have you read RFC 2822?
+
+This is the start of the body of the message. It could continue
+for many lines, but it doesn't.
+.
+
+250 Ok: queued as 5FA26B3DFE
+quit
+221 Bye
+Connection closed by foreign host.
+$
+
+
+Messages come into Postfix in one of four ways:
+        A message can be accepted into Postfix locally (sent from a user on the same machine).
+        A message can be accepted into Postfix over the network.
+        A message that was already accepted into Postfix through one of the other methods is resubmitted for forwarding to another address.
+        Postfix generates messages itself when it has to send notifications of undeliverable or deferred delivery attempts.
+
+#
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# postfix
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+#    Instalace poštovního serveru
+#=============================================================================                       
+    4.1    apt-get install postfix
+        #Systém se taktéž dotáže na naše poštovní jméno. Já použiji stejné, jako je název poèítaèe – v mém pøípadì tedy gateway.hodza.net.
+    4.2 apt-get install telnet                        # abych zjistil zda je system funkcni
+                    # Je-li poštovní systém v poøádku, mìl by naslouchat na portu 25. Vyzkoušíme tedy pøíkaz "telnet localhost 25". Jako odpovìï bychom mìli dostat
+                    # Server nyní oèekává, že se mu pøedstavíme. Uèiníme tak napsáním øetìzce helo localhost. Protože je náš poš ák slušnì vychovaný, mìl by odpovìdìt 250 gateway.hodza.net, èímž zároveò oznámí, že je ochotný s námi komunikovat.
+                    # Zkusíme pøes nìj tedy poslat nìjaký e-mail. Nejprve mu øekneme, kdo zprávu posílá. Píšu mail from: kozak@fofrnet.cz. Opìt bychom mìli získat odpovìï 250 2.1.0 Ok. Pokraèujeme v psaní e-mailu – zadáme, komu chceme email poslat, a to pomocí pøíkazu rcpt to: kozak@fofrnet.cz. Nepøekvapí nás hlášení 250 2.1.5 Ok, a tak pokraèujeme dále pøíkazem data. Pokud je systém pøipraven pro psaní samotného obsahu zprávy, vypíše hlášení 354 End data with ..
+                    mail from: kozak@fofrnet.cz                # napise ok, odesilatel
+                    rcpt to: kozak@fofrnet.cz                # prijemnce
+                    data                                    # Pokud je systém pøipraven pro psaní samotného obsahu zprávy, vypíše hlášení 354 End data with ..
+                        Subject:                                #Jestliže chceme, aby zpráva mìla subjekt, napíšeme Subject: pøedmìt subjektu. Dále pak pokraèujeme, jako bychom psali v bìžném editoru. Já do testovacích zpráv dávám alespoò datum a èas odeslání zprávy, abych pak mohl snadnìji hledat chybu. Jakmile nás to pøestane bavit, zmáèkneme klávesu [Enter]. Na nový øádek napíšeme teèku a opìt odentrujeme. Tím dáváme poš ákovi jasnì najevo, že jsme již e-mail dopsali a chceme ho odeslat.
+                                                                #
+                    [ENTER]
+                    .
+                    [ENTER]                                        # Tím dáváme poš ákovi jasnì najevo, že jsme již e-mail dopsali a chceme ho odeslat. Jako odpovìï bychom mìli dostat hlášení 250 2.0.0 Ok: queued as 451613540B3. Po nìkolika vteøinách nalezneme ve svém mailboxu onu testovací zprávu.
+                        chyba >                                    # var/log/mail.log, /var/log/mail.err a /var/log/daemon.log
+
+
+# cesty paths
+#=============================================================================                       
+/etc/postfix                                # Configuration files and lookup tables
+    main.cf                                    # hlavni konfiguracni soobor
+        mail_spool_directory = /var/spool/mail/                # nastaveni directory, mailbox delivery
+    master.cf                                # The Postfix master daemon launches all of the other Postfix services as they are needed. The various services, and how they are run, are specified in the master.cf file.
+/usr/libexec/postfix                        # Postfix daemons
+/var/spool/postfix                            # Queue files; qmgr --> queue management
+            /var/spool/postfix/active            #
+            /var/spool/postfix/bounce
+            /var/spool/postfix/corrupt
+            /var/spool/postfix/deferred
+            /var/spool/postfix/hold   
+/usr/sbin                                    # Postfix commands
+
+# Starting Postfix the First Time
+#=============================================================================                       
+1. first issue
+    hostname                                    # zjisti mi jmeno hostnme co pak dam do dalsiho prikazu  "teks2.agi"
+    postconf -e myhostname=chess2.agi            # The -e option tells postconf to edit the configuration with the parameters and values specified.
+                                                # If your system is configured with its fully qualified hostname, you don't have to
+                                                # do anything to the Postfix configuration.
+    postconf -e myhostname=mail.example.com
+2. second issue  --> your system's aliases database is in the correct format
+    # For now, be aware that it is a text file that must be mapped into an indexed, binary format.
+    # Your existing aliases binary format might be different from what Postfix uses by default on your system.
+    # You can rebuild the indexed file with the newaliases command:
+    newaliases                                    # This command doesn't require any arguments, and it simply recreates your alias database without making any changes to your actual alias file.
+    #
+
+# prikazy, commands postfixu
+#=============================================================================                       
+postfix start
+postfix reload
+postmap /etc/postfix/canonical                                    # Once you have created a text file with all of your mappings, you have to execute
+                                                                # the postmap command against it to create the actual indexed version of the file:
+postmap -q kdent@example.com /etc/postfix/canonical                # reload
+       
+postconf -m                                                # list of all Db formats ,defaultne jsou tri
+
+postmap -q hash:/etc/postfix/transport                    # test your mysql
+postmap -q mysql:/etc/postfix/transport.cf                # test your mysql
+
+postalias /etc/aliases                                    # Building alias database files
+postfix check                                            # Postfix provides a utility through the postfix command to validate many aspects of your installation. The command checks for configuration problems, looks at directory and file ownership, and creates any missing directories. Executing:
+postfix restart
+
+egrep '(reject|warning|error|fatal|panic):' /var/log/maillog
+sendmail -bd -q15m                                        # init postfix pri startu, posfix reaguje na stejen prikazy jako sendmail                                             
+
+chroot                                                    # To chroot individual components, edit your master.cf file. Change the fifth column to y.
+                                                        # The chroot option is possible with all components except the pipe, virtual, local, and
+                                                        # proxymap services. In Example 4-1, chroot is enabled for the SMTP clients and server.
+
+
+# Configuring Your MTA Identity
+#=============================================================================                       
+#myhostname, mydomain, myorigin, and mydestination
+
+
+# Queue Tools
+#=============================================================================                       
+postqueue -p                        # Listing the Queue
+postsuper -d DBA3F1A9                # za parametrem -d --> queue ID
+postsuper -d ALL
+postsuper -h DBA3F1A9                # Holding message
+postsuper -H DBA3F1A9                # dat zpravu co ceka zase do normalni fronty
+postsuper -r ALL                    # snazi se znovu poslat zpravy, kdyz byly poslany spatne, the -r option to requeue messages.
+postcat -q DBA3F1A9                    # ukazat zpravu
+postqueue -s example.com            # Flushing the queue causes Postfix to attempt to deliver messages in the queue immediately, muze vyvolat problemy.
+
+# Email and DNS
+#=============================================================================                       
+1.    For sending mail, the system running your Postfix mail server must have access to a reliable DNS server
+    to resolve hostnames and email-routing information.
+2.    For receiving mail, your domains must be configured correctly to route messages to your mail server.
+
+
+
+# Email Routing
+#=============================================================================                       
+horatio@denmark.example.com                            # uzivatel --> horatio; workstation --> denmark; example.com --> domain
+
+
+# Local Delivery and POP/IMAP
+#=============================================================================                       
+local                                # Delivers mail on the local system. Each address has an account on the system or comes from the local
+                                    # aliases file (historically /etc/aliases). Delivered messages go to the system's mail spool or mail
+                                    # files in individual home directories. Deliveries are handled by the local delivery agent or passed to a
+                                    # custom delivery program. Lists local domains in the mydestination parameter.
+relay                                # Relay domains are generally configured on gateway systems when Postfix accepts mail for an entire network.
+                                    # The gateway system relays messages to the correct internal mail system
+virtual                                # Virtual mailbox domains are used for hosting multiple domains using a separate mail spool that
+                                    # contains mailboxes for many separate domains. Email users typically do not have system accounts on the
+                                    # mail server. Lists virtual mailbox domains in the virtual_mailbox_domains parameter.
+                                    # Virtual hosting is discussed in Chapter 8.
+# Message Store Formats   
+    # MBOX format            # starsi nez
+    postconf -l                # Since both Postfix and the POP/IMAP servers access the mailbox file, they must use file locking.
+                            # Postfix must obtain an exclusive lock on the file when it is delivering a message, so that it can write
+                            # the message to the file. Postfix offers a variety of locking mechanisms, depending on the platform. You can
+                            # use the postconf -l command to see which mechanisms Postfix can use on your system
+    man flock                # If you want more information about the locking types listed by Postfix on your system, check your
+                            # system's man pages for the specific lock name:
+    # Maildir format        # The maildir mailbox format differs from mbox in that it uses a structure of directories to store email messages.
+            # ma tri sub adresare:
+            ll /home/kdent/maildir
+                    total 12
+                    drwxr-x---    2 kdent    kdent        4096 Mar 13 12:24 cur
+                    drwxr-x---    2 kdent    kdent        4096 Mar 13 12:24 new
+                    drwxr-x---    2 kdent    kdent        4096 Mar 13 12:24 tmp
+           
+# Cyrus IMAP
+#=============================================================================                       
+
+
+# Hosting Multiple Domains
+#=============================================================================                       
+# Regardless of the technique you use, all of your virtual domains must be configured correctly in DNS.
+    # You should configure DNS for virtual domains the same way you do for your system's canonical domain.
+    # See Chapter 6 for information on Postfix and DNS.
+
+A- Shared Domains with System Accounts
+1.  # On a system whose canonical name is oreillynet.com, hosting two virtual domains, ora.com and oreilly.com,
+    # the mydomain parameter is set as if oreillynet.com were the only domain, and mydestination is set as follows:
+    mydomain = oreillynet.com
+    mydestination = $myhostname, $mydomain, ora.com, oreilly.com
+# Make sure you reload Postfix after making changes. Users can now receive mail at any of the domains you listed in mydestination
+2. postfix reload           
+    # Messages addressed to either info@ora.com or info@oreilly.com all go to the same local user account.
+
+B- Separate Domains with System Accounts
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# rpm
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+some usefull linux commands
+
+
+   1. rpm -ivh packages(s).rpm
+      install rpm file(s)
+
+   2. rpm -Uvh packages(s).rpm  
+      upgrade system with rpms
+
+   3. rpm -e package  
+      remove package
+
+   4. rpm -q package  
+      show version of package installed
+
+   5. rpm -q -i package  
+      show all package metadata
+
+   6. rpm -q -f /path/file  
+      what package does file belong
+
+   7. find -name "*.[ch]" | xargs grep -E "search string"  
+      search .c and .h for "search string" in this dir and below
+
+   8. find / -mtime -1  -size +150000000 -print  
+      finds all files created in the last day that are larger than 150GB.
+
+rpm -V                  # to verify a package
+rpm -U --replacepkgs    # re-install an existing package
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# wireshark
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+arp -a                         # vypise pocitace s kteryma jsem komunikoval
+
+
+editcap                                                     # save as , umi cist zcela totozne formaty dat jako wireshark a standardne je zapisuje ve formatu libpcap
+    editcap -r -v -F snoop capture capture_snoop 1-5        # preklad prvnich peti paketu z dat zachycenych tsharkem za pouziti knihovny libpxap do formatu sun snoop (rika se mu capture_snoop)
+mergecap                                                    # ucelem je spojovani nekolika souboru se zachycenymi daty do jednoho vystupniho souboru, zapisuje do formatu libpcap
+    mergecap -v -F snoop -w merge_snoop capture1 capture2 capture3            # zachycuje ze 3 souboru capture1-3 do jedineho vystupniho souboru Sun snoop nazvaneho merge_snoop, ktery bude cist pakety do te doby nez narazi na posledni soubor
+   
+traceroute                                                    # identifikuje kazdy smerova, kterym paket pri sve ceste siti projde
+tshark -V                                    # tshark vypise strukturu protokolui podobne jako ve strednim panelu grafickeho rozhrani wiresharku.
+tshark -x                                    # vytiskne na obrazovku obsah paketu v hexadecimalnim a ASCII formatu bud se soutrhnnyum radkem nebo strukturou protokolu
+
+
+
+
+www.packetstormsecurity.org/sniffers/Sniffer_construction.txt                    # jednoduchy sniffer na 28 radku, strana 34
+
+Honeypoty - je vybornym nastrojem, jak odhalit ubocniky pokousejici se pouzit zachycene heslo.
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# vnc server
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+# prihlasil jsem se na /zeus/ruda
+vncserver :9004
+vncpasswd                    # nastavil jsem heslo
+vim .vnc/zeus\:1.log        # z logu jsem si precetl na kterym portu posloucha
+
+VNC zeus:14903
+http://zeus:14803
+man vncserver
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# wireshark
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+yum isntall wireshark
+yum install wireshark-gnome
+
+SOURCE: http://www.wireshark.org/docs/wsug_html/#ChCustCommandLine
+/usr/sbin/wireshark
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  LINUX - montovani, backup, zustat root i kdyz prejdu ze servru na jinej server
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+cat /etc/exports                    # 
+ 
+# teks2
+chkconfig --list                    # asi musim byt v adresari ./etc/
+chkconfig --on
+chkconfig nfs on
+chkconfig nfslock  on
+ 
+ 
+ps -ef | grep nfs
+cd /etc/
+ls
+vi exports
+cat exports
+ls -l exports
+vi /etc/exports
+chkconfig --list
+chkconfig --on
+chkconfig
+chkconfig nfs on
+chkconfig nfslock  on
+service nfs start
+service nfslock start
+cat /etc/exports
+ 
+# teks3
+cat > /etc/exports
+obsahuje_radek="""
+/home 10.100.0.2(rw,no_root_squash)
+"""                            # tohle zacuci ze je root i na jinym servru, tudiz kdyz jsem na zeus, tak tedkom kdyz pridam tento radek, tak kdyz prejdu jako root ze zeusu na teks3, tak sjem porad root
+chkconfig nfslock  on
+chkconfig nfs on
+service nfs start
+service nfslock start
+ 
+ 
+ 
+#
+  997 cd /etc/cron.daily/
+  998  ls
+  999  less ngbackup.cron                    # to je adresar kde vidim, co je potreba bakapovat
+ 1000  cd /etc/
+ 1001  ls
+ 1002  cat fstab                        # mediat ktery mam backupovat
+ 1004  mount -a
+ 1005  mount /mnt/backup/teks3_export/
+ 1006  cat /etc/exports
+ 1007  man exports
+ 1008  vi /etc/fstab
+ 1009  mount -a
+ 1010  df
+ 1011  mkdir /mnt/backup/teks2_home
+ 1012  mount -a
+ 1013  mount -a
+ 1014  mount
+ 1015  cd /mnt/backup/teks2_home/xp/
+ 1016  ll
+ 1017  ls -ld .
+ 1018  mkdir tmp
+ 1019  chown xp tmp
+ 1020  cd
+ 1021  vi /etc/fstab
+ 1022  mkdir /mnt/backup/teks3_hom
+ 1023  mv /mnt/backup/teks3_hom /mnt/backup/teks3_home
+ 1024  mount -a
+ 1025  df
+ 1026  df
+ 1027  df
+ 1028  df
+ 1029  df
+ 1030  df
+ 1031  df -k
+ 1032  ps -ef
+ 1033  history
+ 
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  SAMBA LINUX
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+grep -i admin *                        # zjisti kdo je administrator pod windowsama /etc/samba/smb.conf
+service smb restart
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  HESLA 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  LINUX DIAGNOSTIKA SITE
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+ip addr list                        # overeni stavu sitovych zarizeni je lepsi nez ifconfig
+ip route ls                        # jestli jsou nastavena nejake routovaci pravidla
+ping 192.168.0.1 -c 10                    # test spojeni; -c urcuje kolik parametru se ma odeslat, pokud neni napsat tak se parametry posilaj az do <CTRL+C>
+hping2 -I eth0 -S 192.168.0.1 -c 5 -p 22        # siroky pouziti; ale neni nainstalovanej
+netstat -t                        # zobrazeni stavu
+netstat -i                        # vypise tabulku zarizeni jadra
+netstat -natup                        # prehled sluzeb ktere bezi, Použijeme volby -n (IP nebudou pøekládány na názvy), -a (zobrazí vše), -t (TCP protokol), -u (UDP protokol) a -p (který program je zodpovìdný za otevøený port).
+netstat --inet -l                    # seznam sluzebeb ktere bezi na nejakym portu
+tcpdump -i eth0                        # odchytavani sitoveho provozu; zachytava packety a zaznamenava jejich hlavicky
+traceroute www.linuxsoft.cz                # trasovani 
+/usr/sbin/tcptraceroute -f 2 linuxsoft.cz smtp        # taky trasovani, ktere by melo projit firewallem; Samozøejmì se mùže stát, že packet zahodí nìjaký firewall, v tom pøípadì vypíše program místo adresy stroje a zpoždìní pouze hvìzdièku (*). A pøesnì tohle øeší program tcptraceroute, který místo toho vysílá packety TCP s pøíznaky SYN, takže by je firewally mìly propustit.
+nmap 192.168.0.1 -O -sS                    # skenovani portu
+     
+service vncserver start
+         
+         
+ 
+     
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  python konstrukce
+#----------------------------------------------------------------------------------------------------------------------------------------------------------     
+    print >> sys.stderr, 'HI!!! Show me session lastSearch: ', self.session['lastSearch']
+    sys.stderr.flush()
+ 
+    $ tail -f /var/log/httpd/error_log        # asi nejlepsi vypis log file z mod_python
+    $ tail error_log            # prochazeni log souboru v pythonu
+    $ tail -f error_log              # parametr -f follow = zobrazuje porad dopredu
+    $ tail -f /var/log/httpd/error_log        # asi nejlepsi vypis log file z mod_python
+    $ tail -f /var/log/dutchman.sql
+ 
+ 
+    os.popen('ls -la /').read()        # zpusti prikaz v linuxu
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# prochazeni div souboru, zmeny od posledniho commit        
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+    1. pwd
+    2. zajdu do cd dutchman/BCR25174/web
+    3. cvs diff -c | less  # vypise seznam rozdilu      + pridano 
+                                ! odebran
+ 
+                        # | less zobrazuje to postupne na strance, mezernikem se to posouva na dalsi stranku
+ 
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# SAMBA
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+/etc/samba/smb.conf
+ 
+service smb restart
+smb://AGIRA2/
+smb://<username>:<password>@<workgroup><pcname><printersharename>
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# tisk linux
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+lpq                # ukaze seznam uloh co jsou ve fronte na tisk
+lprm 2188            # smaze dokument z tiskove rady, ( cislo udava jobs number )
+lpstat
+ 
+ 
+/etc/cups/printers.conf                # printer configuration file
+ 
+/var/log/cups/error_log                # log
+ 
+/usr/sbin/lpc restart all            # tohle zatim nepomohlo
+/etc/init.d/cupsd restart
+/etc/init.d/cups status
+lpinfo -m                    # vypise seznam available printer drivers
+lpr <jmeno_file>                # vytiskne soubor
+lprm -                        # To remove all print jobs for the current user, type the following:
+                        # Another useful feature of any printing system is the ability to cancel a job that has been previously queued
+lpc status                     # vypise status tiskarny
+    * disable option - prevents any new printer job from being entered
+    * down option - disables all printing on the printer
+    * enable option - allow new jobs to enter the print queue
+    * quit (or exit) - leave lpc
+    * restart option - restarts lpd for that printer
+    * status option - print status of printer
+    * up option - enable everything and start a new lpd
+ 
+ 
+man man | col -b | lpr            # vytiskne manualovy stranky
+ 
+ 
+# SOURCE: http://www.faqs.org/docs/Linux-HOWTO/Printing-Usage-HOWTO.html#s6
+# SOURCE: http://etutorials.org/Linux+systems/red+hat+linux+bible+fedora+enterprise+edition/Part+IV+Red+Hat+Linux+Network+and+Server+Setup/Chapter+17+Setting+Up+a+Print+Server/Choosing+CUPS+or+LPRng+Print+Services/
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# prochazeni div souboru, zmeny od posledniho commit        
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+<svg xmlns="http://www.w3.org/2000/svg"
+ width="467" height="462">
+  <rect x="80" y="60" width="250" height="250" rx="20"
+      style="fill:#ff0000; stroke:#000000;stroke-width:2px;" />
+ 
+  <rect x="140" y="120" width="250" height="250" rx="120"
+      style="fill:#0000ff; stroke:#000000; stroke-width:2px;
+      fill-opacity:0.7;" />
+</svg>
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# HOW TO "CVS" 
+#     source: http://www.faqs.org/docs/Linux-HOWTO/CVS-RCS-HOWTO.html
+#     source: http://docs.linux.cz/programming/tools/cvs_manual.html
+#    source: http://www.root.cz/clanky/cvs-pro-kazdeho-zaklady/
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+# doinstalace na teks2,
+yum install cvs
+yum install rpm-build
+yum install python-devel
+ 
+ 
+ 
+mam teks3            a         teks2
+ 
+# pomoci techto souboru jsem si zjistil potrebne udaje co jsem potreboval, zjistene udaje se pak pouzili dal na teks2
+less BCR25174/CVS/Root          # vypise mi radek --> :pserver:xp@cvs:/home/cvs/cvsroot             
+less BCR25174/CVS/Repository       # vypise mi radek --> Tekelec-BCR/dutchman
+less BCR25174/CVS/Tag        # vypise mi radek --> tklc_bcr_25174
+     
+                     
+ 
+# na teks2 potreba doinstalovat
+type rpm-build
+rpm -qf /usr/bin/rpmbuild     
+                        cvs -d :pserver:xp@cvs:/home/cvs/cvsroot login        # prvne se prihlasim do systemu, je potreba znat cestu, kterou zjistim "less BCR25174/CVS/Root" heslo je cvs
+                        ls ~/.cvspass   # v tomto file je ulozeno heslo
+                        cvs -d :pserver:xp@cvs:/home/cvs/cvsroot co -r tklc_bcr_25174 -d dutchman_R02-02 Tekelec-BCR/dutchman
+                            # co  - checkout 
+                            # -r 
+                            # -d dutchman_R02-02    - vytvori adresar
+ 
+                        cd dutchman_R02-02
+                        python setup.py bdist_rpm    # vytvorim rpm                                 
+ 
+ 
+ 
+#================================================================================================================================
+# test co jsem udelal jako uzivatel xp, teks2, /home/xp/dutchman_r/dutchman_r2
+ 
+cvs -d :pserver:xp@cvs:/home/cvs/cvsroot login
+cvs -d :pserver:xp@cvs:/home/cvs/cvsroot co -r tklc_bcr_25174 -d dutchman_r3 Tekelec-BCR/dutchman
+cd dutchman_r3
+python setup.py bdist_rpm            # nahraly se soubory do adresare
+                        # ./build.sh tohle dela to stejny
+ 
+vim /etc/httpd/conf.d/python.conf
+service httpd restart
+ 
+ 
+Alias /ductmanr /home/xp/dutchman_1/dutchman_r3/web
+<Directory /home/xp/dutchman_1/dutchman_r3/web/>
+  PythonPath "['/home/xp/dutchman_1/dutchman_r3']+sys.path"
+  AddHandler python-program .py
+  PythonHandler mod_python.publisher
+#  PythonAutoReload On
+  PythonDebug on
+  Order allow,deny
+  Allow from all
+</Directory>
+ 
+ 
+    rpm -e dutchman                    # odinstalace balicku dutchman
+    rpm -q dutchman     
+ 
+ 
+#================================================================================================================================
+# buildovani dutchman
+ 
+- kdyz provedu nejakou zmenu tak udelam a adresari dutchman
+./build.sh
+rpm -ql -p dist/dutchman-BCR25174-1.noarch.rpm  | grep UG
+ 
+ 
+ 
+================================================================================================================================
+ 
+# prihlaseni -add -commit ######################################################################################################
+cvs -d :pserver:xp@cvs:/home/cvs/cvsroot login              # prihlaseni do cvs
+                                    # musis byt v pracovnim adresari, kde je projekt
+cvs add -m "nejaka poznamka" jmeno_souboru                # pridani noveho souboru do projektu, vkladani pouze textovych souboru
+cvs add -kb -m "nejaka poznamka" jmeno_souboru                # pro vkladani novych souboru, ktere jsou binarni a ktere nejsou jeste v projektu, jako obrazky, dokumenty word, atd. 
+    # jestlize potrebuju zmenit normalni soubor za binarni
+    cvs admin -kb jmeno_souboru                    # soubor se timto v db oznaci za binarni
+    cvs update jmeno_souboru                    # aktualizace souboru
+    cvs commit -m "oprava na binární verzi" jmeno_souboru        # Jako poslední krok nahrajeme do systému CVS (do jeho databáze, èili repository) správnou verzi z pracovního adresáøe. To se provádí již známým pøíkazem commit: 
+cvs add -kd im*.png                            # vkladani bin souboru
+cvs add *.htm *.xml                            # vkladani vice typu souboru
+cvs add jmeno_adresare/                            # takto asi pridam cely adresar i se souborama co jsou v nem, asi musi koncit "/"
+cvs checkout prvniprojekt                        # zalozeni prvniho projektu, nahrani aktualni verzi vsech souboru, pres sit se to dela cvs -d :pserver:xp@cvs:/home/cvs/cvsroot login, atd. ...
+cvs commit -m "nejaka poznamka"                        # nahrani zmen zpet do systemu CVS, vsechno commit
+cvs commit -m "nejaka poznamka" jmeno_souboru                # ulozim pouze zmeny jednoho souboru
+cvs commit -r 2.0                            # cislovani verze,následující pøíkaz nastaví všechny soubory v projektu na verzi 2.0:
+cvs commit -r 3.0 jmeno_souboru                        # jen pro jeden soubor
+ 
+# checkout ######################################################################################################
+ 
+cvs log jmeno_souboru                            # vypisy zmen v souboru, Pøíkaz log vypisuje všechny možné informace o souboru, který si CVS udržuje
+cvs log jmeno_souboru | more                        # zastavi se po kazde obrazovce
+cvs log jmeno_souboru > jmeno_souboru_pro_logovaci_vypis        # ulozim do souboru
+cvs log -R | more                            # seznam souboru ulozenych v repository
+cvs log -wsandokan jmeno_souboru                    # uzivatel "sandokan" Další volbou je zobrazit pouze zmìny souborù, které provedl urèitý èlovìk, CVS si zjistí, kdo je k poèítaèi momentálnì pøihlášený, a zapíše si toto pøihlašovací jméno, v tomto pripade je to uzivatel "sandokan"
+cvs log -d "1 week ago"
+cvs log -d "last month"                            # vypise zmeny provedene drive, nez za posledni mesic
+cvs log -d "1999/12/01"                 
+cvs log -d "> 1 week ago"                        # vypíše zmìny provedené pozdìji, než pøed týdnem
+cvs log -d "1999/11/01 <= 1999/11/30"                    #  - vypíše zmìny provedené od 1.listopadu do 30.listopadu 1999
+cvs log -wabcdefgh -d ">= last week" -l                    # uzivatel zmeny od kdy do kdy
+cvs remove jmeno_souboru                        # vyjmuti souboru z repository
+cvs remove -f jmeno_souboru                        # smaze jak soubor v repository tak i v pracovnim adresari
+cvs status                                # Pokud si pøíkaz vyzkoušíte, program mezi spoustou jiných informací vypíše ke každému souboru File: plus stav vaší pracovní verze. Tento stav je jeden z následujících:
+            Up-to-date                    # Soubor v pracovním adresáøi je shodný s nejnovìjší verzi v CVS.
+            Locally Modified                # Soubor v pracovním adresáøi je novìjší, než verze v CVS
+            Needing Patch                    # Soubor v systému CVS je novìjší, než v pracovním adresáøi.
+            Need Merge                    # Došlo ke konfliktu. Zatímco jste pracoval na souboru, pracoval na nìm též nìkdo jiný, a mezitím nahrál tuto verzi do CVS.
+ 
+cvs stat UG005299*                            # vypise status souboru
+cvs status | grep File                            # vypise statusy vsech souboru, ktere jsou v danem projektu
+cvs update jmeno_souboru                        # Pøíkaz update dohraje ze systému CVS novìjší verzi souboru, pokud jí mezitím nìkdo z pracovního týmu nahrál pøíkazem commit do systému CVS
+cvs 
+cvs update                                # update 
+                            # vypise na kazdy radek soubor s pismenkem na zacatku
+                            # U - byla nahrána novìjší verze souboru z CVS
+                            # A - nic se nestalo, jenom vás CVS upozoròuje, že jste tento soubor zaregistrovali pomocí pøíkazu add,
+                            # P - byla nahrána novìjší verze souboru z CDS, ale systém místo toho, aby pøehrál celý soubor použil metodu patche, tedy nahrál jenom rozdíly mezi verzemi.
+                            # R - nic se nestalo, jenom vás CVS upozoròuje, že jste tento soubor odregistrovali pomocí pøíkazu remove
+                            # M - došlo ke konfliktu, zatímco jste pracovali na souboru, pracoval na nìm také nìkdo jiný, a mezitím nahrál tuto verzi do CVS. Systému CVS se podaøilo oba soubory spojit dohromady, a to tak, že prostì do verze z CVS pøidal øádky, které máte navíc ve vaší verzi. Navíc vaší pùvodní verzi souboru zazálohoval do souboru s názvem .# plus pùvodní jméno souboru plus teèka a èíslo verze vašeho souboru. Doporuèuje se prohlédnout obì verze, dát soubor do poøádku a nahrát do CVS pøíkazem commit. Druhá varianta je, že zjistíte, že buï vy, a nebo ten druhý tam psal nesmysly, a jednu verzi prostì smažete a druhou nahrajete pomocí pøíkazu commit do CVS.
+                            # C - došlo ke konfliktu, zatímco jste pracoval na souboru, pracoval na nìm též nìkdo jiný, a mezitím nahrál tuto verzi do CVS. Prostì stejná situace jako u M, i soubor je zazálohován stejnì, jenom se liší tím, že CVS nedokázal tak jednoduše spojit obì verze do jedné. tento pøípad je podrobnìji rozepsán v dalším textu.
+                            # ? - oznaèuje soubor, který máte v pracovním adresáøi, ale není zaregistrován v CVS.
+                            # 
+ 
+!!!!!cvs -n -q update                    # update naslepo, zajistuje parametr "-n"
+                            # Princip je velice jednoduchý, program cvs umožòuje pøidat prakticky ke každému pøíkazu volbu -n, která vyzkouší pøíkaz naslepo.
+cvs tag -b jmeno_vetve                    # Vìtev mùžeme v základì založit dvìma zpùsoby, buï tak, že za novou vìtev prohlásíme pøesnì to, co teï máme v pracovním adresáøi:
+cvs rtag -b -r jmeno_znacky jmeno_vetve jmeno_projektu    # Druhým zpùsobem, jak odstartovat novou vìtev je vytvoøit jí jako kopii již nìjaké verze souborù uložených v CVS. Tento zpùsob nevyžaduje, abychom byli v pracovním adresáøi projektu, a proto vyžaduje i jméno projektu:
+ 
+ 
+ 
+Systém CVS toto umožòuje pomocí klíèových slov. Pokud kamkoli do nìjakého textového souboru, který je souèástí projektu napíšete tøeba:
+ 
+$Date$                            # vypise to   "$Date: 2000/01/09 17:58:58 $"
+$Author$
+$Header$                        # "$Header: d:\\cvsroot/ponny_html/cvs_manual.html,v 1.30 1999/12/31 12:58:15 ponkrac Exp $"
+$Id$                            #  $Id: cvs_manual.html,v 1.30 1999/12/31 12:58:15 ponkrac Exp $
+$Locker$                        # $Locker: sandokan $
+$Name$                            # $Name: jmeno_znacky $
+$Log$                            # 
+$RCSfile$                        # $RCSfile: cvs_manual.html,v $
+$Revision$                        # $Revision: 2.11 $
+$Source$                        # $Source: d:\\cvsroot/ponny_html/cvs_manual.html,v $
+$State$                            # $State: Exp $
+ 
+Základní syntaxe pøíkazù CVS
+----------------------------
+cvs  globální_volby  jméno_pøíkazu  volby_pøíkazu  parametry
+    * -d adresáø_s_daty_CVS - umožòuje systému CVS øíci, kde máte uložená data pro CVS. Pokud jste si nastavili promìnnou CVSROOT, nebudete tuto volbu potøebovat, jinak musíte tuto volbu použít.
+    * -e editor - umožòuje øíci, že pro napsání komentáøe si pøejete spustit editor, který se vám líbí. Místo slova editor zadejte cestu k vašemu oblíbenému editoru. Pokud tuto volbu nepoužijete, ve Windows se spustí Notepad. Abyste nemuseli svùj oblíbený editor zadávat pøi každém pøíkazu pomocí volby -e, mùžete pøidat do AUTOEXEC.BAT (ve Windows, Unixáci do .profiles) nastavení promìnné CVSEDIT, pøípadnì EDITOR.
+    * -n - toto je jakési divadlo. Pokud použijete volbu -n, mùžete si být jistí, že nic se neprovede, pouze program cvs vypíše na obrazovku to samé, jako by se pøíkaz provedl.
+    * -q - pøíkaz omezuje množství zpráv na obrazovku. Øeknìme, že toho vypíše o trochu ménì, a vypisuje jenom podstatnìjší vìci.
+    * -Q - dìlá z cvs neviditelného nindžu. Prostì se program skuteènì krotí, a nevypisuje opravdu nic, pokud nenastanou nìjaké vážné chyby. Pokud vše probíhá v poøádku, je program tichý, respektive s èistou obrazovkou.
+    * -t - vypisuje naopak co nejvíce na obrazovku. Je vhodné používat spoleènì s volbou -n, pokud chcete vyzkoumat, co urèitý pøíkaz pøesnì dìlá.
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# list of commands WINDOWS
+# source: prikazovy radek A-Z: http://www.microsoft.com/technet/prodtechnol/windowsserver2003/cs/library/ServerHelp/d0518719-7154-49b4-954c-0a6c015ab441.mspx?mfr=true
+#
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+/?                            # zobrazi v prikazovem radku napovedu
+ 
+ASSOC            Zobraz¡ nebo zmØn¡ pýiýazen¡ koncovek soubor
+AT                               # pro planovac uloh
+    AT /?                        # zobrazi informace 
+ATTRIB           Zobraz¡ nebo zmØn¡ atributy
+BREAK            Nastav¡ nebo vynuluje rozç¡ýenou kontrolu CTRL+C checking
+CACLS            Zobraz¡ nebo zmØn¡ seznam ACL soubor
+CALL             Zavol  d vkovì soubor z jin'ho
+CD                               # zobrazi nebo zmeni aktualni adresar
+CHCP             Zobraz¡ nebo nastav¡ aktivn¡ Ÿ¡slo k¢dov' str nky
+chdir                            # zobrazi aktualni adresar nebo prejde do jineho
+    chdir \Danì                    # prejde do adresare \dane
+CHKDSK                           # Zkontroluje disk a zobrazi zpravu o stavu
+CLS                              # vymaze obrazovku
+cmd                            # prikaZova radka     
+COLOR                            # zmeni barvy pisma a pozadi, Nevkládejte mezi parametry F a B mezery.
+    color F2                    # zmeni barvy pisma, od cisla 0-9
+    color B0                     # zmeni barvu pozadi  
+comp                             # Porovn  obsah dvou soubor nebo sad soubor
+    comp [Data1] [Data2] [/d] [/a] [/l] [/n=Poèet] [/c]                # /a - zobrazi rozdily jako znaky; /l - zobrazi cislo radku na kterem doslo ke zmene; /d - Zobrazuje rozdíly ve formátu desítkové soustavy. (Výchozí je formát šestnáctkové soustavy.)
+    comp c:\zprávy \\prodej\záloha\duben                        # porovna dva souboru
+    comp \faktury\*.txt \faktury\zaloha\*.txt /n=10 /d                # Pokud chcete porovnat prvních deset øádkù textových souborù v adresáøi \Faktury a výsledek zobrazit ve formátu desítkové soustavy, zadejte:                                             
+CONVERT                          # prevede svazek FAT na NTFS. N
+copy                             # zkopiruje jeden nebo vice souboru do jineho umisteni
+    copy [/d] [/v] [/n] [{/y | /-y}] [/z] [{/a | /b}] Zdroj [{/a | /b}] [+Zdroj [{/a | /b}] [+ ...]] [Cíl [{/a | /b}]]  # /a - Urèí textový soubor ASCII.; /v - Ovìøí, zda jsou nové soubory zapsány správnì.; 
+    copy *.txt + *.ref spoj.doc            # Chcete-li spojit všechny soubory s pøíponou TXT a pak všechny soubory s pøíponou REF do souboru s názvem Spoj.doc, zadejte:
+    copy /b *.exe spoj.exe                # spojit nekolik binarnich souboru s koncovkou exe do jedineho
+    copy drozd.typ c:\ptaci                # zkopirovat z aktualniho adresare soubor "drozd.typ" do c:\ptaci                         
+    copy bøe99.rpt + dub99.rpt + kvì99.rpt zprava.txt                    # kopirovani vice souboru do jednoho s nazem "zprava.txt"
+DATE                             # zobrazi aktualni datum, cas
+    date [MM- DD- RR[RR]] [/t]            # zmena datumu, za cisla napsat  "date 08-03-00"
+DEL                              # Vymaze jeden nebo vice soubor
+ 
+DIR                              # zobrazi seznam soubor a podslozek slozky
+    dir c:\                        # zobrazi seznam adresaru a souboru a c: a jejich informace; neco jako "ls -l"
+    dir c:\ /s /b                     # postupne zobrazi vsechny soubory, dlohej vypis, proto pusti to roury   'dir c:\ /s /b | find "CPU"'
+    dir c:\ /s /b | find "CPU"            # /s - Zobrazí výskyt zadaného názvu souboru v urèeném adresáøi a ve všech podadresáøích.; /b - Vypíše název všech adresáøù a souborù vèetnì pøípony vždy na zvláštním øádku. Pøi použití parametru /b se nezobrazí záhlaví ani souhrnné informace. Parametr /b má pøednost pøed parametrem /w.
+    dir . /s /b | find "manual" | more        # najde v aktualnim adresari vsechny soubory, adresare, ktere obsahuji "manual" a vylistuje je po strance (prikaz more)
+DOSKEY   Edituje pý¡kazy, znovu vol  pý¡kazy a umo§åuje vytv ýet makra
+ECHO                             # Zapne nebo vypne zobrazování pøíkazù nebo zobrazí zprávu.; Pøi použití bez parametrù zobrazí pøíkaz echo aktuální nastavení zobrazování pøíkazù.
+    echo [{on | off}] [Zpráva]            #  Zpráva = 'Urèuje text, který se má zobrazit na obrazovce.'
+ENDLOCAL Konec lokalizaŸn¡ch zmØn prostýed¡ v d vkov'm souboru
+ERASE    Vyma§e jeden nebo v¡ce soubor
+EXIT     UkonŸ¡ program CMD.EXE (pý¡kazovì ý dek).
+FC       Porovn  dva soubory nebo sady soubor a zobraz¡ rozd¡ly
+FIND                             # 
+    find [/v] [/c] [/n] [/i] "Øetìzec" [[Jednotka:][Cesta]Název_souboru[...]]    # /n - pred kazdy radek vlozi cislo radku; /c - zjisti kolik radku obsahuje zadany retezec                         
+FINDSTR  Vyhled  textovì ýetØzec v souborech
+FOR      Spust¡ urŸenì pý¡kaz pro vçechny soubory v sadØ
+FORMAT                           # format disku pro potreby Windows 2000
+FTYPE    Zobraz¡ nebo zmØn¡ typ souboru, pou§itì v pýidru§en¡ch rozç¡ýen¡
+GOTO     Interpret pý¡kazov'ho ý dku pýejde k vykon v n¡ instrukc¡
+         v oznaŸen'm ý dku d vkov'ho souboru.
+GRAFTABL Povol¡ zobrazov n¡ sady rozç¡ýenìch znak v grafick'm re§imu
+HELP                             # zobrazi seznam prikazu WINDOWS
+if                               # Zpracovava  prikazy v davkovem souboru
+    if exist *.txt echo V aktualnim adresari se nachazi soubory s koncovkou txt.        # napise vetu je-li podminka splnena; stejnej efekt ma i: if exist *.ini echo 'V aktualnim adresari se nachazi soubory s koncovkou txt'.
+ipconfig /all                        # info o me ipadrese 
+    ipconfig /release                  # adresa IP adapteru pripojeni k mistni siti byla uspesne unolnena, prvne release a pak renew
+    ipconfig /renew                  # konfigurace pripojeni k mistni siti
+LABEL                            # vytvori nebo smaze jmenovku disku
+md                               # vytvori slozku
+mkdir                            # vytvori slozku
+    mkdir \Danì\Nemovitosti\Aktuální        # vytvori adresar i s podadresary
+MODE     Konfiguruje syst'mov' zaý¡zen¡
+MORE     Zobraz¡ najednou pouze jednu obrazovku vìstupu
+MOVE     Pýesune jeden nebo v¡ce soubor z jedn' slo§ky do jin'
+PATH                             # zobrazi co je nastaveno v ceste systemu windows  (spustitelne soubory)
+PAUSE    Pozastav¡ zpracov n¡ d vkov'ho souboru a zobraz¡ zpr vu
+POPD     Obnov¡ pýedchoz¡ hodnotu aktu ln¡ slo§ky, ulo§enou pý¡kazem PUSHD
+ping /t zeus                        # dela ping dokola
+PRINT    Vytiskne textovì soubor
+PROMPT   ZmØn¡ tvar pý¡kazov'ho ý dku Windows 2000
+PUSHD    Ulo§¡ aktu ln¡ slo§ku a pak ji zmØn¡
+rd                                # smaze slozku
+    rd [Jednotka:]Cesta [/s] [/q]
+RECOVER  Obnov¡ Ÿiteln' informace z chybn'ho nebo poçkozen'ho disku
+REM      OznaŸuje koment ý v d vkov'm souboru nebo souboru CONFIG.SYS
+REN      Pýejmenuje soubor nebo soubory
+rename                               # prejmenuje soubor nebo soubory
+REPLACE  Pýep¡çe soubory
+rmdir                            # smaze slozku
+    rmdir [Jednotka:]Cesta [/s] [/q]        # /s - Odstraní zadaný adresáø vèetnì všech podadresáøù a souborù.; /q - Pøi odstraòování adresáøù nebude od uživatele vyžadováno potvrzení.
+SET      Zobraz¡, nastav¡, nebo sma§e nastaven¡ prostýed¡ syst'mu Windows 2000
+SETLOCAL ZaŸ tek lokalizaŸn¡ch zmØn prostýed¡ v d vkov'm souboru
+SHIFT    Posune pozici nahraditelnìch parametr v d vkov'm souboru
+SORT     Zkr t¡ vstup
+START    Spust¡ urŸenì program nebo pý¡kaz v nov'm oknØ
+SUBST    Pýiýad¡ p¡smenu jednotky cestu
+time                             # zobrazi nebo nastavi cas systemu
+    time 13:36                    # nastaveni hodin
+    time 1:36P                    # nastaveni hodin
+    time /t                        # zobrazi jenom cas 9:58  # to same jako   "time /time"
+ 
+TITLE    Nastav¡ nadpis okna relace programu CMD.EXE
+TREE     Graficky zobraz¡ strukturu slo§ek jednotky nebo cesty
+
+type                             # zobrazi obsah textoveho souboru
+    type soubor.txt                    # zobrazi obsah souboru
+    type soubor.txt | more                # zobrazeni po obrazovkach
+ver                              # zobrazi verzi systemu Windows 2000
+VERIFY   UrŸuje, zda m  syst'm Windows 2000 kontrolovat spr vnost
+         zaps n¡ soubor
+vol                              # zobrazi jmenovku jednotky a seriove cislo
+XCOPY    Kop¡ruje soubory a stromy slo§ek
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# list of commands LINUX
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+&              myapp &              # run program myapp in the background
+adduser -u 500 -g 500 -o xp   
+alias                               # vypise seznam vsech aliasu
+    alias alias alias_name = command    # vytvoreni noveho alisa a pridat do ~/.bash_profile nebo ~/.login nebo ~/.profile --> prvni co se najde tak ten se konfiguruje
+    alias alias ll = 'ls -l --color=auto'      # ukazka aliasu s pridanou barvou
+apropos <co hledam>                 # stejne jako man -k <co hledam> prohleda hledany vyraz ve vsech manualovych strankach
+arp -a                              # vypise pocitace se kteryma jsem komunikoval
+                                    # zfalsovani  MAC adresu jde pomoci ifconfig, obecne se tomu naziva spoofing
+arp                                 # /sbin/arp -a – vypíše informace ve vìtách (BSD styl) místo tabulky;
+    /sbin/arp -a                    # zobrazi jak <hosts> tak ip musim zadavat v absolutnim tvaru   # Jelikož jej standardnì umístìn v adresáøi /sbin, nemusí jej shell spuštìný pod bìžným uživatelem najít v systémových cestách. Proto jej zde budu uvádìt s plnou cestou.
+    /sbin/arp -n                    # – nebude zobrazovat doménová jména poèítaèù, ale jejich (èíselné) IP adresy;
+    /sbin/arp -v                    # – na konec výpisu bude pøidána informace o poètu položek apod.;
+    arp tabulka                        # cat /proc/net/arp   --> ARP tabulka poslednich IP adress co mam v lokalni siti
+    cat /proc/net/arp               # cat /sbin/arp
+arping                              # neco jak ping, arping funguje na "spojove vrstve" a ping funguje az na "sitove vrstve", ARP musi vzit i firewally, pro komunikaci na ethernetu se pouziva ARP (Adrress Resorulution Protocol) http://www.linuxexpres.cz/praxe/sitove-nastroje-v-linuxu-4-cast
+    arping -b 10.0.0.25             # – všechny (nejen první) ARP dotazy budou zasílány formou broadcast;
+    arping -c 5 10.0.0.25           # – arping provede právì pìt pingnutí na zadanou adresu a skonèí;
+    arping -I eth0 10.0.0.25        # – dotaz na 10.0.0.25 bude vznesen prostøednictvím první ethernetové karty;
+arp agira5                          # souvisi s prikazem: dig agira5,
+at 18:00                            # spusti prikaz v urcity cas, prikaz napisu na dalsi radek
+  at 12pm tomorrow
+  at now + 23 hours
+at>                                 # enter a list of commands to be run, press CTRL D when you're done
+atd                                 # run jobs queued for later execution, spusti jako demony; you can load atd by entering   rcatd start   at the shell prompt
+atq                                 # to view a list of pending at jobs
+atrm                                # to remove a pending at job
+awk                                 # (nebo sed) to manipulate the output from a command by including them in a pipe
+                                    # awk treats command output like a database.
+    cat /var/log/messages | awk '/syslog/ {print $6,$7,$8}'            # zobrazi sloupce 6,7,8 ve vsech zaznamech ktere obsahuji syslog
+bc                                  # kalkulacka
+bg                                  # move a foreground proce3ss into the background by pressing CTRL Z to stop the process and then entering be job_ID to move the process to the background
+cat > <jmeno_souboru>               # ceka na input a ten mu dam nejak at uz <CTRL+C> nebo vlozim a pak CTRL+C a ukoncim prikaz tim se mi ulozi obsah do souboru
+    cat                             # spoji a zobrazi soubory
+    cat /etc/dutchman/config.xml    # zobrazi obsah souboru
+    cat /etc/redhat-release                     # napise verzy fedory
+    cat test_*.py | grep -c 'class Test'
+    cat test_*.py | grep -c ''
+    cat test_*.py | grep -c 'makesuite'
+cd ../24                                     # nacte adresar o uroven vys, nez je aktualni a prepne do 24, coz je na stejne urovni jak aktualni
+    cd -                            # zpatky do predchoziho adresare
+    cd ~xp                          # predne na uzivatele xp, nekde se tam dava cd ~/xp  jak kde
+    cd /etc/yum.repos.d/            # kdyz upgraduju system, tak zde nesmi byt zadne rpmnew
+chkconfig --list | grep vnc            
+    chkconfig --list                   # zobrazi tabulku vsech procesu(zaznamy) a init(jsou pole) a hodnota u zaznamu je pak on/off
+    chkconfig -h                    # help
+    chkconfig smb on                # nastavi proces smb na on
+    chkconfig --del dutchwatchdog   # smaze process
+    chkconfig --add dutchwatchdog   # prida process do
+chkconfig --list
+chcon
+    chcon -R -h -t httpd_sys_content_t /path/to/directory       # For example, if you wanted to recursively change the types of a directory and all the files it contains, you could use this command: chcon -R -h -t httpd_sys_content_t /path/to/directory. The -R switch means to operate recursively, and the -h option means to not follow symlinks (which is almost always what you want).
+chgrp                               # utility to change group ownership
+
+chmod                               # 711, 755, 644 meni pristupova prava ls -l - zobrazi opravneni
+    chmod a+x DutchmanArchive.py    # prida vsem uzivatelum "a" pravo "x"-execute pro soubor "DutchmanArchive.py"
+    chmod 777 /tmp/dutchmanLog       
+    chmod 644 .                     # provede na celym adresaru
+    chmod 755 .
+    chmod 755 build.sh              # to allow everyone to read and execute
+    chmod 755 e1.sh                 # prida vsem execute
+chown root /var/run/httpd.pid               # Zmìna vlastníka z /var/run/httpd.pid na 'root' (superuživatele).
+    chown nobody:nobody /tmp /var/tmp       # Pøi zadání vlastníka a dvojteèkou nebo teèkou oddìleného názvu skupiny, zmìní se souèasnì vlastník i skupina. Øetìzec nesmí obsahovat mezeru.
+    chown -R xp.xp .
+    chown -R xp:dis BCR25174_               # takhle jsem zmenil ok
+cmp                                 # porovna dva soubory
+configure                           # automaticky konfiguruje zdrojovy kod
+cp -i zdrojovy_soubor cilovy_soubor         # kopiruje soubory zdrojovy_soubor cilovy_soubor  # pokud soubor jiz existuje tak ho prepise  -i="pokud soubor jiz existuje vyzve jestli chci prepsat"
+cpio                                        # vytvori archivni soubor nebo obnovi; copy input out, lepsi jak tar soubory
+                                            # v rpm baliku jsou archivovany pomocio cpio  example:  "rpm2cpio ../dist/dutchman-BCR25174-1.noarch.rpm | cpio -ivd"
+ct lsco -cview -fmt  '%n :%Nc               # spawn login to a remote terminal
+cron                                        # vytvorenim skriptu a adresarich vytvorim co se ma kdy spoustet; /etc/cron.hourly /etc/cron.daily /etc/cron.weekly
+                                            # cron jobs are stored in /var/spool/cron/tabs
+crontab                                     # manager, ma casovej plan, a co ma zpustit, takovej casovac  "cat /etc/crontab"
+    crontab -u xp -l                # vypise pro uzivatele "xp" list toho co se automaticky spousti -e = edituje soubor crontab; -r = remove; v adresari "/var/spool/cron" jsou ukladany jednotlive cron soubory kazdeho uzivatele, vlastnikem je root
+    crontab -e                      # create and edit crontab file
+    crontab -l                      # to view your crontab file contents
+    crontab -r                      # to remove crontab file contents
+cut                                 # vybere ze vstupnich radku znaky nebo pole; pouziva se s prikazem paste
+    cut -d: -f5 /etc/passwd   
+    cut /etc/passwd
+    ls -l | cut -c2-10                              # vybere jen opravneni, cti od 2 do 10 znaku
+cvs commit -m "nejaka poznamka co to je za komit"   # commit projektu
+    cvs update <jmeno_souboru>
+    cvs -n update                   # nic neudela, ukaze co bude delat
+    cvs -n upd
+date                                # zobrazi nebo nastavi systemovy cas
+    date '+Datum je %-d %-h %Y'     # vypise "Datum je 5 Jun 2008"
+    date -r who.out                 # zobrazi cas posledni zmeny souboru
+    date 03181407.30                # zmeni datum na "18.brezna 14:07:30 hodin"
+dd                                  # prevede a zkopiruje soubor, neco jako cp
+df -k                            # podobne du; vypise kolik je volnyho mista na disku; -a --> vsechny soubory; -l --> vsechny lokalni
+    df -lh                            # nejlepsi, velikost volneho mista jsou v tomto pripade vyjadrena v megabajtech                             
+dig teks2.agi.                            # zjistim DNS jestli je zaple; service named restart # timhle restartuju DNS na erosu
+diff -qr ADR1 ADR2                                 # porovna obsah dvou adresaru, ale nenasleduje symlinks, rsync -n -v asi jo
+diff -cr web/ /var/www/html/dutchman | grep -v '\.py[co]'
+    diff -c smb.conf orig.smb.conf | less            # -C1 - parametrr C s celociselnou hodnotou, zobrazi okolo zmen i dany pocet okolnich radku 
+    diff -cr -c CVS ECAP_2.204.0 ecap_bcr_29003  | grep ^diff   # diffne dva adresare zobrazi zmeny co maji
+    diff -cr . / > rpm.diffs                # 
+    diff -cr ../tmp/organizer/functions.php functions.php    # difne dva soubory
+    diff -cv 
+    diff -u  soubor1.txt soubor2.txt            # porovna dva soubory   # -u parametr rozseka dlouhy soubor na nekolik mensich 
+    diff -U1 original zmeneny                # --- original; +++ zmeneny  --> oznaceni radku na zacatku radku - nebo + (zmeneny)
+    diff verze0-98 verze0-99                # porovnani adresaru
+    diff -y -W80 original zmeneny                # sloupcovy vypis, -W80 --> kolik znaku na radek
+    diff original zmeneny > change.diff            # vytvoreni patchu (patch ma v sobe zmeny), pak kdyz zmeny chvi aplikovat na original tak:   patch original change.diff 
+    diff UG005299.htm ~xp/dutchman/BCR25174/web/ug/UG005299.htm         # porovna dva adresare  # byl jsem prihlasenej jako root, abych se dostal do korenoveho adresare xp tak se tam napsalo ~xp
+dig                         # is a flexible tool for interrogating(dotazovani) DNS name servers    # 
+                                     # vyhleda mi kde je sel
+du -s * | sort -rn | head -20                                # seradi podle velikosti, vcetne vsech podadresaru a souboru
+ethtoll -p eth0                                                # odesilani packetu na device, udelam tak kontrolu zda jsou eth. device ok, dobre zapojeny, atd., na servru to je fyzicky videt oranzovym blikanim na device
+grep -ir ddrivetip /home/xp/*                                # hleda string "ddrivetip" ve vsech souborech v adresari /home/xp/ 
+    grep -ir sel *                                    # v aktualnim adres  ari najde ve vsech souborech radky, ktere obsahuji sel                                     
+gvim -d soubor_j  soubor2                            # otevre dva soubory vedle sebe   
+gzip -cd 30_08_04.gz  | less                            # prohlizeni obsahu archivu
+http://linux.about.com/od/commands/l/blcmdl1_dig.htm
+    dig agira5                    # souvisi to s prikazem, ktery byl hned potom: arp agira5
+du -k /home/xp | sort                    # velikost
+du -sk ./data/                        # ukazuje velikost v kb     
+    du                            # podobne df; zobrazi udaje o velikosti mista na disku, ktere zabiraji jednotlive soubory, adresare
+    du -c                        # zobrazi celkovej soucet co zabiraji
+    du --summarize /home/*                # zobrazi celkovou velikost adresare
+echo "ruda" > <jmeno_souboru>                # napise ruda na prvni radek do souboru     
+    echo *                        # vypise vsechny soubory v aktualnim adresari
+    echo .*                        # vypise vsechny skryte soubory
+    echo -e "jklfsdjklf\v sdal\n sdfs \v adf"        # -e --> povoluje interpretaci se zpetnym lomitkem,   
+env                             # vypise prostredi systemu; da se pouzit i set nebo echo  --> use a $ when referencing an environment variable
+
+ethtool -p eth0                 # poslu sygnal na device a kdyz blika tak je ok
+eval 'resize'                    # zvetsi terminalove okno na aktualni
+export LANG=C                    # znakova sada, potlaci cestinu
+expr                            # vyhodnoti vyraz
+    expr 21 / 3                    # vrati 3
+    expr 5 \* 4                    # vrati 20
+    expr 2 \* \( 3 + 4 \)                # vrati 14
+    expr 23 % 7                    # vrati 2
+    expr filip \> slavek                # vrati 1  neboli "true", (protoze slavek ma 6 pismen, o jedno vic)
+    expr 5\< m                    # vrati "true" protoze porovna pozici "znaku, nebo cisla" zhlediska ASCII tabulky,
+    expr abcdefghijkl : abc                # porovnavam zda-li prvni tri znaky se rovnaji prvnim trem znakum ve stringu
+    expr 5 \| 6                    # vrati 5;
+    expr 0 \| 5                    # vrati 0; --> jeli prvni cast rovna 0 nebo "" vrati prvni cast, jinak druhou
+fdisk                           # utility is used to partition disks
+fg job_ID                       # move a process that is running in the background to the foreground, opak je bg
+file                            # zobrazi katalogizaci souboru
+    file <nazev.souboru>                    # testuje obsah souboru, jestli je to adresar, ASCII soubor, txt, py, ... (pomoci magic number)
+find . \( -name results -prune  \) -o -print 2>/dev/null | cpio -v -o -H tar -O /tmp/37.0.tar    # ve find je specifikace tudiz v nasem pripade (), proto \; najde vsechny soubory co maji result a prune odsekne zbytek
+    # -o  --> logicke or
+    # -a  --> logicke and
+    find . ! -user xp -ls                # najdi kde se vlastnik nerovna xp 
+    find dir x y                            # x,y jsou kriteria, pricemz obe musi platit, kdyz neplati prvni druhe se uz ani nevykona
+    find dir x - or y                        # kdyz jeden vyhovuje, tak se to ukonci, muze vyhovovat bud prvni, nebo prvni ne a pak vyhovuje ten druhy, tak vysledek je pokazdy true
+    find . -name 'a*'                        # najde vsechny prikazy co zacinaji na "a"
+    find / -name Configure.py; 
+    find . -name '*.py' | xargs ls -l                # xargs
+    find . -name '*.py' | xargs grep '2\.4'
+    find . -name '*.py' | grep -v test_ | xargs grep '2\.4'
+    find / -type f -mtime -1 ! -name '*.o' -print                    # najdi v korenovem adresari a vsech jeho podadresarich normalni soubory (-type f), ktere byly zmeneny posledni den (-mtime -1), s vyjimkou tech souboru, jejichz nazvy konci na .o (! -name '*.o'). (Priponu .o maji objektove soubory, ktere obvykle neni potreba zalohovat)
+    find / -type f -mtime -1 ! -name '*.o' -print | > cpio -oB > /dev/ftape      # zazalohuje vsechno na pasku
+    find . \( -name core -o -name junk \) -print -exec rm {} \            # tento prikaz najde, zobrazi a pote smaze (-exec rm {}) vsechny soubory v pracovnim adresari, ktere se jmenuji core (-name core) nebo(-o) junk
+    find . -type f -exec grep -l "$1" {} \;                        # pro nalezeni souboru s urcitym retezcem
+        1.     vytvorim si script s nazevm "hledas" s obsahem "find . -type f -exec grep -l "$1" {} \;"                         
+        2.     $ cat hledac             --> vypise obsah
+        3.     $ hledac "schuze vedeni"    --> najde soubory obsahuji tento retezec
+    find /home/xp /home/dis -size +100 -atime +5 -ok rm {} \;            # najde ze dvou adresaru, soubory vetsi jak 100bloku(-size +100), pricemz posledni pristup k nim probehl pred vice nez 5 dny (-atime +5). Prikaz find se pote pro kazdy nalezeny prikaz zepta, zda ho chceme smazat (-ok rm {}), odpovedet "y" nebo "n", prikaz rm smaze soubor jen v pripace
+    find /home/xp -follow -print                             # jestlize se prikazu prida argument (-follow) - prejde na cil symbolickeho linku a prohleda obsah tohoto adresare
+fuser -k -m /remote/cosim                        # zjisti kterej user ma jaky otevreny soubory opak lsof
+    fuser                                # zjisti kterej user ma jaky otevreny soubory opak lsof
+finger                                # zobrazi informace o uzivatelych
+fmt                                    # jednoduche formatovani textu
+fsck -y                             # utility to check and repair file systems; y - automaticky odpovi YES na vsechny opravy file systemu
+getpwent                           
+getpruid
+grep                                # search text for a pattern = najde retezec
+    grep -c '^220' journal                    # spocita vsechny vyrazy v souboru, ktere zacinaji na radku znakem 220
+    grep cosim */*/*                        # prohleda vsechny adresare a podadresare od aktualniho adresare
+    grep 'info' poznamka.txt         
+    grep -i allow.*from ../conf/httpd.conf     
+    grep -il mysql test_*.py            # v adresari vypise vsechny soubory, ktere zacinanaji na test_ a konci na .py a obsahuji v nazvu 
+    mysql
+    grep allow *
+    grep alias phpMyAdmin.conf            # vypise vsechny radky ze souboru phpMyAdmin.conf, ktere obsahuji 'alias'
+    grep -i alias phpMyAdmin.conf            # najde vsechno at jiz aLIAS, ALIas, alias...
+    grep "'bucket'" *.py
+    grep bucket *.py
+    grep :27 /etc/passwd                # vypise uzivatele  "mysql"
+    grep -o '[A-Za-z0-9]*$' data-file > out-file    # grep s regularnim vyrazem
+groupadd                                # utility tu add group to your system
+groupmod                                # utility to add or remove users to an existing group
+   groupmod -A "mhuffman,dnelson,jcarr" editors       # prida tri uzivatele "mhuffman, dnelson, jcarr" do skupiny editors
+   groupmod -R "dnelson" editors                      # smaze uzivatele ze skupiny editors                              
+groupdel                                # delete an existing group
+gvim                        # grafickej vim
+    gvim /usr/lib/python2.5/site-packages/dutchman/MySqlApi.py
+head <jmeno_souboru>                # zobrazi zacatek souboru
+headless vnc vncconnect=10.100.0.59 noipv6 ip=dhcp ks=http://10.100.0.54/ks/8.ks        # vzdalena instalace pres anacondu, celou tematiku resi soubor "instalace_fedory.txt"
+host www.seznam.cz                                        # zjisti IP adresu, muzu zadat ip adresu a zjisti domenu     
+    host -a penguin.cz           # vypisou se i postovni servry atd. ,Parametrem -t lze urèit typ DNS záznamù (viz seznam), které hledáme. Kupø. host -t mx bind.org nám vypíše poštovní servery domény bind.org
+host seznam.cz                   # ukaze ip adresu
+hostname                         # ukaze jmeno serveru "teks3"
+hostname teks22                  # znema hostname na jiny jmeno
+hping2 -c 5 192.168.0.28         # nektere distro nemaji– provede právì 5 pingnutí na adresu 192.168.0.28 a     
+jobs                             # ukaze seznam uloh, bg -- maze ulohu, fg - dava ulohu do popredi
+   1. Find a "long" job that needs to be run, and do it in the background with "&". (Optionally, use redirection to make sure any output goes to a file or to the "bit-bucket".)
+   2. Call the job to the foreground, then terminate it with CTL-C. (Do this fairly early!)
+   3. Start the job again in the foreground, then use CTL-Z to suspend the job. Then issue "bg".
+   4. While the job (possibly more) is running, call "jobs" and then "jobs -l" (or "jobs -ls" in some shells). Study the differences in the output.
+   5. Use kill to terminate the job. Remember that in some shells, you must use "%" ("kill %1"). In others, it may be necessary to obtain the job's PID (which can be done with "jobs -l", or other tools) and use this as a flag to kill(1).
+kill                             # ukonci process, specifikovany jako PID
+kill -l                          # seznam vsech jak muzu zabit proces   (QUIT, SIGSEGV)
+kill -SIGKILL 272                # kill -9 272 jsou totozne
+       SIGHUP                    # process to unload and then reload with the same PID
+       SIGINT                    # will use brute force to kill the process and may not allow the process to clean up after itselt
+       SIGTERM                   # will kill the process but still allow it to clean up and release the resources it was assigned
+killall vim                         # ukonci process zadany nazvem
+id                               # to view a user's UID
+info: (phpMyAdmin)               # samotne info funguje
+ifconfig eth0           
+    ipconfig eth0:0 1.2.3.4         # takto jsem rozhrani eth0:0 priradil novou IP adresu 1.2.3.4 a to pod oznacenim rozhrani eth0:0
+    ifconfig eth1                # zobrazi info o zapojeni sitove karty             
+    ifconfig eth0 10.0.0.2 up    # Chceme-li pomocí ifconfig napø. nastavit první sí ové kartì adresu 10.0.0.2, udìláme to následovnì; Výsledek zkontrolujeme zadáním samotného ifconfig nebo ifconfig eth0,
+                                 # vetsinou systemi i naroutuji, jestlize ne
+                                 # route add -net 10.0.0.0 netmask 255.255.255.0 eth0
+                                 # route add -net 10.0.1.0 netmask 255.255.255.0 eth1   # kdyz mam kompl se dvema sitovyma kartama
+    ifconfig eth0 down
+info <prikaz>                    # podobne jako man, jen je tady jeste vic informaci; press <CTRL+S>
+init 6                           # spusteni systemu v rezimu
+ip addr                             # napise seznam vsech sitovych device/karet na kompu
+LANG=C pstree                    # zobrazi strom procesu, jen nazvy bez PID procesu
+                                 # souvisi se prikazem pstree coz je zobrazeni, ktere se asi nezobrazuje dobre v terminalu
+LANG=C pstree -p                 # zobrazi strom procesu s cislem PID procesu
+last <jmeno_uzivatele>           # kdy se posledni uzivatel prihlasil do systemu
+less                             # zobrazi textove soubory, strankuje, vypis po jedne strance
+    less cviceni.txt             # zobrazi soubor po jednotlivych obrazovkach
+    less | ls                    # zobrazi 
+    less phpMyAdmin.conf
+ll                               # vraci podrobny seznam vsech polozek v aktualnim adresari
+    ll -a                        # vraci podrobny seznam i neviditelne soubory
+ln -fs /dev/null dutchman.sql                               # udela symlink na dev null
+    ln existuji_soubor novy_odkaz                           # (pevne odkazy zacinaji zastaravat lepsi symlink) vytvori pridavny pevny odkaz na existujici soubor, rozdil mezi cp ln - ln nevytvari dalsi kopii souboru, pevny odkaz se neda vytvorit na adresar, ale symlink to dokaze
+    ln -s /home/xp/dutchman/ruda/README /home/xp/dutchman   # vytvori symlink pro soubor "README", prectu si ho pomoci ls -l /home/xp/dutchman/ruda/README /home/xp/dutchman  (README -> /home/xp/dutchman/ruda/README)
+    ln file_name link_name                                  # vytvori link
+    ln -s lib dutchman                                      # vytvori symlink dutchman po kliku zobrazi obsah adresare lib
+    ln -s /tmp/123 p5           # symlink podivat se 
+locate <ArchiveRestore>            # najde vsechny cesty kde se nachazi soubor ArchiveRestore a vypise jej
+ls nazev_adresare               # zobrazi soubory v danem adresari
+    ls -a                       # zobrazi i neviditelne soubory
+    ls | less                   # zobrazi ppostupne vypis adresare, mezernikem dalsi  
+    ls *                        # vypise obsahy aktualniho adresare i obsahy podadresaru
+    ls | cat         
+    ls /etc/yum.repos.d/
+    ls -ali                        # vypis s informacemi
+    ls -i                       # vypise id souboru
+    ls -lt /tmp                    # 
+    ls -l                        # zobrazi opravneni chmod - meni pristupova prava
+    ls -x                        # vypisuje to po radcich a ne po sloupcich podle abecede
+    ls -r                         # reverse, vypise od konce
+    ls -aZ /var/www/            # every  object on the system, such as regular files, network ports, processes, file descriptors, etc., has a security context associated with it.
+lsof                            # procesy, pro kazdy proces vypise souboru ktere pouziva, opak je fuser
+    lsof -u root                # vypise vypis otevrenych souboru uzivatelem root
+    lsof -i                        # vypisu otevrene sockety a s nima sdruzene procesy
+    lsof -c syslogd                          # s prepinacem -c muzu zadat namisto ciselneho PID textovy nazev procesu
+    lsof /mnt                                # zjistim konkretni procesy, ktere nad svazkem /mnt pracuji
+man <page_name>                              # manual pages ;  /etc/man.config   --> nastaveni manualovych stranek
+    man -k <co hledam>                       # to search for text across man pages --> je stejne jako apropos <co hledam>
+    man chmod
+mailq                                        # displays a list of all messages that have not been delivered yet.  podivat se do cd /var/log a tam vi maillog
+make                                         # udrzuje sadu programu v aktualnim stavu
+mkdir                                        # vytvoreni adresare
+    mkdir -p /mnt/fedora/8/i386             
+mkfs                                         # build a linux file system
+mount                                        # namontuje  in /etc/mtab  --> can view mounted file system; podobne jako /proc/mounts
+    mount -t iso9660 /dev/cdrom /media/cdrom                      # namontuju cd;
+    mount | grep cdrom
+    ls media/cdrom;
+    mount -a                                                      # showmount podivat se na to; namontuju vsechny disky, ktere jsou v souboru "/etc/fstab" odmontuji pomoci "umount"
+    mount -o loop /root/Fedora-8-i386-DVD.iso /mnt/fedora/8/i386            # namontuje soubor /root/Fedora-8-i386-DVD.iso do /mnt/fedora/8/i386 # pozn. kdyz  restartuju tak uz tam neni
+    mount labfs1:/vol/COSIM /remote/cosim/                    # namontuje vzdaleny disk do adresare /remote/cosim
+    mount                                                     # ukaze disky co jsou namontovany
+    mount -t                                                  # let mount try to determine the correct file system type
+mv poznamka poznamka.nova                                     # zmena nazvu souboru - nebo presun souboru, prejmenuje, rename
+myisamchk -r dutchman_message_types.MYI                          # flush table dutchman_message_types.MYI --> tohle jsem bezel pred neco to opravilo, jeste se podivat; kontroluju jestli jsou dobre tabulky; prihlasenej jako mysql; a byt v mysql home directory
+mysql -h dutchman -u -dutchman -p                             # pripoji se ke vzdalenemu hostu s nazvem "dutchman" a pak se prihlasi pod uzivatelem "dutchman"
+    mysql -h teks2 -u dutchman -pflying                       # pripojeni k mysql databazi i s heslem
+    mysql -hlocalhost -uroot -pmnem0syne < init.sql         
+mysqldump dutchman dutchman_archives > dutchman_archives.dump.2008-04-10        # vydampuje z "dutchman dutchman_archives" do > 
+    mysqldump -u root -p -A >záloha.sql                       # vyexportuje vsechny databaze do souboru "zaloha.sql"
+    mysqldump -u root -p -B uzivatele mysql >záloha.sql       # vyexportuje jen databaze uzivatele, mysql do souboru zaloha.sql
+    mysqldump -u root -p mysql user >záloha_tabulky.sql       # vyexporuje pouze tabulku
+netstat -anp | grep 9011                                      # vypise i porty
+    netstat -lnp                                              # podrobne, displays network connections, detail, zobrazi i procesy, kdo si drzi otevreny port
+    netstat -tnc                                              # budu se rekurzivne volat a ukazovat stav spojeni
+nice -10 rm -rf big_folder                                    # prikaz na snizeni priority
+    nice --10 rm -rf big_folder                                   # prikaz na zvyseni priority prikazu (v rozmezni -20 +19) -20 je nejvetsi priorita
+    nice -n nice_value command                                # to adjust the nice value of a process as it's loaded.
+    nice -n -5 myapp                                          # zmeni prioritu procesu myapp na pet
+
+nm <jmeno souboru>                                            # najde vsechny jedinecne simboly v souboru         
+  nm <jmeno_sooboru> | grep "co hledam"                      
+nmap -sS -O 127.0.0.1                                         # prohledavani kompu, sudo nmap ..; -O = "Enable Operating System detection"   # instalace Fedora: sudo yum install nmap nmap-frontend, Deb: sudo aptitude install nmapfe
+    nmap -sU 127.0.0.1                                        # port scan
+    nmap -sS -O -p 20-25 127.0.0.1                            # zjisti otevreny porty v rozsahu 20-25 portu , -sS = "TCP SYN scan"
+    nmap -T Aggressive -A -v 127.0.0.1 -p 1-65000             # which service is listening on a given port
+nslookup 213.94.69.95                                         # zjisti jmeno serveru pres DNS
+nslookup www.linux.cz ns.penguin.cz                              # Pokud se chceme tázat nìjakého dùvìryhodného DNS serveru v Internetu (a ne tøeba vaší brány, která dìlá kešovací DNS), zadejte jej jako druhý parametr v uvedenem stylu
+ntop                                                          # statistika site v realnem case
+od -c soubor                                                  # zobrazi  i skryte znaky \n\r, zobrazi -c zobrazi ASCII characters
+passwd                                                        # utility to set user password
+poweroff                                                      # vypne system ze site  shutdown -h now
+ps                                                            # zobrazi jen procesy co se poji se soucastnou shell session
+    ps -e                                                         # zobrazi vsechny spustene procesy
+    ps -o user,pid,ppid,command -ax | grep httpd | grep root      # najde vsechny procesy python; flag "-o" urci, ktery output chci vytisknout
+    ps --ppid 30694 -opid | tail -n +2                            # zobrazi jen cisla child procesu; tail -n +2 precte od druheho radku, na prvnim radku se vypisuje PID
+    ps -ef | grep telnetd | awk '{print $3}' | xargs kill -1  # kilne vsechny rodice, ktere spustil telnetd
+    ps                                                        # process management - report proces status
+    ps ax                                                     # seznam vsech spustenych procesu
+    ps -ef | grep sleep                # zjisti jestli je  tam nejakej nazev co obsahuje "sleep"
+    ps -ef | grep http              # zjistim jestli je http server v provozu
+    ps -ef | grep vi                # zjistim jestli mam otevrenych vic vi souboru, se stejnym nazvem atd.
+    ps -ef | grep -i sql            # zjistim jestli bezi sql
+    ps -f |grep telnet
+    ps -fp 30526                    #  - ps is commonly run with the options -ef, where "-e" selects every process and "-f" chooses the "full" output format.  ##http://en.wikipedia.org/wiki/Ps_%28Unix%29
+    ps - fu apache
+    ps -l  nebo ps -f               # zobrazi rozsirene zobrazeni procesu
+ ps -ef | grep defunct | grep -v grep | awk '{kill $2}'                # nevim jestli dobre, kill vsechny defunct
+    pstree -pAc 22585                    # napisu rodicovsky proces a zobrazi mi deti
+    pstree -a                    # zobrazeni PID procesu, nekdy se spatne zobrazuje lepzi je pouzit prikaz  $ LANG=C pstree -p
+    * pstree -a                 # - zobrazení argumentù, s nimiž byly procesy spuštìny;
+    * pstree -c                 # - zabrání shlukování stejných procesù, tj. vypíšou se i ty, které se nìkolikrát za sebou opakují;
+    * pstree -G                 # - na terminálech VT100 bude pro vykreslování èar používat hezèí znaky;
+    * pstree -n                 # - seøadí procesy podle PID (èíselnì), a ne podle jména;
+    * pstree -p                 # - za každým procesem zobrazí v závorce jeho PID.
+pwck                            # verify that /etc/passwd and /etc/shadow are synchronized
+pwconv                          # copy missing users from /etc/passwd to /etc/shadow
+pwd                        # vraci aktualni cestu v adresari v kterem jsem
+renice 15 -p 28886                    # zmena priority za behu, neco jako nice
+    renice -5 2345                  # za behu zmeni prioritu procesu
+rm *                        # vymaze vsechny soubory v aktualnim adresaru
+    rm cviceni                     # vymaze soubor                     
+    rm -i cviceni                    # ceka na potvrzeni o smazani souboru potvrdim "y-ENTER"
+    rm result.*
+    rm -rf <jmeno_adresare>                # smaze adresar vsechne souboru
+    rm -rf/                        # smaze celej adresar home a neco v tmp
+rmdir --help
+    rmdir -p build                    # remove directory and its ancestors
+route                        # Systém totiž neví, které pakety má posílat pøes které rozhraní, nebo již má nejménì dvì (lo a eth0). Musíme mu tedy øíci, které pakety na eth0 smìrovat (neboli routovat).
+    route add -net 10.0.0.0 netmask 255.255.255.0 eth0            # spolupracuje s prikazem ifconfig
+    route add -host 192.168.56.201 netmask 255.255.255.0 gw 10.128.16.17   # MOZNA MISTO TOHO pouzit bridged
+    
+rpm -ql dutchman | xargs grep Vavra                    # prohleda vsechny soubory a vypise radky, ktere obsahuji string "Vavra"
+    rpm -q --info M3uaTraffic-2.204-0.i386.rpm      # zobrazi info kolem nainstalovaneho balicku
+    rpm -q --info -p  M3uaTraffic-2.204-0.i386.rpm    # zobrazi info o balicku ktery neni nainstalovany
+    rpm -V dutchman                   # vypise jaky jsou rozdily mezi tim co bylo puvodne v balicku a mezi tim co se pridalo
+    rpm                        # how to sourceL " http://www.rpm.org/RPM-HOWTO/ "  &  " http://www.faqs.org/docs/securing/chap3sec20.html "
+    rpm -e dutchman                    # odinstalace balicku dutchman
+    rpm -q dutchman                    # napise mi verzy <dutchmanu>
+    rpm -qa "*mod"                      # najdi vsechny rpm ktere v nazvu obashuji "mod"
+    rpm -q mod_python                # zjisti cestu
+    rpm -qf /usr/bin/rpmbuild            # zjisti verzi mod pythonu     
+    rpm -ql phpMyadmin | less            # vylistuje vsechny nainstalovny soubory daneho balicku; podivam se jestli tady neni nejakej konfiguracni soubor treba;
+    rpm -ql -p dist/dutchman-BCR25174-1.noarch.rpm    # -p = "cte z package file" 
+    rpm -qi dutchman                # zobrazi package information
+    rpm -irh dist/dutchman_2_1.noarch        # instalace, spatne zapsany, ale dobre parametry
+    rpm -ivh ./panda-2.0-1.i386.rpm            # instalace package 
+    rpm -Uvh foo-1.0-2.i386.rpm            # To upgrade a RPM package, use the command:
+    rpm -checksig dutchman-2.0.0.rpm   # zjisti integritu; This command checks the PGP signature of specified package to ensure its integrity and origin. Always use this command first before installing new RPM package on your system.
+    rpm -i ./<jmeno_balicku>                # check the package for dependencies
+    rpm -test ./<jmeno_balicku>             # check the package for dependencies
+    rpm -q --whatprovides /usr/bin/perl     # to find out which RPM package provides this component
+
+rpm -qa | grep dutchman                    # zjisti kde vsude je dutchman
+rpm2cpio ../dist/dutchman-BCR25174-1.noarch.rpm                # vezme balik kterej mu dam na vstupu a vypise jej binarne
+    rpm2cpio ../dist/dutchman-BCR25174-1.noarch.rpm | cpio -ivd        # vezme balik a | cpio -ivd   -i = "extract"; v="je ukecanej"; d="vytvori adresar kdyz je potreba"                                    # - ulozi do tempu jak bude rpm ulozeno v systemu do instalaci 
+    rpm2cpio ../dist/dutchman-BCR25174-1.noarch.rpm | less             
+runlevel                                # print which runlevel your operation system is actually raning
+sh -x /etc/init.d/collectord restart                # debug bash scripts
+scp -rp hbures3@linuxsrv02:/view/hbures3 .            # prekopiruje rekurzivne a 
+    scp -v 10_11.tar  xp@teks3:/home/xp/dutchman    # prekopiruju soubor 10_11.tar z aktualniho adresare na druhej kompl
+    scp -v dutchman_7_5_08.tar dis@teks2:/home/dis/dutchman    # prekopiruje
+sdiff -o vysledek pravy levy                        # merge, slucovani dvou souboru, sdif je prikaz s interaktivnim rozhranim, ktery postupne prochazi radky obou souboru
+showmount a <jmeno_disku>       # shmount a; zjisti kdo montuje dany disk
+service httpd restart           # restart apache
+    service network restart        # restart site
+    service mysqld restart      # restart mysql
+    service iptable stop
+    service smb restart            # samba
+    service ntpd start          # restart "network time protokol"
+    service sendmail restart    # restart service
+sort soubor.txt                 # seradi a zobrazi obsah souboru; sort < ./soubor.txt   --> to stejne jen jiny zapis; cat ./soubor.txt | sort
+su <jmeno_uzivatele>            # prepinani uzivatelu
+sudo   
+sum <jmeno_souboru>                   # spocita kolik ma bloku dany soubor
+sh -x /etc/init.d/collectord start                            # debug prikazu
+ssh -x root@teks2                                             # debug prikazu   
+strace -p <pid_number>          # trasovani systemoveho kodu, procesu
+stty sane                       # zpravuje terminal
+tail                            # zobrazi konec souboru opak head
+    tail error_log                                            # projede soubor jenom jednou
+    tail -200lf /var/log/httpd/error_log                      # prohlizeni log file, parametr -f pokracuje, prikaze porad jede dokud ho neukoncim CTRL+Z 
+    tail -f /var/log/httpd/error_log                          # prohlizeni log file, parametr -f pokracuje, prikaze porad jede dokud ho neukoncim CTRL+Z 
+    tail /var/log/messages                                    # vypis vsech messages
+    tar cf - BCR25174 | gzip -9 > BCR25174_2008-03-28.tar.gz
+tar cvf dutchman_7_5_08.tar /home/xp/dutchman/BCR25174        # vytvori soubor "dutchman_7_5_08"
+    tar -xvzf 38.0.0-60.27.0.tar.gz                              # rozbali zazipovanej zatarovanej soubor, gunzip -r <jmeno_souboru>
+    tar -xvzf 38.0.0-60.27.0.tar.gz -C /<jmeno_adresare>      # zkopiruje do adresare
+tcpdump -vv -n -Xx tcp port 80                                # trasovani na portu 80
+tee                                       # filtr - odesle vystup do dvou smeru , kopiruje svuj vystup jak do souboru tak i na obrazovku; who | tee     ls | tee a > b                # se zapise vystup jak do a tak i b
+who.out | grep root                       # vytvori soubor who.out - vypis vsech uzivatelu a na obraozku vypise radek, ktery obsahuje "root"
+    tee who | tee >> soubor1 | grep xp 
+telnet cyts10103                                              # telnet na kterym bezi vsechny dutchman
+telnet teks2 9011 | tee sim.out                               # vypise vypis na obrazovku a do souboru, od -c projdu vypis souboru a uvidim i skryte znaky \nq     
+time /home/xp/dutchman/BCR25174/tasks/ArchiveRestore 99999    # time + prikaz zobrazi delku casu co se prikaz vykonaval
+tmpname                                                       # systemo volani na unix, ktere je potencialne nebez, neni atomicka operace nejde to zabezpecit, od roku 1977,  uzivecne ale nebezpecne
+top -b                                    # zobrazi sesnam spustenym procesu, online, zobrazuje kolik bere pameti atd.
+    top                                   # klavesa "h" -- za behu programu top klavesou h si reknu o help --> muzu menit barvy, add/remove sloupce, atd.
+tput reset                                # zpravi rozbity terminal, da se z oken udelat to stejny ze kliknu na terminal a oprava
+tr 123asd 456qwe                          # nahrazeni znaku, na dalsi radek pak napisu neco a prevedemi to na nove znaky, znaku vlevo se nesmi opakovat (4566we), jinak precte ten posledni
+                                          # kdyz chci pak zpatky prevest tak na radek napisu tr 456qwe 123asd a pak prelozene slovo a tim dostanu puvodni slovo
+tcpdump -v -Xx -i eth0 -s 0 host agira10 and host mail.radiante-corp.com                  # tohle jsem pustil na erosu; k tomu abych z myho pocitace sledoval postu
+tshark                                    # trasovani neco jako wireshark, ale delam na shell, k wiresahrk potrebuju graficke prostredi
+type                                      # Describe a command, for each name, indicate how it would be interpreted if used as a command name.
+type sleep                                # write a description of command type
+    type php                              # napise kde je php, neco jako whereis
+shutdown -h now                           # vypne kompl, stejne jako poweroff   
+uname -a                                  # zjisti info o systemu, verze kernelu
+updatedb                                  # spojeno s yum
+umount /var/lib/mysql                     # odmontuju disk; aby to nemohlo nahodou zapsat
+useradd                                   # pridani uzivatele to a LInux system; passwd --> to set user's password
+  useradd -c "Rudolf Vavra" -m -p "heslo" rvavra       # vytvori uzivatele Vavra a s heslem a s home directory v /home
+userdel <jmeno>                           # to delete an existing user account, nesmaze home directory daneho uzivatele
+  userdel -r xp                           # smaze jak uzivatele tak i jeho /home directory
+usermod                                   # utility to modify an existing user account
+  usermod -l "novejmeno" -c "Nove jmeno uzivatele" puvodniJmeno   # zmeni uzivatelske jmeno z puvodniJmeno na novejmeno
+vat phpMyAdmin.conf
+vi .forward
+    vi +468 <jmeno_souboru>               # posune na radek 468
+vncviewer dmzlinu04:1                     # vnc command 
+xterm
+xargs                                     # find . -name *.o  | xargs rm              # najde a smaze
+w                                         # vypise uzivatele systemu
+.w !xxd                                   # . - adresa soucastneho radku; w - write;  !xxd - vypise hexadicky na vystup a nevypise do souboru, create hex dump of a given file or standart output. It can also convert a hex dump back to its original binary form
+wc | *.xml | sort   
+    wc -l *.mnl | sort -n                       
+    wc -l dutchman_messages_49.txt        # spocita kolik to ma radku
+    wc -lt | head
+    wc -l loc.csv
+    ls -l | wc -l                         # spocita kolik je souboru v danym adresari
+wdiff original zmeneny                    # hleda slova ve kterych se dva soubory lisi, nikoliv radky
+wireshark &                                  # spusti wireshark v pozadi, spustit jako root
+wget http://teks3/dutchman/ug/UG005299.htm   # zkopiruje jeden soubor z netu
+whereis phpMyAdmin                           # phpMyAdmin: /etc/phpMyAdmin /usr/share/phpMyAdmin podobne k which
+which <program>                                 # zobrazi absolutni cestu k programu
+    which tar                                # najde cestu k programu tar  /bin/tar    lepsi je mozna whereis tar - zobrazi vice detailu
+who am i                                     # napise kdo je
+    who | sort | lpr                # sort plni funkci filtru  - tento prikaz posila setrideny vystup uzivatelu na tiskarnu
+write <jmeno uzivatele>              # posle vzkaz uzivately, vzkaz napisu na dalsi radek, pos stisku enter
+xsltproc cap2html.xsl ../tmp/runit.xml        # aplikuje sablonu xsl na xml dokument, dobre je ze podporuje jen xml 1.0, tudiz vim, jake funkce pripadne nepouzivam dobre, dobre pro kontrolu
+# yum help na fedora http://fedoraproject.org/wiki/YumUpgradeFaq
+# http://www.experts-exchange.com/Web_Development/Web_Languages-Standards/PHP/Q_22849311.html
+xargs grep '2\.4'                # xargs vlastnosti - smaze vsechny soubory co mu dam na vstup, neudela dlouhej radek  example: "find . -name '*.py' | grep -v test_ | xargs grep '2\.4'"
+xset
+ypcat passwd| grep -i buddy        # zjistim jestli funguje NIS       
+    ypcat                        # print values of all keys in NIS service
+yum check-update                # case sensitive
+yum clean all                    # vycistime cash
+yum help na fedora                # http://www.experts-exchange.com/Web_Development/Web_Languages-Standards/PHP/Q_22849311.html
+yum info phpMyAdmin                # yum info <packagename>
+yum install <packagename>
+yum install yum-fastesmirror
+yum list all | grep -i php              # to show you a list of all packages that have php in their name, case insensitive.
+yum list all | grep -i phpMyAdmin
+yum remove phpMyAdmin                # yum search <word>
+yum search phpMyAdmin                # yum search <word>
+yum update  
+yum uninstall phpMyAdmin
+yum -C list '*mysql*'                # vypise seznam vsech instalovanych baliku, kde se nekde v nazvu objevuje mysql
+yum -C info rekall-mysql.i386            # vypise info o balicku "rekall-mysql.i386"
+yum -C search gdbm | less            # hleda yum balicky, ktere obsahuji hledane slovo
+ 
+/etc/init.d/httpd restart            # restart apache
+| less                        # zobrazovany soubor mezernikem posouvam po strankach
+|                           # M-80,135 - zobrazuje na prikazovym radku rouru - roura prevezme vystup z jednoho programu a preda jej druhymu jako vstupni data
+                        # cat mesice | head -1
+                          tail mesice | lpr # odeslat vystup tiskarne
+~/                         # je domovsky adresar uzivatele
+ 
+ 
+# help 
+$ ls /etc/yum.repos.d/              # podivat se na repository
+     
+$ yum list all | grep -i php              # to show you a list of all packages that have php in their name, case insensitive.
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ridici posloupnosti se zpetnym lomitkem
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+\a                        # zvonek
+\b      
+\f      
+\c                        # potlaceni koncovych znaku NEWLINE
+\n                        # NEWLINE
+\r                        # u windous \r\n, mozna return, jeste se podivat       
+\t                        # vodorovny TAB
+\v                        # svisly TAB
+\x
+\\                        # Zpetne lomitko
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# sitove prikazy, rozchozeni site
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+ifconfig eth0
+lsmod
+modprobe                    # high level handling of loadable modules
+ls *mod*
+dmesg | grep eth
+ 
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# vznik procesu & python
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+1. $ python  # zkouska
+    1.1    >>> import os
+        >>> os.spawnv(os.P_NOWAIT, '/bin/sleep', ['10000'])  # vypise processID
+         
+2. python tasks/ArchiveRestore 100185 # archivace, DB dutchman, dutchman_archives,  arc_active=1
+ 
+    2. python ArchiveRestore 100187
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# SE linux
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+1. moznost 
+selinuxenabled
+setenforce
+sealert -l 9b47a72c-dd04-4db5-bed6-1cb216a6400e    
+setenforce 0                    # vypina selinux
+ 
+ 
+2. moznost
+cd /etc/sysconfig/
+grep -ir sel *                     # vyhleda mi kde je sel
+vi selinux         
+         
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# python test
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+python test_all.py -v 2>&1 | tee result.out   #v adresari dutchman/lib
+python test_all.py -v
+ 
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#     Add user "dis" - prida uzivatele dis a nastavi heslo na dis, id zjisti jaka skupina je atd
+#    source:        http://www.ahinc.com/linux101/users.htm            #    source:        http://www.cyberciti.biz/faq/howto-linux-add-user-to-group/
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+adduser dis
+passwd dis
+id dis
+ 
+ 
+# pridani uzivatele do skupiny
+1.    -prihlasim se jako uzivatel "root" a zjistim zda existuje skupina uzivatelu "developers"
+    grep developers /etc/group            # jestli nevidim zadnej output, pak pridam skupinu "developers"
+    groupadd developers                # prida skupinu developers
+    useradd -G developers vivek            # Add a user vivek to group developers
+ 
+# dalsi prikazy
+useradd     -d        home directory
+        -s        starting program
+        -p        password
+        -g         primary group assigned to the users
+        -G        other groups the user belongs to 
+        -m        create the user's home directory
+ 
+usermod                # modifying existing user
+userdel                # deleting a user
+ 
+#    Where user and group information stored??
+#    /etc/passwd
+#    /etc/shodow
+#    /etc/group
+#    /etc/skel
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# regularni vyrazy, specialni znaky
+# book str. 70, 147, 779
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+specialni znaky: & ; | * ? ' " ' [ ] ( ) $ < > { } ^ # / \ % ! ~ +
+ENTER a TAB - maji v ramci shell taky zvlastni vyznam 
+ 
+\         - je ridicim znakem pro specialni znaky, ktere doplnime pred specialni znak, je-li vic specialnich znaku, umistit \ zpetne lomitko pred kazdy z nich
+        \\ - dve podobne jako \* nebo \|  - prvni lomitko proste uvozuje specialni znak
+''        - kdyz mam vic specialnim i normalnich znaku, tak vsechny ted jiz bez zpetneho lomitka, vlozim mezi apostfory ''
+ 
+ 
+|        # roura mezi programama vystup 1 je vstup do programu 2 
+        "prikaz_a [argumenty] | prikaz_b [argumenty]"  = prikaz_a [argumenty] > temp  
+                                 prikaz_b [argumenty] < temp
+                                 rm temp                  - roura to vsechno udela zaraz
+ 
+>        # M-138 presmerovani standartniho vystupu, prikazuje shellu presmerovat do zadaneho souboru namisto na obrazovku = pri presmerovani davat pozor jestli soubor existuje, prikaz jej znici
+        prikaz [argumenty] > nazev_souboru   =  
+        cat krabice.txt tuzka.txt pero.txt > pomucky.txt    - vytvori soubor "pomucky.txt", ktery bude obsahovat vsechny predesle soubory
+ 
+<        # opak ">"  myslim
+ 
+>>        #pripojeni standartniho vystupu k souboru - prikazi shellu pridat nove udaje na konec vystupniho souboru
+        cat hruska.txt >> pomeranc.txt   # prida hrusku k pomeranci
+ 
+ 
+&        # (ampersand) spustim prikaz na pozadi a & umistim tesne pred ENTER  - pak shell priradi uloze PID  a zobraziho mezi hranatymi zavorkami
+ 
+?        # slouzi ke generovani nazvu souboru
+ 
+*        # vyjadruje jako ? otaznik libovolny znak, ale zaroven odpovida libobolnemu poctu znaku - vcetne nuloveho poctu znaku
+ 
+[]        # mam-li v adresari soubory WO1, WO2, WO12, WO3, Wo4, WOKL, WOML tak prikaz $ ls WO[12] - vypise dva soubory, jen ty co obsahuji bud 1, nebo 2, WO12 nezobrazi, jen jeden znak se bere
+        # spolupracuje s [^] nebo [!] - coz se rovna a oba bezprostredne za [  znamenaji doplnek
+ 
+^         # doplnek bezprostredne za zavorkou
+        ls
+        aa ab ac ad ba bb bc bd cc dd
+        ls *[^ab]
+        ac ad bc bd cc dd cc 
+ 
+-        # rozsah znaku
+ 
+~        # znak tilda
+ 
+ 
+?:        # kdyz najde, tak hned zkonci, a dal neprohledava; dava se na zacatek stringu
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Regularni vyrazy - doplnek; znak "/" = slouzi pouze jako oddelovac = nema vyznam
+#
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+/^\S+\.(gif|jpg|jpeg|png)$/                    # Often validation of an URL or filename requires a specific extension. One regular expression that will catch all filenames (and more!) is:
+/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/            # Example: E-mail Addresses; One regular expression that matches 99.99% of valid entries is:     
+ 
+ 
+ 
+/[kruh]/        - kruh, okruh, kruhovy
+/[my ne]/        - my nejdeme
+/[ .olo]/        - kolo, molo, solo
+/[dB]il/        - radil, Billa
+/t[aeiou].l/        - tank, tisk  # "."  - libovolny znak
+/# [6-9]/        - # 6m, # 8
+/[^a-zA-Z]/        - libovolny znak, ktery neni pismenem
+/[ab*c]/        # a nasledovane nula bebo vice vyskytu b za kterymi nasleduje c        - ac, abc, abbc, debbca
+/[t.*ink]/        # "trenink", za t libovolny pocet az do ink
+/[a-zA-Z]*/        # reztezec jen z mezer a pismen, bez interpunkce
+/(.*)/            # nejdelsi retezec mezi ()
+/([^)]*)/        # nejkratci mozny retezec zacinajici znakem ( a koncici znakem )
+/^T/            # T na zacatku radku
+/^+[0-9]/        # znak + nasledovany cislici na zacatku radku
+/:$/            # dvojtecka ukoncujici radek
+/ec\./            # vsechny retezce obsahujici ec nasledovane teckou - konec.
+/\\/            # jedno zpetne lomitko 
+/\*/            # hvezdicka, *.c, hvezdicka(*) 
+/\[5\]/            # [5]        bylo jich pet [5]
+/a\/nebo/        # a/nebo         
+         
+ 
+|            # znamena ze je to nedeterministicka cast, 
+ 
+# ok, najde prvniho eagle
+a = "stpa9020901 08-05-25 02:50:16 EDT  EAGLE5 38.0.0-60.36.0
+ sdfsd f  EAGLE1 38.0.0-60.36.0  9509.1149    CARD 5201,A   INFO    SLK Level-3 T19 timer expired                 Report Date:08-05-25  Time:02:50:16"
+findStr = re.search('EAGLE[0-9]+ [0-9]+.[0-9]+.[0-9]+-[0-9]+.[0-9]+.[0-9]+', a)
+if findStr != None:
+    findStr = findStr.group()
+    print findStr
+else:
+    print "there is no string"
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Regularni vyrazy - python
+#
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+a = "stpa9020901 08-05-25 02:50:16 EDT  EAGLE5 38.0.0-60.36.0
+ sdfsd f  EAGLE1 38.0.0-60.36.0  9509.1149    CARD 5201,A   INFO    SLK Level-3 T19 timer a = "stpa9020901 08-05-25 02:50:16 EDT  EAGLEd 38.0.0-60.36.0
+ sdfsd f  UNKNOWN ??.?.?-60.36.0  9509.1149    CARD 5201,A   INFO    SLK Level-3 T19 timer expired                 Report Date:08-05-25  Time:02:50:16"
+ 
+findStr = re.search('EAGLE5 [0-9]+.[0-9]+.[0-9]+-[0-9]+.[0-9]+.[0-9]+', a)
+if findStr != None:
+    findStr = findStr.group()
+    print findStr
+ 
+ 
+>>> r = re.search(r'([\w.]+@[\w.]+)', 'Adresa honza@py.cz ...')
+>>> r.group(1)                        # 'honza@py.cz'
+---
+>>> re.findall(r'[\w.]+@[\w.]+', 'Adresy: honza@py.cz, redakce@root.cz')        # ['honza@py.cz', 'redakce@root.cz']
+---
+>>> re.findall(r'([\w.]+)@([\w.]+)',
+...            'Adresy: honza@py.cz, redakce@root.cz')                    # [('honza', 'py.cz'), ('redakce', 'root.cz')]
+ 
+#=======================================================================================================================================
+# python commands
+#---------------------------------------------------------------------------------------------------------------------------------------
+dir()                            # vypise seznam všechn promìnnych ktere jsem pouzil
+znamky=[1,1,3,1,4,8]; >>> dir(znamky)             # vypise jake vsechny metody ma muj objekt
+x=[5,4,2]  >>> help(x)                     # napoveda na prikazovem radku 
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#     mysql initial state of database 
+#     _Note: be aware this script drop all data in database if exists_
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+#import initial state of database to MySQL
+mysql -h<host> -u<user> -p<password> < /etc/dutchman/init.sql
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Bourne Again Shell
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+Bourne Again Shell a TC Shell(tcsh) jsou interpretry prikazu a vysokourovnove programovaci jazyky. Ve funkci interpretru prikazu spousteji prikazy zapsane v prikazovem radku za vyzkou shellu.
+ 
+prihlasovaci shell             = jsou interaktivni
+ 
+interaktivni shell             = ten, ktery ziskame spustenim prikazu "bash"
+ 
+neinteraktivni shell             = pouzity ke spusteni skriptu
+ 
+Prihlasovani
+    /etc/profile
+    ~/.bash_profile, ~/.bash_login, ~/.profile           (~/ je domovsky adresar uzivatele) - jsou spousteny za sebou v poradi a muzu jima meni treba /etc/profile
+    ~/.bash_logout                        - po odhlaseni
+ 
+ 
+ 
+ 
+Promenne
+     set, setenv             # definice stringu  setend - je jedina globalni promenna
+     @                # pro hodnotu
+         
+    - jakmile promenna existuje, tcsh nahradi jeji hodnotou nazev promenne uvedeny v prikazovem radku za znakem dolaru ($). Jestlize je pred znak vlozeno \ zpetne lomitko nebo je nazev promenne uzavren do apostrofu k substituci nedojde.
+    $ set jmeno = Filip
+    $ echo $jmeno
+     
+     unset
+     setenv SCRDIR /usr/local/scr
+ 
+ 
+tcsh                    # vytvori podrizeny shell
+ 
+ 
+while true; do /usr/sbin/in.telnetd -h -debug 9011 -L /home/xp/dutchman/BCR25174/tools/eagleSimulator.py ; sleep 1; done          # tohle napsat do radku
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# chmod  
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+Extra User Group Other
+      ----------------
+ 
+MSB --> READ
+b2  --> WRITE
+LSB --> EXECUTE
+ 
+7o = 111b = rwx
+6o = 110 = rw
+5o = 101 = rx
+...
+744
+ 
+chmod u+x            # pridava prava 
+chmod a+x <jmeno_souboru>
+chmod o-r            # - odebira prava 
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# error apache 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+Starting httpd: httpd: apr_sockaddr_info_get() failed for teks3.agi
+httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1 for ServerName
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#    LInux Security 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+/etc/passwd             zde byly driv ulozeny hesla, v novem linuxu jsou v /etc/shadow
+vi /etc/inittab            # this file is the key to most of the startup processes
+ 
+Protecting your machine with hosts.allow and hosts.deny
+- imbound packets to tpcd are filtered through the rules in hosts.allow first
+ 
+ 
+v nasteveni portu ze to ma zkousek nejake domenove 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#    konstrukce
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+msgAlaTypeId = self.execute(query)  
+>>> ((10L,3L),)
+msgAlaTypeId = msgAlaTypeId[0][0]
+>>> 10
+ 
+ 
+ala_allRel_id = 1
+ala_type_id = 2
+ala_ident_id = 3
+ala_cardType_id = 4
+ala_speCard_id = 5
+alarm = {}
+alarm = {'allRel':ala_allRel_id, 'type':ala_type_id, 'ident':ala_ident_id, 'cardType':ala_cardType_id, 'speCard':ala_speCard_id}
+print alarm.keys()
+for index in [alarm.keys(), alarm.values()]:
+    print index[0],index[1]
+for index in [alarm.keys(), alarm.values()]:
+    print index
+for alm in alarm.values():
+    print alm
+for alm in alarm.keys():
+     print alm
+#for index, value in alarm.keys():
+# print index, value
+ 
+ 
+ 
+knights = {'gallahad': 'the pure', 'robin': 'the brave'}
+for k, v in knights.iteritems():
+     print k, v
+ 
+ 
+# example 
+asdds = ((227L, 'message 15 type 1'), (228L, 'message 15 identification 2'))
+alarms = {'allRel':0, 'type':227, 'ident':228, 'cardType':0, 'speCard':0}
+for k, v in alarms.iteritems():
+    #print k, v
+        for asdd in asdds:
+            if asdd[0] == v:
+                part ="SELECT * FROM %%(database)s.dutchman_messages_alarm WHERE %s=%d " % (k,v)     
+            print part
+  
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  protokoly   
+#     source: http://www.linuxexpres.cz/praxe/sitove-nastroje-v-linuxu-4-cast
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+Po ethernetu lze totiž šíøit i jinou komunikaci než jen TCP/IP (napø. IPX/SPX nebo NetBEUI).Proto má každá ethernetová karta svou hardwarovou adresu, oznaèovanou MAC. Adresu své karty mùžeme zjistit jednoduše pøíkazem ifconfig (resp. /sbin/ifconfig).
+ 
+ 
+ICMP se používá ke komunikaci mezi aktivními prvky sítì. Již jsme se s ním setkali v podobì pøíkazù ping a traceroute. Ping využíval ICMP pakety pøímo pro komunikaci. Traceroute nepøímo tím, že IP paketùm nastavoval krátkou životnost, aby mu pak jednotlivé routery na cestì vracely jejich úmrtní listy, a to právì pomocí ICMP.
+ 
+Výhodou TCP je kontrola nad navázaným spojením. Je tedy vhodný tam, kde se bude posílat vìtší objem dat. V situacích, kde se posílá tøeba jen jeden nebo nìkolik málo paketù (napø. dotaz DNS), by navazování a ukonèování TCP spojení znìkolikanásobilo objem probíhající komunikace. Proto se používá jednodušší forma – protokol UDP (User Datagram Protocol).
+ 
+UDP nenavazuje spojení a nekontroluje, zda paket dorazil k cíli v poøádku. Pokud poèítaè pøes UDP odeslal dotaz, na který oèekává odpovìï, a ta stále nepøichází, prostì dotaz po chvíli zopakuje. Využívá se to napø. pro již zmínìné DNS, dále tøeba pro TFTP, NTP, sí ové hry èi pro internetovou telefonii (VOIP). 
+ 
+Aplikaèní vrstva     HTTP, FTP, POP3, SMTP, NTP, DNS, ...
+Transportní vrstva     TCP, UDP, ...
+Sí ová vrstva     IP, ICMP, ...
+Spojová vrstva     ARP, PPP, ...
+ 
+# maska site: V každé síti je tøeba vyèlenit dvì zvláštní adresy, které nemohou být pøidìleny žádnému zaøízení. Jde o adresu sítì pro potøeby smìrování paketù z jiných sítí a o všesmìrovou adresu pro komunikaci se všemi poèítaèi sítì souèasnì. Adresa sítì bývá nejnižší èíslo sí ového rozsahu (10.0.0.0, 10.0.1.0 apod.), všesmìrová adresa naopak nejvyšší (10.0.0.255, 10.0.1.255).
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  XSLT
+#     source: ""
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+<xsl:if test="string(.)==''">
+</xsl:if>
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  XPath
+#     source: "http://www.w3schools.com/xpath/default.asp"
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++MYSQL queries
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+query = "SELECT * FROM %%(database)s.dutchman_eagle_alarm_comments WHERE dev_id = '%s' AND alm_card='%s' AND alm_id = (SELECT alm_id FROM %%(database)s.dutchman_eagle_alarms WHERE alm_id = %d and alm_rel = '*') " % ( dev_id, alm_card, alm_id )
+ 
+query = "INSERT INTO %%(database)s.dutchman_eagle_alarm_comments ( alm_id, dev_id, alm_card, alm_comment, created_at, usr_id ) SELECT %%(database)s.dutchman_eagle_alarms.alm_id, '*', '*', '%s', NOW(), %d FROM %%(database)s.dutchman_eagle_alarms WHERE alm_rel = '*' AND alm_sev = '%s'" % ( alm_comment, usr_id, dbData[0][0]  )
+ 
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  mySQL
+#     source: "http://www.tech-recipes.com/mysql_tips484.html"
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+   .         match any character
+   ?         match zero or one
+   *         match zero or more
+   +         match one or more
+   {n}       match n times
+   {m,n}     match m through n times
+   {n,}      match n or more times
+   ^         beginning of line
+   $         end of line
+   [[:<:]]   match beginning of words
+   [[:>:]]   match ending of words
+   [:class:] match a character class
+              i.e., [:alpha:] for letters
+              [:space:] for whitespace
+              [:punct:] for punctuation
+              [:upper:] for upper case letters
+   [abc]     match one of enclosed chars
+   [^xyz]    match any char not enclosed
+   |         separates alternatives 
+ 
+# source: http://www.brainbell.com/tutorials/MySQL/Using_MySQL_Regular_Expressions.htm
+[:alnum:]        #Any letter or digit, (same as [a-zA-Z0-9])
+[:alpha:]        #Any letter (same as [a-zA-Z])
+[:blank:]        # Space or tab (same as [\\t ])
+[:cntrl:]        # ASCII control characters (ASCII 0 tHRough 31 and 127)
+[:digit:]        # Any digit (same as [0-9])
+[:graph:]        # Same as [:print:] but excludes space
+[:lower:]        # Any lowercase letter (same as [a-z])
+[:print:]        # Any printable character
+[:punct:]        # Any character that is neither in [:alnum:] nor [:cntrl:]
+[:space:]        # Any whitespace character including the space (same as [\\f\\n\\r\\t\\v ])
+[:upper:]        # Any uppercase letter (same as [A-Z])
+[:xdigit:]        # Any hexadecimal digit (same as [a-fA-F0-9])
+ 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#    mysql vyrazy
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT *, (msg_message REGEXP "[0-9]+.[0-9]+.[0-9]") AS msgRel FROM %(database)s.dutchman_messages_18        # REGEXP vraci jenom 0 nebo 1
+
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#    info
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+quata                # This feature of Linux allows the system admin to allocate a maximum amount of disk space a user or group may use; prvne to musim nainstalovat  (http://www.yolinux.com/TUTORIALS/LinuxTutorialQuotas.html)
+    usrquota, grpquota   --> tohle musi byt pristupno v /etc/fstab                
+Sticky Bit           # a directory with the sticky bit set means that only the file owner and tbhe superuser may remove files from that directory. Other users are denied the right to remove files fegardless of fhe directory permissions.
+SUID                 # When a SUID file executed, the process which runs it is granted access to system resources based on the user who owns the file and not the user who created the process. When a file is SUID root it allows a program/script to perform functions that regular users are not allowed to do themselves.
+                     # The SUID pemission causes the user who runs the file to temporarily become the file's owner.
+SGID                 # SGID stands for set group id. When looking at files SGID they behave much the same as SUID files, and must be executable for it to have any effect. The SGID bit on a directory means files created in that directory will have their group set to the directory's group.
+umask                # Default Permissions : 777; subtrack umask value: 022;  Allowed Permission: 755
