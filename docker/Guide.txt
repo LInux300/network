@@ -1,0 +1,96 @@
+
+
+
+
+#------------------------------------------------------------------------------
+# Docker rails app
+#------------------------------------------------------------------------------
+# https://www.youtube.com/watch?v=QgmzBuPuM6I
+
+
+#------------------------------------------------------------------------------
+# Docker install ubuntu:latest
+#------------------------------------------------------------------------------
+# https://www.youtube.com/watch?v=eCm9xUl7quk
+
+
+sudo docker pull centos:latest
+sudo docker pull ubuntu:latest
+sudo docker pull ubuntu:14.04
+
+sudo docker images
+
+sudo docker run -t -i ubuntu:latest /bin/bash
+exit
+sudo docker run -t -i centos:latest /bin/bash
+
+
+
+# run container from sudo docker ps -a
+sudo docker start <container_id>
+sudo docker attach <container_id>                # go to container terminal
+
+
+sudo docker search rails
+
+# run an interactive shell
+sudo docker run -t -i instedd/nginx-rails /bin/bash
+
+
+# it download if is not locally in images, check with "sudo docker images"
+sudo docker run -t -i ubuntu:14.04 /bin/bash
+cat /etc/os-release
+exit
+sudo docker run -t -i ubuntu:16.04 /bin/bash
+# run ubuntu under dockeer container name ruda
+sudo docker run --name ruda -it ubuntu:14:0
+
+
+# add log in and log out when starting docker image
+sudo groupadd docker
+sudo usermod -aG docker kuntuzangpo
+
+# To see only names of containers
+sudo docker inspect --format='{{.Name}}' $(sudo docker ps -aq --no-trunc)
+
+# See containers
+sudo docker ps -a
+sudo docker ps -a -f status=running
+
+# To remove all containers that are NOT running
+sudo docker rm `docker ps -aq -f status=exited`
+
+#------------------------------------------------------------------------------
+# 
+#------------------------------------------------------------------------------
+https://www.youtube.com/watch?v=pGYAg7TMmp0&list=PLoYCgNOIyGAAzevEST2qm2Xbe3aeLFvLc
+
+
+sudo vim /etc/hosts
+"""
+81.2.254.221 tibetanmedicine.com
+"""
+
+
+
+# docker login
+# user: kuntuzangmo
+# pass: 
+create docker hub
+create repository private|public
+
+docker pull kuntuzangmo/tibetanmedicine.eu
+
+#------------------------------------------------------------------------------
+# Docker
+#------------------------------------------------------------------------------
+https://docs.docker.com/linux/step_one/
+
+which curl
+
+curl -fsSL https://get.docker.com/ | sh
+#   $ curl -fsSL https://get.docker.com/gpg | sudo apt-key add -
+
+#------------------------------------------------------------------------------
+
+
