@@ -1,0 +1,76 @@
+http://www.tutorialspoint.com/postgresql/postgresql_limit_clause.htm
+
+sudo -u postgres psql                          # login in
+sudo -u postgres createdb mytestruda
+sudo -u postgres createuser --superuser $USER
+pgadmin3                                      # host -> localhost, user, pass, maintenance DB
+psql -h localhost -p 5432 -U postgress devise_development
+
+
+
+su - postgres
+createdb testdb
+psql testdb
+service postgresql restart
+
+#--------------------------------------------------------------
+\password postgres                             # change pass
+\l                                             # list of db
+\c devise_development;                         # connect to db
+\d                                             # list of relations in choosen db
+\\d line_items                                 # describe the table in db
+
+
+
+# CREATE DATABASE testdb;
+# DROP database testdb;
+
+CREATE TABLE COMPANY(
+   ID INT PRIMARY KEY     NOT NULL,
+   NAME           TEXT    NOT NULL,
+   AGE            INT     NOT NULL,
+   ADDRESS        CHAR(50),
+   SALARY         REAL
+);
+CREATE TABLE DEPARTMENT1(
+   ID INT PRIMARY KEY      NOT NULL,
+   DEPT           CHAR(50) NOT NULL,
+   EMP_ID         INT      references COMPANY(ID)
+);
+CREATE TABLE COMPANY5(
+   ID INT PRIMARY KEY     NOT NULL,
+   NAME           TEXT    NOT NULL,
+   AGE            INT     NOT NULL,
+   ADDRESS        CHAR(50),
+   SALARY         REAL    CHECK(SALARY > 0)
+);
+
+
+DELETE FROM COMPANY;                       # delete records
+DROP table department, company;            # drop table
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (1, 'Paul', 32, 'California', 20000.00 ,'2001-07-13');
+SELECT EMP_ID, NAME, DEPT FROM COMPANY INNER JOIN DEPARTMENT ON COMPANY.ID = DEPARTMENT.EMP_ID;
+SELECT EMP_ID, NAME, DEPT FROM COMPANY LEFT OUTER JOIN DEPARTMENT ON COMPANY.ID = DEPARTMENT.EMP_ID;
+SELECT EMP_ID, NAME, DEPT FROM COMPANY RIGHT OUTER JOIN DEPARTMENT ON COMPANY.ID = DEPARTMENT.EMP_ID
+SELECT EMP_ID, NAME, DEPT FROM COMPANY FULL OUTER JOIN DEPARTMENT ON COMPANY.ID = DEPARTMENT.EMP_ID;
+SELECT COUNT(*) AS "RECORDS" FROM COMPANY;
+SELECT C.ID, C.NAME, C.AGE, D.DEPT FROM COMPANY AS C, DEPARTMENT AS D WHERE  C.ID = D.EMP_ID;
+SELECT C.ID AS COMPANY_ID, C.NAME AS COMPANY_NAME, C.AGE, D.DEPT FROM COMPANY AS C, DEPARTMENT AS D WHERE  C.ID = D.EMP_ID;
+SELECT current_timestamp;
+SELECT DISTINCT name FROM COMPANY;        # do not have any duplicate entry
+SELECT NAME, SUM(SALARY) FROM COMPANY GROUP BY NAME;
+SELECT NAME, SUM(SALARY) FROM COMPANY GROUP BY NAME ORDER BY NAME DESC;
+SELECT NAME FROM COMPANY GROUP BY name HAVING count(name) < 2;
+SELECT * FROM COMPANY LIMIT 4;
+SELECT * FROM COMPANY LIMIT 3 OFFSET 2;                    # it start from 3rd position
+SELECT * FROM COMPANY ORDER BY NAME, SALARY ASC;
+SELECT * FROM COMPANY ORDER BY AGE ASC;
+SELECT * FROM COMPANY WHERE AGE >= 25 AND SALARY >= 65000;
+SELECT * FROM COMPANY WHERE AGE IS NOT NULL;
+SELECT * FROM COMPANY WHERE NAME LIKE 'Pa%';
+SELECT * FROM COMPANY WHERE AGE IN ( 25, 27 );
+SELECT * FROM COMPANY WHERE AGE BETWEEN 25 AND 27;
+SELECT * FROM COMPANY WHERE AGE::text LIKE '2%';           # AGE starts with 2
+UPDATE COMPANY SET SALARY = 15000 WHERE ID = 3;
+UPDATE COMPANY SET ADDRESS = NULL, SALARY = NULL where ID IN(6,7);
+
