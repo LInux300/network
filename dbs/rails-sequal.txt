@@ -1,0 +1,40 @@
+# Rails sequal
+# http://sequel.jeremyevans.net/plugins.html
+# http://sequel.jeremyevans.net/documentation.html
+# gem 'sequel-rails', '~> 0.9.11'
+# https://rubygems.org/gems/sequel-rails/versions/0.9.11
+#---------------------------------------------------
+# AR & Sequel
+User.where(name: "Tom")
+User.where("name = :name", name: "Tom")
+User.where("name = ? OR email = ?", "Tom", "jack@jack.com")
+User.where("users.name = ?", "Tom")
+
+# Sequel-only
+User.where(users__name: "Tom")
+User.where(Sequel.lit('users.name') => "Tom")
+
+
+# Sequel alternative option for "name = ? OR email = ?"
+User.where(Sequel.expr(name: "Tom") | Sequel.expr(email: "jack@jack.com"))
+# Sequel alternative option for "name = ? OR email != ?"
+User.where(Sequel.expr(name: "Tom") | Sequel.~(email: "jack@jack.com"))
+
+# Sequel-only
+User.select(Sequel.function(:sum, :id)).first
+User.select(Sequel.lit("SUM(id)")).first
+
+# Sequel-only
+User.exclude(name: "Tom")
+
+Album.left_join(:artists, artist_id: :id)
+
+
+
+
+
+
+
+
+
+

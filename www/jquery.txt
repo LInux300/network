@@ -1,0 +1,358 @@
+# reference !!! 
+http://www.w3schools.com/jquery/jquery_ref_selectors.asp
+
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        $("#test").hide();
+    });
+});
+</script>
+<p id="test">This is another paragraph.</p>
+<button>Click me</button>
+
+<script>
+$(document).ready(function(){
+    $("#p1").mouseleave(function(){
+        alert("Bye! You now leave p1!");
+    });
+});
+</script>
+<p id="p1">This is a paragraph.</p>
+
+#http://www.w3schools.com/jquery/tryit.asp?filename=tryjquery_focus_blur
+<script>
+$(document).ready(function(){
+    $("input").focus(function(){
+        $(this).css("background-color", "#cccccc");
+    });
+    $("input").blur(function(){
+        $(this).css("background-color", "#ffffff");
+    });
+});
+</script>
+Name: <input type="text" name="fullname"><br>
+Email: <input type="text" name="email">
+
+# http://www.w3schools.com/jquery/tryit.asp?filename=tryjquery_hide
+<script>
+$(document).ready(function(){
+    $("p").click(function(){
+        $(this).hide();
+    });
+    $("h2").click(function(){
+        $(this).hide();
+    });
+});
+</script>
+<h2>Click me away!</h2>
+<p>If you click on me, I will disappear.</p>
+<p>Click me away!</p>
+
+<script>
+$(document).ready(function(){
+    $("#hide").click(function(){
+        $("#ruda").hide();
+    });
+    $("#show").click(function(){
+        $("#ruda").show();
+    });
+});
+</script>
+</head>
+<body>
+<p id="ruda">If you click on the "Hide" button, I will disappear.</p>
+<button id="hide">Hide</button>
+<button id="show">Show</button>
+
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        $("p").toggle();
+    });
+});
+</script>
+<button>Toggle</button>
+<p>This is a paragraph with little content.</p>
+<p>This is another small paragraph.</p>
+
+
+#http://www.w3schools.com/jquery/tryit.asp?filename=tryjquery_hide_explanations
+<script>
+$(document).ready(function(){
+    $(".ex .hide").click(function(){
+        $(this).parents(".ex").hide("slow");
+    });
+});
+</script>
+<style> 
+div.ex {
+    background-color: #e5eecc;
+    padding: 7px;
+    border: solid 1px #c3c3c3;
+}
+</style>
+<h3>Island Trading</h3>
+<div class="ex">
+  <button class="hide">Hide me</button>
+  <p>Contact: Helen Bennett<br> 
+  Garden House Crowther Way<br>
+  London</p>
+</div>
+<h3>Paris spécialités</h3>
+<div class="ex">
+  <button class="hide">Hide me</button>
+  <p>Contact: Marie Bertrand<br> 
+  265, Boulevard Charonne<br>
+  Paris</p>
+</div>
+
+
+
+
+
+
+# http://www.w3schools.com/jquery/tryit.asp?filename=tryjquery_slide_toggle
+<script> 
+$(document).ready(function(){
+    $("#flip").click(function(){
+        $("#panel").slideToggle("slow");
+    });
+});
+</script>
+<style> 
+#panel, #flip {
+    padding: 5px;
+    text-align: center;
+    background-color: #e5eecc;
+    border: solid 1px #c3c3c3;
+}
+#panel {
+    padding: 50px;
+    display: none;
+}
+</style>
+</head>
+<body>
+<div id="flip">Click to slide the panel down or up</div>
+<div id="panel">Hello world!</div>
+
+
+<script>
+$(document).ready(function(){
+    $("#btn1").click(function(){
+        alert("Text: " + $("#test").text());
+    });
+    $("#btn2").click(function(){
+        alert("HTML: " + $("#test").html());
+    });
+});
+</script>
+</head>
+<body>
+<p id="test">This is some <b>bold</b> text in a paragraph.</p>
+<button id="btn1">Show Text</button>
+<button id="btn2">Show HTML</button>
+
+
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        alert("Value: " + $("#test").val());
+    });
+});
+</script>
+<p>Name: <input type="text" id="test" value="Mickey Mouse"></p>
+<button>Show Value</button>
+
+
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        alert($("#w3s").attr("href"));
+    });
+});
+</script>
+<p><a href="http://www.w3schools.com" id="w3s">W3Schools.com</a></p>
+<button>Show href Value</button>
+
+
+<script>
+$(document).ready(function(){
+    $("#btn1").click(function(){
+        $("#test1").text("Hello world!");
+    });
+    $("#btn2").click(function(){
+        $("#test2").html("<b>Hello world!</b>");
+    });
+    $("#btn3").click(function(){
+        $("#test3").val("Dolly Duck");
+    });
+});
+</script>
+<p id="test1">This is a paragraph.</p>
+<p id="test2">This is another paragraph.</p>
+<p>Input field: <input type="text" id="test3" value="Mickey Mouse"></p>
+<button id="btn1">Set Text</button>
+<button id="btn2">Set HTML</button>
+<button id="btn3">Set Value</button>
+
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        $("#w3s").attr({
+            "href" : "http://www.w3schools.com/jquery",
+            "title" : "W3Schools jQuery Tutorial"
+        });
+    });
+});
+</script>
+<p><a href="http://www.w3schools.com" title="some title" id="w3s">W3Schools.com</a></p>
+<button>Change href and title</button>
+
+
+<script>
+$(document).ready(function(){
+    $("p").not(".intro").css("background-color", "yellow");
+});
+</script>
+<h1>Welcome to My Homepage</h1>
+<p>My name is Donald.</p>
+<p class="intro">I live in Duckburg.</p>
+<p class="intro">I love Duckburg.</p>
+<p>My best friend is Mickey.</p>
+
+<script>
+$(document).ready(function(){
+    $("p").eq(1).css("background-color", "yellow");
+});
+</script>
+</head>
+<body>
+<h1>Welcome to My Homepage</h1>
+<p>My name is Donald (index 0).</p>
+<p>Donald Duck (index 1).</p>
+<p>I live in Duckburg (index 2).</p>
+<p>My best friend is Mickey (index 3).</p>
+
+
+<script>
+$(document).ready(function(){
+    $("div p").last().css("background-color", "yellow");
+});
+</script>
+<h1>Welcome to My Homepage</h1>
+<p>This is the first paragraph in body.</p>
+<div style="border: 1px solid black;">
+  <p>This is the first paragraph in a div.</p>
+  <p>This is the last paragraph in a div.</p>
+</div><br>
+<div style="border: 1px solid black;">
+  <p>This is the first paragraph in another div.</p>
+  <p>This is the last paragraph in another div.</p>
+</div>
+
+<script>
+$(document).ready(function(){
+    $("#btn1").click(function(){
+        $("p").append(" <b>Appended text</b>.");
+    });
+    $("#btn2").click(function(){
+        $("ol").append("<li>Appended item</li>");
+    });
+});
+</script>
+<p>This is a paragraph.</p>
+<p>This is another paragraph.</p>
+<ol>
+  <li>List item 1</li>
+  <li>List item 2</li>
+  <li>List item 3</li>
+</ol>
+<button id="btn1">Append text</button>
+<button id="btn2">Append list items</button>
+
+# prida na zacatek 
+# http://www.w3schools.com/jquery/tryit.asp?filename=tryjquery_html_prepend
+<script>
+$(document).ready(function(){
+    $("#btn1").click(function(){
+        $("p").prepend("<b>Prepended text</b>. ");
+    });
+    $("#btn2").click(function(){
+        $("ol").prepend("<li>Prepended item</li>");
+    });
+});
+</script>
+<p>This is a paragraph.</p>
+<p>This is another paragraph.</p>
+<ol>
+  <li>List item 1</li>
+  <li>List item 2</li>
+  <li>List item 3</li>
+</ol>
+<button id="btn1">Prepend text</button>
+<button id="btn2">Prepend list item</button>
+
+
+
+<script>
+function appendText() {
+    var txt1 = "<p>Text.</p>";              // Create text with HTML
+    var txt2 = $("<p></p>").text("Text.");  // Create text with jQuery
+    var txt3 = document.createElement("p");
+    txt3.innerHTML = "Text.";               // Create text with DOM
+    $("body").append(txt1, txt2, txt3);     // Append new elements
+}
+</script>
+<p>This is a paragraph.</p>
+<button onclick="appendText()">Append text</button>
+
+
+<script>
+$(document).ready(function(){
+    $("#btn1").click(function(){
+        $("img").before("<b>Before</b>");
+    });
+
+    $("#btn2").click(function(){
+        $("img").after("<i>After</i>");
+    });
+});
+</script>
+<img src="/images/w3jquery.gif" alt="jQuery" width="100" height="140"><br><br>
+<button id="btn1">Insert before</button>
+<button id="btn2">Insert after</button>
+
+<script>
+function afterText() {
+    var txt1 = "<b>I </b>";                   // Create element with HTML
+    var txt2 = $("<i></i>").text("love ");    // Create with jQuery
+    var txt3 = document.createElement("b");   // Create with DOM
+    txt3.innerHTML = "jQuery!";
+    $("img").after(txt1, txt2, txt3);      // Insert new elements after img
+}
+</script>
+<img src="/images/w3jquery.gif" alt="jQuery" width="100" height="140">
+<p>Click the button to insert text after the image.</p>
+<button onclick="afterText()">Insert after</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
