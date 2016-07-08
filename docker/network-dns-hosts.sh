@@ -5,11 +5,16 @@ DOMENA_NAME_1='example.com'
 DOMENA_NAME_2='test.com'
 DOMENA_NAME_3='virtual.com'
 
+primaryDNS='10.128.10.10'
+secondaryDNS='10.128.10.20'
+host1='10.128.10.30'
+host2='10.128.10.40'
+
 echo "# INFO:  Host    Role                   Private FQDN             Private IP"
-echo "# INFO:  ns1     Primary DNS Server     ns1.nyc3.example.com     10.128.10.11"
-echo "# INFO:  ns2     Secondary DNS          ns2.nyc3.example.com     10.128.20.12"
-echo "# INFO:  host1   Generic Host 1         host1.nyc3.example.com   10.128.100.101"
-echo "# INFO:  host2   Generic Host 2         host2.nyc3.example.com   10.128.200.102"
+echo "# INFO:  ns1     Primary DNS Server     ns1.nyc3.example.com     $primaryDNS"
+echo "# INFO:  ns2     Secondary DNS          ns2.nyc3.example.com     $secondaryDNS"
+echo "# INFO:  host1   Generic Host 1         host1.nyc3.example.com   $host1"
+echo "# INFO:  host2   Generic Host 2         host2.nyc3.example.com   $host2"
 echo "# INFO: WEB: https://www.digitalocean.com/community/tutorials/how-to-configure-bind-as-a-private-network-dns-server-on-ubuntu-16-04"
 
 
@@ -25,7 +30,7 @@ installDNS() {
     sudo systemctl daemon-reload
     sudo systemctl restart bind9
 }
-#installDNS
+installDNS
  
 dnsConfigurePrimaryDNS() {
     file='/etc/bind/named.conf.options'
@@ -37,10 +42,10 @@ dnsConfigurePrimaryDNS() {
         echo '#       listen-on, allow-transfer'
         cat > $file <<EOF
 acl "trusted" {
-        10.128.10.11;    # ns1 - can be set to localhost
-        10.128.20.12;    # ns2
-        10.128.100.101;  # host1
-        10.128.200.102;  # host2
+        $primaryDNS;    # ns1 - can be set to localhost
+        $secondaryDNS;    # ns2
+        $host1;  # host1
+        $host2;  # host2
 };
 
 options {
@@ -61,7 +66,7 @@ options {
 
         recursion yes;                 # enables resursive queries
         allow-recursion { trusted; };  # allows recursive queries from "trusted" clients
-        listen-on { 10.128.10.11; };   # ns1 private IP address - listen on private network only
+        listen-on { $primaryDNS; };   # ns1 private IP address - listen on private network only
         allow-transfer { none; };      # disable zone transfers by default
 
         forwarders {
@@ -95,13 +100,13 @@ dnsConfigureLocalFile() {
 zone "nyc3.$1" {
     type master;
     file "/etc/bind/zones/db.nyc3.$1"; # zone file path
-    allow-transfer { 10.128.20.12; };           # ns2 private IP address - secondary
+    allow-transfer { $secondaryDNS; };           # ns2 private IP address - secondary
 };
 
 zone "128.10.in-addr.arpa" {
     type master;
     file "/etc/bind/zones/db.10.128";  # 10.128.0.0/16 subnet
-    allow-transfer { 10.128.20.12; };  # ns2 private IP address - secondary
+    allow-transfer { $secondaryDNS; };  # ns2 private IP address - secondary
 };
 EOF
     else
@@ -120,9 +125,11 @@ dnsCreateForwardZoneFile() {
     echo "# INFO: Creates a file: '$file'"
     cp '../db.local' $file
     cp $file "$file.default"
-    #echo "# INFO: DEFAULT: $file" 
-    #echo "# INFO: $(cat $file)"
-    #echo "#--------------------------------------------------------------------"
+
+    echo "#--------------------------------------------------------------------"
+    echo "# INFO: BEFORE: $(pwd)  $file.default"
+    echo "#--------------------------------------------------------------------"
+    echo "$(cat $file)"
 
     confOptionsZone=$(cat $file | grep $1)
     if [[ ! $confOptionsZone ]]; then
@@ -131,9 +138,8 @@ dnsCreateForwardZoneFile() {
 ;
 ; BIND data file for local loopback interface
 ; Update Serial +1
-;
-$TTL    604800
-@       IN      SOA    ns1.$domane. admin.$domane. (
+\$TTL    604800
+@       IN      SOA     ns1.nyc3.$1. admin.nyc3.$1. (
                               3         ; Serial
                          604800         ; Refresh
                           86400         ; Retry
@@ -145,16 +151,17 @@ $TTL    604800
     IN      NS      ns2.$domane.
 
 ; name servers - A records
-ns1.$domane.          IN      A       10.128.10.11
-ns2.$domane.          IN      A       10.128.20.12
+ns1.$domane.          IN      A       $primaryDNS
+ns2.$domane.          IN      A       $secondaryDNS
 
 ; 10.128.0.0/16 - A records
-host1.$domane.        IN      A      10.128.100.101
-host2.$domane.        IN      A      10.128.200.102
+host1.$domane.        IN      A      $host1
+host2.$domane.        IN      A      $host2
 EOF
-        echo "# INFO: $file"
-        echo "# INFO: $(cat $file)"
         echo "#--------------------------------------------------------------------"
+        echo "# INFO: AFTER: $file"
+        echo "#--------------------------------------------------------------------"
+        echo "$(cat $file)"
     else
         echo '# INFO: your Forward Zone File already exist for '$1''
     fi
@@ -165,20 +172,21 @@ dnsCreateReverseZoneFile() {
     dir='/etc/bind/zones'
     cd $dir
 
-    file='./db.10.128'
+    file="./db.10.128"
     cp '../db.127' $file
     cp $file "$file.default"
-    #echo "# INFO: DEFAULT: $file" 
-    #echo "# INFO: $(cat $file)"
-    #echo "#--------------------------------------------------------------------"
+    echo "#--------------------------------------------------------------------"
+    echo "# INFO: BEFORE: $(pwd) $file.default"
+    echo "#--------------------------------------------------------------------"
+    echo "$(cat $file)"
 
     confOptionsZone=$(cat $file | grep $1)
     if [[ ! $confOptionsZone ]]; then
         domane="nyc3.$1"
         cat > $file <<EOF
-$TTL    604800
+\$TTL    604800
 @       IN      SOA     $domane. admin.$domane. (
-                              3         ; Serial
+                              2         ; Serial
                          604800         ; Refresh
                           86400         ; Retry
                         2419200         ; Expire
@@ -188,13 +196,15 @@ $TTL    604800
       IN      NS      ns2.$domane.
 
 ; PTR Records
-11.10   IN      PTR     ns1.$domane.    ; 10.128.10.11
-12.20   IN      PTR     ns2.$domane.    ; 10.128.20.12
-101.100 IN      PTR     host1.$domane.  ; 10.128.100.101
-102.200 IN      PTR     host2.$domane.  ; 10.128.200.102
+11.10   IN      PTR     ns1.$domane.    ; $primaryDNS
+12.20   IN      PTR     ns2.$domane.    ; $secondaryDNS
+101.100 IN      PTR     host1.$domane.  ; $host1
+102.200 IN      PTR     host2.$domane.  ; $host2
 EOF
-        echo "# INFO: $file"
-        echo "# INFO: $(cat $file)"
+        echo "#--------------------------------------------------------------------"
+        echo "# INFO: AFTER: $file"
+        echo "#--------------------------------------------------------------------"
+        echo "$(cat $file)"
         echo "#--------------------------------------------------------------------"
     else
         echo '# INFO: your Reverse Zone File already exist for '$1''
@@ -204,16 +214,109 @@ dnsCreateReverseZoneFile $DOMENA_NAME_1
 
 
 
+echo "# INFO: PRIMARY DSN Cheks"
 domena="nyc3.$DOMENA_NAME_1"
 named-checkconf
 named-checkzone $domane "db.$domane"
 #sudo named-checkzone 128.10.in-addr.arpa /etc/bind/zones/db.10.128
 sudo systemctl restart bind9
+echo "# INFO: PRIMARY DSN end"
+echo "#--------------------------------------------------------------------"
+# IF you have the UFW firewall configured open up access to bind by typing
+#sudo ufw allow Bind9
 
-sudo ufw allow Bind9
+
+dnsConfigureSecondDns() {
+    echo "#INFO: TODO"
+}
+
+
+
+
+linuxGetInterfaceNames() {
+    ip addr
+}
+
+linuxGetAllEthernetInterfaces() {
+    ifconfig -a | grep eth
+}
+
+linuxGetClassNetwork() {
+    lshw -class network
+}
+
+installEthtool() {
+    sudo apt install ethtool
+}
+#ethtool eth0
+
+linuxAssignMultipleIpAddressesToOneInterface() {
+    primaryDNS=$1
+    secondaryDNS=$2
+    host1=$3
+    host2=$4
+    echo "#--------------------------------------------------------------------"
+    echo "# INFO: Virtual Hosts "
+    echo "#--------------------------------------------------------------------"
+    #sudo ip address add 172.01.200.1 dev docker0
+    # TODO: wifiNetworkInterface=$(ethtool wlp2s0)
+    wifiNetworkInterface='wlp2s0'
+
+    # TEMPORARY
+    # ip addr add $host1 dev $wifiNetworkInterface
+    # ip addr add $host2 dev $wifiNetworkInterface
+
+    # sudo ip addr add 192.168.0.2/24 dev eth1
+    file='/etc/network/interfaces'
+    cat > $file<<EOF
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# add permanently
+auto lo
+iface lo inet loopback
+
+#iface  inet dhcp
+
+#iface $wifiNetworkInterface inet static
+#    address $primaryDNS
+
+#iface $wifiNetworkInterface inet static
+#    address $secondaryDNS
+
+#iface $wifiNetworkInterface inet static
+#    address $host1
+
+#iface $wifiNetworkInterface inet static
+#    address $host2
+
+EOF
+    echo "# INFO: ifdown && ifup network interfaces"
+    echo "#--------------------------------------------------------------------"
+    ifdown $wifiNetworkInterface
+    ifup $wifiNetworkInterface
+    linuxGetInterfaceNames
+}
+linuxAssignMultipleIpAddressesToOneInterface $primaryDNS $secondaryDNS $host1 $host2
+
+
+
+dncConfigureDnsClients() {
+    # TODO!
+    file='/etc/network/interfaces'
+    if [ $file ]; then
+       cp $file "$file.default"
+       cat > $file <<EOF
+dns-nameservers $primaryDNS $secondaryDNS 8.8.8.8
+dns-search nyc3.example.com
+EOF
+    else
+      echo "#INFO: TODO"
+    fi
+}
+
 
 
 #------------------------------------------------------------------------------
 # MAIN
 #------------------------------------------------------------------------------
+
 
