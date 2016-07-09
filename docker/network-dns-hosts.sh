@@ -9,19 +9,14 @@ primaryDNS='10.128.10.10'
 secondaryDNS='10.128.10.20'
 host1='10.128.10.30'
 host2='10.128.10.40'
+forward1='8.8.8.8';
+forward2='8.8.4.4';
 
-echo "# INFO:  Host    Role                   Private FQDN             Private IP"
-echo "# INFO:  ns1     Primary DNS Server     ns1.nyc3.example.com     $primaryDNS"
-echo "# INFO:  ns2     Secondary DNS          ns2.nyc3.example.com     $secondaryDNS"
-echo "# INFO:  host1   Generic Host 1         host1.nyc3.example.com   $host1"
-echo "# INFO:  host2   Generic Host 2         host2.nyc3.example.com   $host2"
 echo "# INFO: WEB: https://www.digitalocean.com/community/tutorials/how-to-configure-bind-as-a-private-network-dns-server-on-ubuntu-16-04"
-
 
 installDNS() {
     sudo -apt-get update
     sudo apt-get install -y bind9 bind9utils bind9-doc
-
 
     echo "# INFO to 'sudo systemctl edit  --full bind9' do change:"
     echo "ExecStart=/usr/sbin/named -f -u bind"
@@ -30,7 +25,7 @@ installDNS() {
     sudo systemctl daemon-reload
     sudo systemctl restart bind9
 }
-installDNS
+#installDNS
  
 dnsConfigurePrimaryDNS() {
     file='/etc/bind/named.conf.options'
@@ -70,8 +65,8 @@ options {
         allow-transfer { none; };      # disable zone transfers by default
 
         forwarders {
-                8.8.8.8;
-                8.8.4.4;
+                $forward1;
+                $forward2;
         };
 
         //========================================================================
@@ -225,13 +220,9 @@ echo "#--------------------------------------------------------------------"
 # IF you have the UFW firewall configured open up access to bind by typing
 #sudo ufw allow Bind9
 
-
 dnsConfigureSecondDns() {
     echo "#INFO: TODO"
 }
-
-
-
 
 linuxGetInterfaceNames() {
     ip addr
@@ -259,12 +250,21 @@ linuxAssignMultipleIpAddressesToOneInterface() {
     echo "# INFO: Virtual Hosts "
     echo "#--------------------------------------------------------------------"
     #sudo ip address add 172.01.200.1 dev docker0
-    # TODO: wifiNetworkInterface=$(ethtool wlp2s0)
-    wifiNetworkInterface='wlp2s0'
+    # TODO: networkInterface=$(ethtool wlp2s0)
+ 
+    networkInterface='wlp2s0'
+    networkInterface='eth0'
+    networkInterface='docker0'
+    networkInterface='wlan0'
+
+    # Get Default
+    ip route del default
 
     # TEMPORARY
-    # ip addr add $host1 dev $wifiNetworkInterface
-    # ip addr add $host2 dev $wifiNetworkInterface
+    #ip addr add $primaryDNS dev $networkInterface
+    #ip addr add $secondaryDNS dev $networkInterface
+    #ip addr add $host1 dev $networkInterface
+    #ip addr add $host2 dev $networkInterface
 
     # sudo ip addr add 192.168.0.2/24 dev eth1
     file='/etc/network/interfaces'
@@ -274,26 +274,36 @@ linuxAssignMultipleIpAddressesToOneInterface() {
 auto lo
 iface lo inet loopback
 
-#iface  inet dhcp
+# STATIC
+# TEMPORARY: ifconfig eth0:0 123.123.22.22
+iface $networkInterface:0 inet static
+  address $host1
+  netmask 255.0.0.0
+#broadcast 123.255.255.255
 
-#iface $wifiNetworkInterface inet static
+
+#iface $networkInterface inet static
 #    address $primaryDNS
 
-#iface $wifiNetworkInterface inet static
+#iface $networkInterface inet static
 #    address $secondaryDNS
 
-#iface $wifiNetworkInterface inet static
+#iface $networkInterface inet static
 #    address $host1
 
-#iface $wifiNetworkInterface inet static
+#iface $networkInterface inet static
 #    address $host2
 
 EOF
     echo "# INFO: ifdown && ifup network interfaces"
     echo "#--------------------------------------------------------------------"
-    ifdown $wifiNetworkInterface
-    ifup $wifiNetworkInterface
+    /etc/init.d/networking restart
+    ifdown $networkInterface
+    ifup $networkInterface
     linuxGetInterfaceNames
+    # updta your dns settings
+    resolvconf -u
+    #sudo apt-get update
 }
 linuxAssignMultipleIpAddressesToOneInterface $primaryDNS $secondaryDNS $host1 $host2
 
@@ -305,7 +315,7 @@ dncConfigureDnsClients() {
     if [ $file ]; then
        cp $file "$file.default"
        cat > $file <<EOF
-dns-nameservers $primaryDNS $secondaryDNS 8.8.8.8
+dns-nameservers $primaryDNS $secondaryDNS $forward1
 dns-search nyc3.example.com
 EOF
     else
@@ -318,5 +328,11 @@ EOF
 #------------------------------------------------------------------------------
 # MAIN
 #------------------------------------------------------------------------------
+#installDNS
 
+echo "# INFO:  Host    Role                   Private FQDN                Private IP"
+echo "# INFO:  ns1     Primary DNS Server     ns1.nyc3.$DOMENA_NAME_1     $primaryDNS"
+echo "# INFO:  ns2     Secondary DNS          ns2.nyc3.$DOMENA_NAME_1     $secondaryDNS"
+echo "# INFO:  host1   Generic Host 1         host1.nyc3.$DOMENA_NAME_1   $host1"
+echo "# INFO:  host2   Generic Host 2         host2.nyc3.$DOMENA_NAME_1   $host2"
 

@@ -6,9 +6,13 @@ echo "RUN: as 'sudo bash $0'"
 # https://www.digitalocean.com/community/tutorials/how-to-set-up-apache-virtual-hosts-on-ubuntu-14-04-lts
 #------------------------------------------------------------------------------
 
-DOMENA_NAME_1='example.com'
-DOMENA_NAME_2='test.com'
-DOMENA_NAME_3='virtual.com'
+DOMAIN_NAME_1='server210.com'
+DOMAIN_NAME_2='server220.com'
+DOMAIN_NAME_3='server230.com'
+host1='192.168.1.210'
+host2='192.168.1.220'
+host3='192.168.1.230'
+networkInterface='wlan0'
 
 apacheInstall() {
     sudo apt-get update
@@ -23,13 +27,11 @@ apacheDirVirtualHosts() {
     sudo chown -R $USER:$USER /var/www/$1/public_html
     sudo chmod -R 755 /var/www
 }
-apacheDirVirtualHosts $DOMENA_NAME_2
-apacheDirVirtualHosts $DOMENA_NAME_3
-
 
 apacheDemoPage() {
-    echo "# INFO: Create Demo Pages for virtual host: $1"
     file="/var/www/$1/public_html/index.html"
+    echo "# INFO: Create index.html for virtual host: '$1' in '$file'"
+    echo "---------------------------------------------------------------------"
     cat > $file <<EOF
 <html>
   <head>
@@ -41,13 +43,11 @@ apacheDemoPage() {
 </html>
 EOF
 }
-apacheDemoPage $DOMENA_NAME_2
-apacheDemoPage $DOMENA_NAME_3
-
 
 apacheHostFiles() {
     echo "# INFO: Create New Virtual Host Files for $1"
     echo "# INFO: Default file: /etc/apache2/sites-available/000-default.conf"
+    echo "---------------------------------------------------------------------"
     file="/etc/apache2/sites-available/$1.conf"
     cat > $file <<EOF
 <VirtualHost *:80>
@@ -61,34 +61,12 @@ apacheHostFiles() {
 EOF
 
 }
-apacheHostFiles $DOMENA_NAME_2
-apacheHostFiles $DOMENA_NAME_3
 
 apacheEnableVirtualHost() {
     echo "# INFO: Enable the New Virtual Host File for $1"
     sudo a2ensite $1.conf
     sudo service apache2 restart
 }
-apacheEnableVirtualHost $DOMENA_NAME_2
-apacheEnableVirtualHost $DOMENA_NAME_3
-
-
-apacheSetLocalHostFile() {
-    echo "# INFO: Optional, Set Up Local Hosts File"
-    file='/etc/hosts'
-    # TODO: asign ip address
-    string="
-111.111.111.111 $1
-"
-    #echo $string >> $file
-}
-
-apacheHttpTest() {
-    echo "# INFO: Test your Results"
-    wget http://$1
-}
-apacheHttpTest $DOMENA_NAME_2
-apacheHttpTest $DOMENA_NAME_3
 
 apacheHelps() {
     echo "# INFO: Apache 2 Virtual Hosts"
@@ -101,20 +79,129 @@ apacheHelps() {
     # links2 www.google.com
 }
 
+linuxVirtualNetworkInterfaces() {
+    networkInterface=$1
+    host1=$2
+    host2=$3
+    host3=$4
+    file='/etc/network/interfaces'
+
+    # TODO default reacrete & add
+    if [ 'default' == 'default' ]; then
+        cp $file $file.previous
+        echo "# WARNING: Recreate '$file'"
+        cat > $file<<EOF
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# add permanently
+auto lo
+iface lo inet loopback
+
+# STATIC
+# TEMPORARY: ifconfig eth0:1 $host1
+iface $networkInterface:0 inet static
+  address $host1
+  netmask 255.0.0.0
+
+iface $networkInterface:1 inet static
+  address $host2
+  netmask 255.0.0.0
+
+iface $networkInterface:2 inet static
+  address $host3
+  netmask 255.0.0.0
+EOF
+    else
+        # TODO: $networkInterface:XXX  get correct number
+        echo "# TODO: WARNING: Add to the file '$file'"
+    fi
+    #/etc/init.d/networking restart
+    #ifdown $networkInterface:1
+    #ifup $networkInterface:1
+
+}
+
+linuxEtcHostsAddHosts() {
+    DOMAIN=$1
+    HOST=$2
+    file='/etc/hosts'
+
+    #cat /etc/hosts | grep $DOMAIN | awk -F " " '{print $2}'
+    DOMAIN_IS_PRESENT="$(cat /etc/hosts | grep $DOMAIN)"
+    echo "# INFO: $DOMAIN_IS_PRESENT"
+    if [[ -z "$DOMAIN_IS_PRESENT" ]]; then
+        cp $file $file.previous
+        echo "# INFO: To file '$file' add"
+        echo "# INFO: $HOST $DOMAIN"
+        echo "----------------------------------------------------------------"
+        cat >> $file <<EOF
+$HOST $DOMAIN
+EOF
+        cat "$file"
+    else
+        echo "# INFO: Domain: '$DOMAIN' already in '$file'"
+    fi
+
+    if [ 'default' == 'xxx' ]; then
+        echo "# WARNING DEFAULT value for file '$file'"
+        exit
+        cat > $file <<EOF
+127.0.0.1	localhost
+127.0.1.1	kuntuzangpo
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+81.2.254.221 tibetanmedicine.com
+# DEFAULT
+EOF
+    fi
+}
+
+apacheHttpTest() {
+    echo "# INFO: Test Results"
+    ping $1
+}
 
 #------------------------------------------------------------------------------
 # MAIN
 #------------------------------------------------------------------------------
-apacheHelps
+linuxVirtualNetworkInterfaces $networkInterface $host1 $host2 $host3
+
+linuxEtcHostsAddHosts $DOMAIN_NAME_1 $host1
+linuxEtcHostsAddHosts $DOMAIN_NAME_2 $host2
+linuxEtcHostsAddHosts $DOMAIN_NAME_3 $host3
+
+#apacheHelps
 # apacheInstall
+#apacheHttpTest $DOMAIN_NAME_1
+#apacheHttpTest $DOMAIN_NAME_2
+#apacheHttpTest $DOMAIN_NAME_3
 
-apacheDirVirtualHosts $DOMENA_NAME_1
-apacheDemoPage $DOMENA_NAME_1
-apacheHostFiles $DOMENA_NAME_1
-apacheEnableVirtualHost $DOMENA_NAME_1
-apacheHttpTest $DOMENA_NAME_1
+declare -a DOMAIN_ARRAY
+DOMAIN_ARRAY=($DOMAIN_NAME_1 $DOMAIN_NAME_2 $DOMAIN_NAME_3)
+for i in $array; do
+    echo "# INFO: Domain: $1"
+    echo "--------------------------------------------------------------------"
+    apacheDirVirtualHosts $i
+    apacheDemoPage $i
+    apacheHostFiles $i
+    apacheEnableVirtualHost $i
+done
 
-sudo service apache2 restart
+echo "# INFO: Virtual Network Interfaces down & up"
+ifdown $networkInterface:0
+ifup $networkInterface:0
+ifdown $networkInterface:1
+ifup $networkInterface:1
+ifdown $networkInterface:2
+ifup $networkInterface:2
+
+service apache2 reload
+#service apache2 restart
 echo "# INFO: Apache Status: 'systemctl status apache2.service'"
 echo "#-----------------------------------------------------------------------"
 systemctl status apache2.service
