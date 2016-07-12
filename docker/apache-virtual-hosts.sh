@@ -1,9 +1,10 @@
 #!/bin/bash
-echo "RUN: as 'sudo bash $0'"
+echo "RUN: as ./'$0'"
 #------------------------------------------------------------------------------
-# Apache Virtual Hosts
+# Apache/Nginx Virtual Hosts
 # Ubuntu 14.04 LTS
 # https://www.digitalocean.com/community/tutorials/how-to-set-up-apache-virtual-hosts-on-ubuntu-14-04-lts
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-server-blocks-virtual-hosts-on-ubuntu-16-04
 #------------------------------------------------------------------------------
 
 DOMAIN_NAME_1='server210.com'
@@ -13,13 +14,14 @@ host1='192.168.1.210'
 host2='192.168.1.220'
 host3='192.168.1.230'
 networkInterface='wlan0'
+datetime=$(date +%Y%m%d%H%M%S)
 
-apacheInstall() {
-    sudo apt-get update
-    sudo apt-get install apache2
+apacheCheckWebServer() {
+    echo "# INFO: the Check for web server"
+    systemctl status apache2
 }
 
-apacheDirVirtualHosts() {
+virtualHostsCreateDir() {
     echo "# INFO: Create Directory Structure for $1"
     sudo mkdir -p /var/www/$1/public_html
 
@@ -28,7 +30,7 @@ apacheDirVirtualHosts() {
     sudo chmod -R 755 /var/www
 }
 
-apacheDemoPage() {
+virtualHostsDemoPage() {
     file="/var/www/$1/public_html/index.html"
     echo "# INFO: Create index.html for virtual host: '$1' in '$file'"
     echo "---------------------------------------------------------------------"
@@ -59,13 +61,17 @@ apacheHostFiles() {
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 EOF
-
 }
 
 apacheEnableVirtualHost() {
     echo "# INFO: Enable the New Virtual Host File for $1"
     sudo a2ensite $1.conf
     sudo service apache2 restart
+}
+
+apacheHttpTest() {
+    echo "# INFO: Test Results"
+    ping $1
 }
 
 apacheHelps() {
@@ -78,6 +84,75 @@ apacheHelps() {
     # sudo apt-get install links2
     # links2 www.google.com
 }
+
+apacheInstall() {
+    if [ $DIST == 'Ubuntu' ]; then
+        sudo apt-get update
+        sudo apt-get -y install apache2
+    else
+        echo "# WARNING: Apache2 is not installed"
+        exit
+    fi
+}
+
+nginxCheckWebServer() {
+    echo "# INFO: the Check for web server"
+    systemctl status nginx
+}
+
+ngingxInstall() {
+    if [ $DIST == 'Ubuntu' ]; then
+        echo "# INFO: Install Nginx on $DIST"
+        sudo apt-get update
+        sudo apt-get -y install nginx
+        sudo ufw allow 'Nginx HTTP'
+        sudo ufw status
+        nginxCheckWebServer
+        # TODO: check with curl
+        #sudo apt-get -y install curl
+        #curl localhost | grep nginx
+    elif [ $DIST == 'RedHat' ]; then
+        echo "# INFO: Install Nginx on $DIST"
+        sudo yum install nodejs npm
+    else
+        echo "# WARNING: Nginx is not installed"
+        exit
+    fi
+}
+
+nginxCreateServerFilesForDomain() {
+    sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/example.com
+    file=""
+}
+
+nginxInstallWebsocket() {
+    echo "# INFO: Install Nginx Websockets"
+    if [ $DIST == 'Ubuntu' ]; then
+       sudo apt-get -y install nodejs npm
+       ln -s /usr/bin/nodejs /usr/local/bin/node
+    elif [ $DIST == 'RedHat' ]; then
+       echo "# INFO: Install Nginx on $DIST"
+    else
+       echo "# WARNING: Nginx not installed"
+       exit
+    fi
+}
+
+mysqlInstall() {
+    if [ $DIST == 'Ubuntu' ]; then
+       sudo apt-get install mysql-server
+       sudo mysql_secure_installation
+       # VALIDATE PASSWORD PLUGIN   : Y
+    elif [ $DIST == 'RedHat' ]; then
+       echo "# INFO: Install MySQL on $DIST"
+    else
+       echo "# WARNING: Nginx MySQL installed"
+       exit
+    fi
+
+}
+
+#ip addr show wlp2s0 | grep inet | awk '{ print $2; }' | sed 's/\/.*$//'
 
 linuxVirtualNetworkInterfaces() {
     networkInterface=$1
@@ -161,33 +236,89 @@ EOF
     fi
 }
 
-apacheHttpTest() {
-    echo "# INFO: Test Results"
-    ping $1
+linuxLowercase() {
+    echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
 }
+
+linuxShootProfile() {
+    OS=`linuxLowercase \`uname\``
+    KERNEL=`uname -r`
+    MACH=`uname -m`
+
+    if [ "${OS}" == "windowsnt" ]; then
+        OS=windows
+    elif [ "${OS}" == "darwin" ]; then
+        OS=mac
+    else
+        OS=`uname`
+        if [ "${OS}" = "SunOS" ]; then
+            OS=Solaris
+            ARCH=`uname -p`
+            OSSTR="${OS} ${REV}(${ARCH} `uname -v`)"
+        elif [ "${OS}" = "AIX" ]; then
+            OSSTR="${OS} `oslevel` (`oslevel -r`)"
+        elif [ "${OS}" = "Linux" ]; then
+            if [ -f /etc/redhat-release ]; then
+	        DistroBasedOn='RedHat'
+                DIST=`cat /etc/redhat-release |sed s/\ release.*//`
+	        PSUEDONAME=`cat /etc/redhat-release | sed s/.*\(// | sed s/\)//`
+                REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
+            elif [ -f /etc/SuSE-release ]; then
+	        DistroBasedOn='SuSe'
+	        PSUEDONAME=`cat /etc/SuSE-release | tr "\n" ' '| sed s/VERSION.*//`
+	        REV=`cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //`
+	    elif [ -f /etc/mandrake-release ]; then
+	        DistroBasedOn='Mandrake'
+	        PSUEDONAME=`cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//`
+	        REV=`cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//`
+            elif [ -f /etc/debian_version ]; then
+	        DistroBasedOn='Debian'
+	        if [ -f /etc/lsb-release ]; then
+	            DIST=`cat /etc/lsb-release | grep '^DISTRIB_ID' | awk -F=  '{ print $2 }'`
+		    PSUEDONAME=`cat /etc/lsb-release | grep '^DISTRIB_CODENAME' | awk -F=  '{ print $2 }'`
+		    REV=`cat /etc/lsb-release | grep '^DISTRIB_RELEASE' | awk -F=  '{ print $2 }'`
+                fi
+            fi
+            if [ -f /etc/UnitedLinux-release ]; then
+	         DIST="${DIST}[`cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//`]"
+            fi
+            OS=`linuxLowercase $OS`
+            DistroBasedOn=`linuxLowercase $DistroBasedOn`
+            readonly OS
+            readonly DIST
+            readonly DistroBasedOn
+            readonly PSUEDONAME
+            readonly REV
+            readonly KERNEL
+            readonly MACH
+        fi
+    fi
+}
+
 
 #------------------------------------------------------------------------------
 # MAIN
 #------------------------------------------------------------------------------
+linuxShootProfile
+ngingxInstall
+
+
+
+exit
+
 linuxVirtualNetworkInterfaces $networkInterface $host1 $host2 $host3
 
 linuxEtcHostsAddHosts $DOMAIN_NAME_1 $host1
 linuxEtcHostsAddHosts $DOMAIN_NAME_2 $host2
 linuxEtcHostsAddHosts $DOMAIN_NAME_3 $host3
 
-#apacheHelps
-# apacheInstall
-#apacheHttpTest $DOMAIN_NAME_1
-#apacheHttpTest $DOMAIN_NAME_2
-#apacheHttpTest $DOMAIN_NAME_3
-
 declare -a DOMAIN_ARRAY
 DOMAIN_ARRAY=($DOMAIN_NAME_1 $DOMAIN_NAME_2 $DOMAIN_NAME_3)
 for i in $array; do
     echo "# INFO: Domain: $1"
     echo "--------------------------------------------------------------------"
-    apacheDirVirtualHosts $i
-    apacheDemoPage $i
+    virtualHostsCreateDir $i
+    virtualHostsDemoPage $i
     apacheHostFiles $i
     apacheEnableVirtualHost $i
 done
