@@ -1,3 +1,61 @@
+Wallarm -> WAF with machine learning + vulnerability scanner
+Does a hybrit approach with filtering nodes installed in customer's infrasture and strong analytics in the cloud
+
+
+# NGINX directives to limit the buffers
+client_header_buffer_size
+large_client_header_buffers
+client_body_buffer_size
+client_max_body_size
+
+# NGINX directives to limit time outs
+reset_timeout_connection
+clien_header_timeout
+clien_body_timeout
+keepalive_timeout
+send_timeout
+
+
+# limit connections in NGINX, run benchmarks to see how many requests application can handle
+limit_conn and limit_req
+# www.fail2ban.org -> to ban people who tried to generate a lot of requests
+
+
+# USE test_cookie module
+# if the client can perform HTTP Redirect
+# if it support JavaScript / Flash / cookies
+test_cookie -> to quickly understand it was products of a bot
+
+
+# What is perfect Ratio of Buffer & timeout
+
+location /search {
+  return 444;
+}
+
+#
+# https://www.youtube.com/watch?v=LTq8LO9Het0
+#
+#------------------------------------------------------------------------------
+# Naxsi goes from black users to white users
+# blacklist are negative by default in naxsi 
+# blacklist are moustly with regular exprecion -> slower or with string
+
+MainRule "str:<" "msg open tag" "mz:Args|URL|BODY\$HEADERS_VAR:Cookie" "s:$XSS:8" "id:1302";
+
+As for a real FW, naxsi rules/whitelists should be as tight as possible:
+  - $URL/footbar|$BODY_VAR:message
+
+Duty of administrator is to create whitelist to avoid false positive
+
+nxsi can runs script to tell this user from this ip will be not blocked
+
+Whitelist generation from logs or live traffic
+
+
+# top 5000 sizes
+
+
 
 cat naxsi.rules
 """
