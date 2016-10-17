@@ -1,6 +1,111 @@
+
+cat naxsi.rules
+"""
+SecRulesEnabled;
+DeniedUrl "50x.html"
+
+CheckRule
+"""
+
+
+
 # NGINX NAXSI
 # https://www.youtube.com/watch?v=JiJHCodn_PQ
-# https://www.youtube.com/watch?v=dsTub1_4Upg
+#------------------------------------------------------------------------------
+Rather than detecting << complex >> signatures, will focus on << tokens >>
+-<>()[];='#...
+
+Tokens presence leads to score increase -> action
+
+Generated logs are pushed into ES - elastic search
+Data is relevant for monitoring and trafic inspection
+Nxapi with ES helps the admin generate whitelists
+
+Beginning dump a lot of false positive
+if exaptions are not false positive learning is over
+
+# Very low memory footprint
+# you don't need to update signatures
+# learning is getting better and better
+
+Detection rule - what you want to match into http traffic; score; id for whitelist
+
+CheckRule - one request is processed the request reach specific score, log  -> block or drop (sometimes during learning you want to drop it)
+
+Whitelist -> common patert, 80% users make the same; this is false positive we want to whitelist, put them to db and tag them
+
+
+Learning Fast -> nothing is blocked, but still you can drop with blocklist or libinjections
+blocking -> i set to true if i'm ok with learning
+
+Learning is the biggest downside, however
+- When it comes to << market >> apps,
+  whitelists are very predictable (tamplates!)
+- For home-made apps, several options:
+  - Relaying on statistics
+  - Relying on << trusted >> trafic
+
+More into learning
+Nxtool templates (dynamic)
+{
+  "_msg" : "Magento checkout page (BODY|NAME)",
+  "?un" : "/checkout/onepage/",
+  "zone : "BODY|NAME",
+  "id" ;
+}
+
+$ python nodtool.py -c nxapi.json -x -x-s xxx.com 
+learning for cokkies !!!
+
+
+reporting/visualisation
+{
+  "zone" : "BODY",
+  "ip" : "",
+  "whitelisted" : "false",
+  "url" : "/en/node/250/edit",
+  "comments" : "import:20",
+  "server" : "xxx",
+  "content" : "xxx",
+  "var_name" : "",
+  "coords" : "[-40.82048048230482304, -10.489023802]",
+  "contry" : "ES",
+  "date" : "2015-05-19Y",
+  "id" : "1000",
+}
+
+# you can see as monitoring
+# to see the learning of attacks
+Kybernete 
+
+
+#Trips, naxsi language
+if ($remote_addr = "1.2.3.4"){
+  set $naxsi_flag_learning 0;
+  set $naxsi_libinjection_sql q;
+}
+# Learning only for some specifics URL(s)
+# Learning only from some IP(s)
+# Learning if the visitor fits some criteria
+
+
+# Tweaks around learning
+# Libinjection
+CheckRule
+# https://libinjection.client9.com
+
+# Doxi-rules
+CheckRule "$UWA >=8" DROP;
+# www.mare-system.de/doxi
+
+
+ 
+
+
+
+
+
+# NGINX https://www.youtube.com/watch?v=dsTub1_4Upg
 #------------------------------------------------------------------------------
 A lot of customization, we do hosting 
 Web application, Classical IT
@@ -27,17 +132,81 @@ openssl req -new -sha256 -key key.pem -out key.csr
 Recommend at least 1.0.1p  (openssl )
 
 
+nginz.conf 
+"""
+ssl_certificate   multiSAN.crt;
+ssl_certificate_key multiSAN.key
+
 server {
-  listen 444 ssl
+  listen  443 ssl;
+  listen *:80  ## listen for ipv4; this line is default and implied
+  # listen [::]:80 default_server ipv6only=on; ## listen for ipv6
+  server_name  www.example.com;
 
-  ssl_certificate /path/to/signed_cert_plus_intermediates;
-  ssl_certificate_key /path/to/private_key;
+  #root html;
+  #inder index.html index.htm;
+ 
+  #ssl_certificate /path/to/signed_cert_plus_intermediates;
+  #ssl_certificate_key /path/to/private_key;
 
-  ssl_session_cache shared:SSL:50m;    # workers 
-  ssl_session_timeout 1d;
+  ssl_session_timeout 5m;
+  #ssl_session_timeout 1d;
+  
+  ssl_session_cache shared:SSL:50m;    # share between nginx workers; session resumtion
+
+  # High security, low compatibility
+  ssl_protocols TLSv1.2
+  # Medium security, maximum compatibility
+  #ssl_protocols TLSv1 TLSv1.1 TLSv1.2
+  # Low security, maximum compatibility
+  #ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2
+
+  #ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256;
+  ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384
+ 
+  ssl_prefer_server_ciphers on;     # server choice, always better  
 
   # session tickets 
+
+  # HSTS
+  add_header $strict-Transport-Security max-age=15768000;   # 6 months
+   
+  # OCSP Stampling: server pre-fetches OSCP responce -> make it faster
+  # Saves a round-trip to the client
+  set_stapling on;
+  set_stapling_verify on;
+  set_trusted_certificate /path/to/root_CA_cert_plus_intermediates;
+
 }
+
+server {
+  listen       442 ssl;
+  server_name  www.example.org
+}
+
+# nginx acts as browser to any backend
+http {
+  server {
+    proxy_ssl_protocols    TLSv1 TLSv1.1 TLSv1.2;
+    proxy_ssl_ciphers <ssl_ciphers>;  
+    proxy_ssl_trusted_certificate  /etc/ssl/certs/trusted_cs_cert.crt;
+
+    proxy_ssl_verify on;
+    proxy_ssl_verify_depth 2;
+    proxy_ssl_session_route on;
+  }
+}
+
+# what you have to setup correctly
+# ssllabs.com
+# 
+"""
+
+# To add HSTS !!! A+ security
+HSTS  Hyperprotect strick transport security; always redirect to https, but it's dangerous if ssl is down 
+# HTTP header cached by browser
+# browser always attempts HTTPS
+# Maximum age defined in seconds
 
 
 # tools  jack tutorials
