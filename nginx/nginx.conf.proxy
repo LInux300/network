@@ -6,13 +6,14 @@ http {
     }
 
     upstream websocket {
-        server 127.0.0.1:8010;
+        server 127.0.0.1:8050;
     }
 
     server {
-        listen 8020;
-        location / {
-            proxy_pass http://websocket;
+        listen *:80;
+        #listen 8020;
+        location /websocket/ {
+            proxy_pass http://websocket/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $connection_upgrade;
