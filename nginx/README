@@ -1,0 +1,165 @@
+
+
+#------------------------------------------------------------------------------
+# WSCAT
+#------------------------------------------------------------------------------
+sudo npm install -g wscat
+
+websocketd --port=8050 websocketd/examples/bash/count.sh
+wscat -c ws://localhost:8050
+
+
+# or
+#---------------------------------
+# kuntuzangmo@kuntuzangpo:~/code/network/nginx$ wscat -l 8050 -p 13
+#listening on port 8050 (press CTRL+C to quit)
+
+
+# A command line WebSocket client
+kuntuzangmo@kuntuzangpo:~/code/network/nginx$ wscat -l 8050 -p 13
+listening on port 8050 (press CTRL+C to quit)
+client connected
+> 
+kuntuzangmo@kuntuzangpo:~/code/network/nginx$ wscat -c ws://localhost:8050
+connected (press CTRL+C to quit)
+
+
+
+https://blog.grandcentrix.net/a-command-line-websocket-client/
+
+#------------------------------------------------------------------------------
+# install websocketd
+#------------------------------------------------------------------------------
+cd ~/code/network/nginx
+wget github.com/joewalnes/websocketd/archive/v0.2.12.tar.gz
+tar -xvzf v0.2.12.tar.gz
+export PATH="~/code/network/nginx/websocketd:$PATH"
+cd
+source .bashrc
+
+# DEB package
+#------------------------------------------------------------------------------
+wget github.com//joewalnes/websocketd/releases/download/v0.2.12/websocketd-0.2.12_amd64.deb
+sudo dpkg -i awesome_new_app.deb
+
+
+
+cd ~/code/network/nginx/websocketd/examples/bash
+websocketd --port=8050 ./count.sh
+
+vim /home/kuntuzangmo/code/network/nginx/count.html
+"""
+<!DOCTYPE html>
+<pre id="log"></pre>
+<script>
+  // helper function: log message to screen
+  function log(msg) {
+    document.getElementById('log').textContent += msg + '\n';
+  }
+
+  // setup websocket with callbacks
+  var ws = new WebSocket('ws://localhost:8050/');
+  ws.onopen = function() {
+    log('CONNECT');
+  };
+  ws.onclose = function() {
+    log('DISCONNECT');
+  };
+  ws.onmessage = function(event) {
+    log('MESSAGE: ' + event.data);
+  };
+</script>
+"""
+firefox /home/kuntuzangmo/code/network/nginx/count.html
+
+
+#------------------------------------------------------------------------------
+# Nginx and websocket
+# https://www.nginx.com/blog/websocket-nginx/
+#------------------------------------------------------------------------------
+https://blog.martinfjordvald.com/2013/02/websockets-in-nginx/
+
+# Instalation 
+sudo apt-get install nodejs npm
+# sudo yum install nodejs npm
+ln -s /usr/bin/nodejs /usr/local/bin/node
+sudo npm install ws
+sudo npm install -g initialize
+# sudo npm config set registry http://registry.npmjs.org/
+
+# create a program a server: server.js
+"""
+# to execute: node server.js
+console.log("Server started");
+var Msg = '';
+var WebSocketServer = require('ws').Server
+    , wss = new WebSocketServer({port: 8010});
+wss.on('connection', function(ws) {
+    ws.on('message', function(message) {
+        console.log('Received from client: %s', message);
+        ws.send('Server received from client: ' + message);
+    });
+});
+"""
+
+
+# UFW  adjust the firewall
+#------------------------------------------------------------------------------
+sudo ufw app list
+sudo ufw allow 'Nginx HTTP'
+sudo ufw status
+
+# Check your server
+systemctl status nginx
+ip addr show eth0 | grep inet | awk '{ print $2; }' | sed 's/\/.*$//'
+curl -4 
+
+# Manage
+sudo systemctl stop nginx
+sudo systemctl start nginx
+sudo systemctl restart nginx
+sudo systemctl reload nginx
+sudo systemctl disable nginx
+sudo systemctl enable nginx
+
+/var/www/html
+/etc/nginx/nginx.conf
+/etc/nginx/snippets: This directory contains configuration fragments that can be included elsewhere in the Nginx configuration. Potentially repeatable configuration segments are good candidates for refactoring into snippets.
+
+/var/log/nginx/access.log
+/var/log/nging/error.log
+
+
+
+# Websockets
+#------------------------------------------------------------------------------
+ 	Node.js 	Ruby
+	ws      	websocket-rails
+	socket.io 	em-websocket
+	SockJS   	webmachine-ruby
+	  	 
+	Perl 	        Tomcat
+	Mojolicious 	WebSocket How-To
+	Net::WebSocket::Server 	
+	  	 
+	PHP 	        WebLogic
+	Ratchet 	Using WebSockets in WebLogic Server
+	PHP-Push-WebSocket 	
+	PHP-Websockets 	
+	  	 
+	Python 	
+	websockets 	
+	ws4py
+
+
+
+# test nginx
+http://192.168.0.104/
+
+
+
+
+
+
+
+
