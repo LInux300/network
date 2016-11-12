@@ -1,0 +1,19 @@
+
+# HIDE.ME
+
+function infoInstallHideme() {
+  https://hide.me/en/vpnsetup/ubuntu/openvpn/
+}
+
+
+function installOpenvpn() {
+  sudo apt-get install openvpn network-manager-openvpn network-manager-openvpn-gnome
+}
+
+# vpm - comparison
+http://whatismyipaddress.com/vpn-comparison?utm_source=homepage&utm_medium=banner&utm_campaign=ps&utm_term=vpn-comparison
+
+
+# FREE VPNs
+#------------------------------------------------------------------------------
+http://thegeekdesire.com/best-free-vpn-services-for-better-security-anonymity.html?gclid=CPHMtPv7stACFc8y0wodBrENew

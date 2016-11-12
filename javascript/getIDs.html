@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>id demo</title>
+  <style>
+  div {
+    width: 300px;
+    float: left;
+    padding: 2px;
+    margin: 3px;
+    background-color: #eee;
+  }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+<body>
+
+<div id="myID.entry[0]">id="myID.entry[0]"</div>
+<div id="myID.entry[1]">id="myID.entry[1]"</div>
+<div id="myID.entry[2]">id="myID.entry[2]"</div>
+ 
+
+
+<div id="mydiv">
+ <span id='span1'>
+ <span id='span2'>
+</div>
+
+<script>
+var IDs = [];
+$("#mydiv").find("span").each(function(){ IDs.push($(this).attr("id")); });
+
+$( "#myID\\.entry\\[1\\]" ).css( "border", "3px solid red" );
+
+
+var idarray = $("#myDiv")
+             .find("span") //Find the spans
+             .map(function() { return this.id; }) //Project Ids
+             .get(); //ToArray
+
+
+
+
+</script>
+ 
+</body>
+</html>
+

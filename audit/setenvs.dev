@@ -1,0 +1,6 @@
+#. ~/.sshagent >/dev/null
+
+export APP_ROOT=$HOME/code/network/audit
+
+export APP_1_DIR=$APP_ROOT/rkhunter
+

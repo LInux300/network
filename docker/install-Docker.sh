@@ -97,12 +97,31 @@ function addToFile() {
   fi
 }
 
-#------------------------------------------------------------------------------
-# MAIN
-#------------------------------------------------------------------------------
-dockerPreInstall
-checkKernelVersion "3.10"
-setDockerRepoVersion
-installDocker
-
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo "#--------------------------------------------------------------------"
+      echo "#  INSTALL DOCKER"
+      echo "#--------------------------------------------------------------------"
+      echo "# OPTIONS:"
+      echo -e "\t-h|--help                 help"
+      echo ""
+      echo "# DOCKER:"
+      echo "#--------------------------------------------------------------------"
+      echo -e "\t--install_docker          install docker on ubuntu"
+      echo ""
+      exit 0
+      ;;
+    --install_docker)
+      dockerPreInstall
+      checkKernelVersion "3.10"
+      setDockerRepoVersion
+      installDocker
+      ;;
+    *)
+      break
+      ;;
+  esac
+  exit 0
+done
 
