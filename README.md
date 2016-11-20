@@ -6,3 +6,4 @@
 - openvpn
 - network
 - support
+- main.sh

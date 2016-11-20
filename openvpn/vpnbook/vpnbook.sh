@@ -48,8 +48,9 @@ function runEuro2App() {
 }
 
 function userPassword() {
-  echo -e "\tINFO: USER: vpnbook"
-  echo -e "\tINFO: PASS: VeStubr6"
+  echo -e "\tINFO: USER & PASS"
+  wget -q http://www.vpnbook.com/freevpn -O - | grep "Username: <strong"
+  wget -q http://www.vpnbook.com/freevpn -O - | grep "Password: <strong"
 }
 
 function runCa1App() {
@@ -61,7 +62,7 @@ function runCa1App() {
 function runDe1App() {
   userPassword
   echo -e "\tINFO: run '$APP_NAME'"
-p sudo openvpn --config $CERFIFICATES/vpnbook-de233-tcp443.ovpn
+  sudo openvpn --config $CERFIFICATES/vpnbook-de233-tcp443.ovpn
 }
 
 function runUs1App() {

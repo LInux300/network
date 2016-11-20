@@ -1,6 +1,8 @@
 *.swp
 *.swo
 *.ovpn
+network_monitoring_log_*.txt
+*.deb
 
 
 # Byte-compiled / optimized / DLL files
