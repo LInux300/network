@@ -57,10 +57,8 @@ function searchDockerRepos() {
 #------------------------------------------------------------------------------
 # KALI DOCKER
 #------------------------------------------------------------------------------
-DOCKER_NAME='kali-linux' && DOCKER_IMAGE=kalilinux/kali-linux-docker
-function runKaliDocker() {
+function runImageDocker() {
   echo -e "\tINFO: Run $DOCKER_IMAGE"
-  echo -e "\tINFO: https://hub.docker.com/r/kalilinux/kali-linux-docker/"
   docker pull $DOCKER_IMAGE
   DOCKER_NAME_EXIST=$(docker ps -a --format={{.Names}} -f name=$DOCKER_NAME)
   if [ "$DOCKER_NAME" == "$DOCKER_NAME_EXIST" ]; then
@@ -271,6 +269,10 @@ while test $# -gt 0; do
       echo -e "\t--run_kali_docker         run kali docker interactive"
       echo -e "\t--run_cmd_on_kali_docker  run command on kali docker"
       echo ""
+      echo "# KAFKA:"
+      echo "#--------------------------------------------------------------------"
+      echo -e "\t--run_kafka_docker        run kafka docker interactive"
+      echo ""
       echo "# RASPBERRY:"
       echo "#--------------------------------------------------------------------"
       echo -e "\t--micro_sd_raspberry      download and do image on microSD"
@@ -289,7 +291,15 @@ while test $# -gt 0; do
       installKaliLinux
       ;;
     --run_kali_docker)
-      runKaliDocker
+      echo -e "\tINFO: https://hub.docker.com/r/kalilinux/kali-linux-docker/"
+      export DOCKER_NAME='kali-linux'
+      export DOCKER_IMAGE=kalilinux/kali-linux-docker
+      runImageDocker
+      ;;
+    --run_kafka_docker)
+      export DOCKER_NAME='kafka'
+      export DOCKER_IMAGE=wurstmeister/kafka
+      runImageDocker
       ;;
     --run_cmd_on_kali_docker)
       runCmdOnKaliDocker

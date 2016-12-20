@@ -7,3 +7,4 @@
 - network
 - support
 - main.sh
+- kafka
