@@ -45,7 +45,14 @@ function dockerInfo() {
 }
 
 function removeExitedDockers() {
-  docker rm `docker ps -aq -f status=exited`
+  dockerInfo
+  echo -e "\tWARNING: Removed Docker Containers"
+  echo -n "Enter <container_name>|<container_id> for removing and press [ENTER]: "
+  read container_name
+  docker rm $container_name
+
+  #echo -e "\tWARNING: Removed all Docker Exited Containers"
+  #docker rm `docker ps -aq -f status=exited`
 }
 
 function searchDockerRepos() {
@@ -254,57 +261,76 @@ while test $# -gt 0; do
       echo "# OPTIONS:"
       echo -e "\t-h|--help                 help"
       echo ""
+      echo "# ANSIBLE:"
+      echo "#--------------------------------------------------------------------"
+      echo -e "\t-rad |--run_ansible_docker      run ansible docker centos ia"
+      echo -e "\t-radd|--run_ansible_docker_deb8 run ansible doc deb interactive"
+      echo ""
       echo "# DOCKER:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t--docker_info             docker local info"
-      echo -e "\t--remove_exited_dockers   remove exited dockers"
-      echo -e "\t--search_docker_repos     search for string in docker reposr"
+      echo -e "\t-do  |--docker_info             docker local info"
+      echo -e "\t-red |--remove_exited_dockers   remove exited dockers"
+      echo -e "\t-sdr |--search_docker_repos     search for string in docker reposr"
       echo ""
       echo "# KALI LINUX:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t--install_kali             download & install Kali"
+      echo -e "\t-ik  |--install_kali             download & install Kali"
       echo ""
       echo "# KALI DOCKER:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t--run_kali_docker         run kali docker interactive"
-      echo -e "\t--run_cmd_on_kali_docker  run command on kali docker"
+      echo -e "\t-rkd  |--run_kali_docker         run kali docker interactive"
+      echo -e "\t-rckd |--run_cmd_on_kali_docker  run command on kali docker"
       echo ""
       echo "# KAFKA:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t--run_kafka_docker        run kafka docker interactive"
+      echo -e "\-rka  |--run_kafka_docker        run kafka docker interactive"
       echo ""
       echo "# RASPBERRY:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t--micro_sd_raspberry      download and do image on microSD"
+      echo -e "\t-msdr |--micro_sd_raspberry      download and do image on microSD"
       exit 0
       ;;
-    --docker_info)
+    -do|--docker_info)
       dockerInfo
       ;;
-    --remove_exited_dockers)
+    -red|--remove_exited_dockers)
       removeExitedDockers
       ;;
-    --search_docker_repos)
+    -sdr|--search_docker_repos)
       searchDockerRepos
       ;;
-    --install_kali)
+    -is|--install_kali)
       installKaliLinux
       ;;
-    --run_kali_docker)
+    -rkd|--run_kali_docker)
       echo -e "\tINFO: https://hub.docker.com/r/kalilinux/kali-linux-docker/"
       export DOCKER_NAME='kali-linux'
       export DOCKER_IMAGE=kalilinux/kali-linux-docker
       runImageDocker
       ;;
-    --run_kafka_docker)
+    -rka|--run_kafka_docker)
+      echo -e "\tINFO: https://hub.docker.com/r/wurstmeister/kafka"
       export DOCKER_NAME='kafka'
       export DOCKER_IMAGE=wurstmeister/kafka
       runImageDocker
       ;;
-    --run_cmd_on_kali_docker)
+    -radd|--run_ansible_docker_debian8)
+      echo -e "\tINFO: https://hub.docker.com/r/williamyeh/ansible/"
+      export DOCKER_NAME='ansible'
+      export DOCKER_IMAGE=williamyeh/ansible:debian8
+      runImageDocker
+      ;;
+    -rad|--run_ansible_docker)
+      echo -e "\tINFO: https://hub.docker.com/r/williamyeh/ansible/"
+      export DOCKER_NAME='ansibleCentos'
+      echo -e "\tTODO: add os versions"
+      export DOCKER_IMAGE=williamyeh/ansible:centos7
+      runImageDocker
+      ;;
+    -rckd|--run_cmd_on_kali_docker)
       runCmdOnKaliDocker
       ;;
-    --micro_sd_raspberry)
+    -msdr|--micro_sd_raspberry)
       microSdRaspberry
       ;;
     --test)
