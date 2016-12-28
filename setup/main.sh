@@ -1,7 +1,8 @@
 #!/bin/bash
-DIR_NAME=$(dirname $(readlink -f $0))
-. $DIR_NAME/setenvs
-
+#DIR_NAME=$(dirname $(readlink -f $0))
+#. $DIR_NAME/setenvs
+#source $DIR_NAME/setenvs
+source ~/code/network/setenvs
 #------------------------------------------------------------------------------
 # Browser in terminal
 #------------------------------------------------------------------------------
@@ -36,23 +37,33 @@ function installDocker() {
 function dockerInfo() {
   echo -e "\tINFO: Docker Images"
   docker images
-  echo -e "\tINFO: Docker Containers"
+  echo -e "\tINFO: Docker Containers Overview"
   docker ps -a
-  echo -e "\tINFO: Running Containers"
-  docker ps -a -f status=running
-  echo -e "\tINFO: State of Running Containers"
-  docker ps -q
+  #echo -e "\tINFO: Running Containers"
+  #docker ps -a -f status=running
+  #echo -e "\tINFO: State of Running Containers"
+  #docker ps -q
 }
 
-function removeExitedDockers() {
+function removeOneContainer() {
+  dockerInfo
+  echo -e "\tWARNING: Remove 1 Container"
+  echo -n "Enter <container_name>|<container_id> for removing and press [ENTER]: " 
+  read container_name
+  docker stop $container_name
+  docker rm $container_name
+}
+
+function removeDockers() {
   dockerInfo
   echo -e "\tWARNING: Removed Docker Containers"
-  echo -n "Enter <container_name>|<container_id> for removing and press [ENTER]: "
-  read container_name
-  docker rm $container_name
-
-  #echo -e "\tWARNING: Removed all Docker Exited Containers"
-  #docker rm `docker ps -aq -f status=exited`
+  echo -e "\tINFO: Enter [yes] to delete all '$1' Containers"
+  read answer
+  echo -e "\tINFO: Your Answer was: '$answer'"
+  if [ "$answer" == "yes" ]; then
+    echo -e "\tWARNING: Those '$1' Containers were removed:"
+    docker rm `docker ps -aq -f status=$1`
+  fi
 }
 
 function searchDockerRepos() {
@@ -61,8 +72,38 @@ function searchDockerRepos() {
   docker search --stars=3 --no-trunc --automated $search
 }
 
+function checkDockerContainerUp() {
+  #dockerInfo
+  #echo -n "Enter <container_name>|<container_id> to get Container IP [ENTER]: "
+  docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$@"
+}
+
+function getDockerContainerIps() {
+  echo -e "\tINFO: IPAddress - Name "
+  docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}  - {{.Name}}" $(docker ps -aq)
+}
+
+function dockerCleanup() {
+  EXITED=$(docker ps -q -f status=exited)
+  DANGLING=$(docker images -q -f "dangling=true")
+
+  if [ -n "$EXITED" ]; then
+    #docker rm $EXITED
+    docker rm -v $(docker ps --filter status=exited -q 2>/dev/null) 2>/dev/null
+  else
+    echo -e "\tINFO: No containers to remove."
+  fi
+  if [ -n "$DANGLING" ]; then
+    echo -e "\tWARNING: Removing unused images"
+    docker rmi $(docker images --filter dangling=true -q 2>/dev/null) 2>/dev/null
+  else
+    echo -e "\tINFO: No images to remove."
+  fi
+
+}
+
 #------------------------------------------------------------------------------
-# KALI DOCKER
+# Docker Network - Container Network
 #------------------------------------------------------------------------------
 function runImageDocker() {
   echo -e "\tINFO: Run $DOCKER_IMAGE"
@@ -73,14 +114,69 @@ function runImageDocker() {
     docker ps -a | grep $DOCKER_NAME
     docker start $DOCKER_NAME
     docker attach $DOCKER_NAME
+    # If we use attach we can use only one instance of shell. So if we want open new terminal with new instance of container's shell, we just need run the following
+    #docker exec -i -t $DOCKER_NAME /bin/bash
   else
+    echo "INFO: Run container interactive"
     docker run --name $DOCKER_NAME -it $DOCKER_IMAGE /bin/bash
   fi
 }
 
+function startDockerContainer() {
+  echo -e "\tINFO: Booting '$DOCKER_IMAGE' container ..."
+  docker pull $DOCKER_IMAGE
+  DOCKER_NAME_EXIST=$(docker ps -a --format={{.Names}} -f name=$DOCKER_NAME)
+  
+  if [ "$DOCKER_NAME" == "$DOCKER_NAME_EXIST" ]; then
+    echo -e "\tINFO: Starting existing '$DOCKER_NAME' container ..."
+    docker start $DOCKER_NAME
+  else
+    sleep 1
+    echo -e "\tINFO: Starting new '$DOCKER_NAME' container ..."
+    docker run --name $DOCKER_NAME -t $DOCKER_IMAGE
+  fi
+}
+
+function stopDockerContainer() {
+  echo -e "\tINFO Stopping '$DOCKER_NAME' Container ... "
+  docker stop $DOCKER_NAME
+}
+
+function dockerContainers() {
+  
+  downloadJsonBashParser
+
+  cat_file=`cat $SETUP_DIR/main.json`
+
+  # TODO change NUMBER_CONTAINERS for len of containers
+  for i in `seq 0 $NUMBER_CONTAINERS`; do
+    search_string=".network.containers[$i].docker_name"
+      docker_name=`echo $cat_file | $BIN_DIR/jq $search_string`
+      docker_name=`echo ${docker_name:1:-1}` # strip first and last
+    search_string=".network.containers[$i].docker_image"
+      docker_image=`echo $cat_file | $BIN_DIR/jq $search_string`
+      docker_image=`echo ${docker_image:1:-1}`
+    search_string=".network.containers[$i].enable"
+      enable=`echo $cat_file | $BIN_DIR/jq $search_string`
+      enable=`echo ${enable:1:-1}`
+    #echo -e "\tINFO: $docker_name \t: $docker_image"
+
+    export DOCKER_NAME=$docker_name
+    export DOCKER_IMAGE=$docker_image
+    #export INTERACTIVE=false
+    if [ "$enable" == "true" ]; then
+      if [ "$1" == "start" ]; then
+        startDockerContainer
+      elif [ "$1" == "stop" ]; then
+        stopDockerContainer
+      fi
+    fi
+  done
+}
+
 function runCmdOnKaliDocker() {
     container_id=$(docker ps -aqf "name=$DOCKER_NAME")
-    echo -e "\tINFO: run command on $container_id"
+    echo -e "\tINFO: Run command on '$container_id'"
     echo -n -e "\tEnter commands and press [ENTER]: "
     read commands
     docker start $DOCKER_NAME
@@ -141,6 +237,15 @@ function installKaliLinux() {
     #sudo qemu-system-x86_64 -usb -usbdevice disk:/dev/sdb
 }
 
+#------------------------------------------------------------------------------
+# NGINX
+#------------------------------------------------------------------------------
+# https://docs.docker.com/engine/reference/run/
+
+function serviceNginxStart() {
+  echo -e "\tINFO: TODO json service nginx starting ..."
+  docker run -d -p 80:80 my_image service nginx start
+}
 
 #------------------------------------------------------------------------------
 # RASPBERRY
@@ -206,8 +311,14 @@ function infoHttp() {
 # veracrypt, truecrypt, luks and many other tecnologies designed to defend 
 # your privacy and your identity. Linux Distro PEN DRIVE
 
-function downloadParrot() {
-  echo -e "\tINFo: PARROR linux security distro"
+function installParrot() {
+  echo -e "\tINFO: PARROR linux security distro"
+  echo -e "\tTODO"
+}
+
+function installTails() {
+  echo -e "\tINFO: https://tails.boum.org/"
+  echo -e "\tTODO"
 }
 
 #------------------------------------------------------------------------------
@@ -240,6 +351,41 @@ function infoPenetrationTesting() {
   echo -e "\tINFO: http://kali-linux.co"
 }
 
+#------------------------------------------------------------------------------
+# JSON
+#------------------------------------------------------------------------------
+function downloadJsonBashParser() {
+  echo -e "\tINFO: https://stedolan.github.io/jq/tutorial/"
+  if [ -e "$BIN_DIR/jq" ]; then
+    echo -e "\tINFO: $BIN_DIR/jq exists."
+  else
+  echo -e "\tINFO: Coping json parser for bash into $BIN_DIR/jq ..."
+    curl http://stedolan.github.io/jq/download/linux64/jq -o $BIN_DIR/jq
+    #wget http://stedolan.github.io/jq/download/linux64/jq $BIN_DIR/jq
+    chmod a+x $BIN_DIR/jq
+  fi
+}
+
+
+function readJson2 {
+  UNAMESTR=`uname`
+  if [[ "$UNAMESTR" == 'Linux' ]]; then
+    SED_EXTENDED='-r'
+  elif [[ "$UNAMESTR" == 'Darwin' ]]; then
+    SED_EXTENDED='-E'
+  fi;
+
+  VALUE=`grep -m 1 "\"${2}\"" ${1} | sed ${SED_EXTENDED} 's/^ *//;s/.*: *"//;s/",?//'`
+
+  if [ ! "$VALUE" ]; then
+    echo "Error: Cannot find \"${2}\" in ${1}" >&2;
+    exit 1;
+  else
+    echo $VALUE ;
+  fi;
+}
+#[VAR]=readJson2 [filename] [key] || exit [code]
+
 
 #------------------------------------------------------------------------------
 # LINUX
@@ -261,6 +407,11 @@ while test $# -gt 0; do
       echo "# OPTIONS:"
       echo -e "\t-h|--help                 help"
       echo ""
+      echo "# START|STOP SERVICES:"
+      echo "#--------------------------------------------------------------------"
+      echo -e "\t-sdn |--start_docker_network       Start network of containers"
+      echo -e "\t-stdn|--stop_docker_network        Stop network of containers"
+      echo ""
       echo "# ANSIBLE:"
       echo "#--------------------------------------------------------------------"
       echo -e "\t-rad |--run_ansible_docker      run ansible docker centos ia"
@@ -268,9 +419,13 @@ while test $# -gt 0; do
       echo ""
       echo "# DOCKER:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t-do  |--docker_info             docker local info"
-      echo -e "\t-red |--remove_exited_dockers   remove exited dockers"
-      echo -e "\t-sdr |--search_docker_repos     search for string in docker reposr"
+      echo -e "\t-di   |--docker_info             Local Info"
+      echo -e "\t-dciu |--docker_cleanup          Remove Unused Images, exited Containers"
+      echo -e "\t-dci  |--docker_container_ips    Get IPs of Containers"
+      echo -e "\t-dcu  |--docker_containers_up    Get IP of the <container_ids>"
+      echo -e "\t-drc  |--docker_remove_container          Remove one Container"
+      echo -e "\t-drec |--docker_remove_exited_containers  Remove exited dockers"
+      echo -e "\t-dsr  |--docker_search_repos     Search <string> in docker repos"
       echo ""
       echo "# KALI LINUX:"
       echo "#--------------------------------------------------------------------"
@@ -283,28 +438,62 @@ while test $# -gt 0; do
       echo ""
       echo "# KAFKA:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\-rka  |--run_kafka_docker        run kafka docker interactive"
+      echo -e "\t-rka |--run_kafka_docker        run kafka docker interactive"
+      echo ""
+      echo "# PARROT & TAILS:"
+      echo "#--------------------------------------------------------------------"
+      echo -e "\t-rt |--run_tails       Run linux distro tails for privacy"
+      echo -e "\t-rp |--run_parrot      Run linux security disto tails"
       echo ""
       echo "# RASPBERRY:"
       echo "#--------------------------------------------------------------------"
       echo -e "\t-msdr |--micro_sd_raspberry      download and do image on microSD"
+      echo ""
+      echo "#--------------------------------------------------------------------"
       exit 0
       ;;
-    -do|--docker_info)
+    -rp|--run_parrot)
+      installParrot
+      ;;
+    -rt|--run_tails)
+      installTails
+      ;;
+    -di|--docker_info)
+      dockerInfo
+      getDockerContainerIps
+      ;;
+    -dsr|--docker_search_repos)
+      searchDockerRepos
+      ;;
+    -dci|--docker_container_ips)
+      getDockerContainerIps
+      ;;
+    -dcu|--docker_containers_up)
+      checkDockerContainerUp ansible_centos7
+      ;;
+    -drc|--docker_remove_container)
+      removeOneContainer
+      ;;
+    -drec|--docker_remove_exited_containers)
+      removeDockers exited
+      ;;
+    -dciu|--docker_cleanup)
+      dockerCleanup
+      ;;
+    -sdn|--start_docker_network)
+      dockerContainers start
       dockerInfo
       ;;
-    -red|--remove_exited_dockers)
-      removeExitedDockers
-      ;;
-    -sdr|--search_docker_repos)
-      searchDockerRepos
+    -stdn|--stop_docker_network)
+      dockerContainers stop
+      dockerInfo
       ;;
     -is|--install_kali)
       installKaliLinux
       ;;
     -rkd|--run_kali_docker)
       echo -e "\tINFO: https://hub.docker.com/r/kalilinux/kali-linux-docker/"
-      export DOCKER_NAME='kali-linux'
+      export DOCKER_NAME='kali_linux'
       export DOCKER_IMAGE=kalilinux/kali-linux-docker
       runImageDocker
       ;;
@@ -316,13 +505,13 @@ while test $# -gt 0; do
       ;;
     -radd|--run_ansible_docker_debian8)
       echo -e "\tINFO: https://hub.docker.com/r/williamyeh/ansible/"
-      export DOCKER_NAME='ansible'
+      export DOCKER_NAME='ansible_debian8'
       export DOCKER_IMAGE=williamyeh/ansible:debian8
       runImageDocker
       ;;
     -rad|--run_ansible_docker)
       echo -e "\tINFO: https://hub.docker.com/r/williamyeh/ansible/"
-      export DOCKER_NAME='ansibleCentos'
+      export DOCKER_NAME='ansible_centos'
       echo -e "\tTODO: add os versions"
       export DOCKER_IMAGE=williamyeh/ansible:centos7
       runImageDocker
