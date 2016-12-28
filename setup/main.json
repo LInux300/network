@@ -1,0 +1,92 @@
+{"network": {
+    "debug": "on",
+    "window": {
+        "title": "Sample Konfabulator Widget",
+        "name": "main_window",
+        "width": 500,
+        "height": 500
+    },
+    "containers": [{
+        "docker_name": "ansible_centos7",
+        "docker_image": "williamyeh/ansible:centos7",
+        "docker_description": "",
+        "docker_run": "",
+        "docker_web": "",
+        "enable": "true",
+        "interactive": "false"
+
+    },{
+        "docker_name": "ansible_debian8",
+        "docker_image": "williamyeh/ansible:debian8",
+        "docker_description": "",
+        "docker_run": "",
+        "docker_web": "",
+        "enable": "false",
+        "interactive": "false"
+    },{
+        "docker_name": "apache_debian",
+        "docker_image": "eboraas/apache",
+        "docker_description": "Apache (with SSL support), built on Debian",
+        "docker_run": "",
+        "docker_web": "",
+        "enable": "true",
+        "interactive": "false"
+    },{
+        "docker_name": "centos",
+        "docker_image": "jdeathe/centos-ssh",
+        "docker_description": "",
+        "docker_run": "",
+        "docker_web": "",
+        "enable": "false",
+        "interactive": "false"
+    },{
+        "docker_name": "kafka",
+        "docker_image": "wurstmeister/kafka",
+        "docker_description": "",
+        "docker_run": "",
+        "docker_web": "true",
+        "enable": "false",
+        "interactive": "false"
+    },{
+        "docker_name": "kali_linux",
+        "docker_image": "kalilinux/kali-linux-docker",
+        "docker_description": "",
+        "docker_run": "",
+        "docker_web": "",
+        "enable": "true",
+        "interactive": "false"
+    },{
+        "docker_name": "nginx_naxsi_ui",
+        "docker_image": "scollazo/naxsi-waf-with-ui",
+        "docker_description": "Ubuntu based naxsi web application firewall. Includes naxsi-ui",
+        "docker_run": "",
+        "docker_web": "",
+        "enable": "true",
+        "interactive": "false"
+    },{
+        "docker_name": "nginx_proxy",
+        "docker_image": "jwilder/nginx-proxy",
+        "docker_description": "",
+        "docker_run": "docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy",
+        "docker_web": "",
+        "enable": "true",
+        "interactive": "false"
+    },{
+        "docker_name": "rails_alpine",
+        "docker_image": "bluebu/rails-alpine",
+        "docker_description": "the rails version will be always the latest stable version",
+        "docker_run": "",
+        "docker_web": "https://github.com/jwilder/nginx-proxy",
+        "enable": "false",
+        "interactive": "false"
+    }],
+    "text": {
+        "data": "Click Here",
+        "size": 36,
+        "style": "bold",
+        "name": "text1",
+        "hOffset": 250,
+        "vOffset": 100,
+        "alignment": "center"
+    }
+}}

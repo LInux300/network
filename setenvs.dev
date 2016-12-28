@@ -1,0 +1,4 @@
+export SETUP_DIR=~/code/network/setup
+export TMP_DIR=~/code/network/tmp
+export BIN_DIR=~/code/network/bin
+export NUMBER_CONTAINERS=13
