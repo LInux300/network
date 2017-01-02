@@ -73,9 +73,10 @@ function searchDockerRepos() {
 }
 
 function checkDockerContainerUp() {
-  #dockerInfo
-  #echo -n "Enter <container_name>|<container_id> to get Container IP [ENTER]: "
-  docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$@"
+  dockerInfo
+  echo -n "Enter <container_name>|<container_id> to get Container IP [ENTER]: "
+  read container
+  docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container"
 }
 
 function getDockerContainerIps() {
@@ -106,20 +107,28 @@ function dockerCleanup() {
 # Docker Network - Container Network
 #------------------------------------------------------------------------------
 function runImageDocker() {
-  echo -e "\tINFO: Run $DOCKER_IMAGE"
+  echo -e "\tINFO: Run '$DOCKER_IMAGE'"
   docker pull $DOCKER_IMAGE
   DOCKER_NAME_EXIST=$(docker ps -a --format={{.Names}} -f name=$DOCKER_NAME)
   if [ "$DOCKER_NAME" == "$DOCKER_NAME_EXIST" ]; then
     echo -e "\tINFO: Container '$DOCKER_NAME' already exists"
     docker ps -a | grep $DOCKER_NAME
     docker start $DOCKER_NAME
-    docker attach $DOCKER_NAME
-    # If we use attach we can use only one instance of shell. So if we want open new terminal with new instance of container's shell, we just need run the following
-    #docker exec -i -t $DOCKER_NAME /bin/bash
+    #docker attach $DOCKER_NAME
+    docker exec -i -t $DOCKER_NAME /bin/bash
   else
-    echo "INFO: Run container interactive"
-    docker run --name $DOCKER_NAME -it $DOCKER_IMAGE /bin/bash
+    echo -e "\tINFO: Run container interactive for '$DOCKER_NAME'"
+    #docker run --name $DOCKER_NAME -it $DOCKER_IMAGE /bin/bash
+    docker run --name $DOCKER_NAME --tty --detach $DOCKER_IMAGE /bin/bash
+    docker exec -i -t $DOCKER_NAME /bin/bash
   fi
+}
+
+function execDockerContainer() {
+  dockerInfo
+  echo -n -e "\tINFO: Exec <container> interactive and press [ENTER]: "
+  read container
+  docker exec -i -t $container /bin/bash
 }
 
 function startDockerContainer() {
@@ -132,8 +141,14 @@ function startDockerContainer() {
     docker start $DOCKER_NAME
   else
     sleep 1
-    echo -e "\tINFO: Starting new '$DOCKER_NAME' container ..."
-    docker run --name $DOCKER_NAME -t $DOCKER_IMAGE
+    echo -e "\tINFO: Starting new '$DOCKER_NAME' container in background..."
+    if [ "$DOCKER_RUN" == "default" ]; then
+      echo -e "\tINFO: 'NO Json Run param';\trunning as daemon with default setting ... "
+      docker run --name $DOCKER_NAME --tty --detach $DOCKER_IMAGE /bin/bash
+    else
+      echo -e "\tINFO: run cmd:\t\n\t$DOCKER_RUN"
+      eval `$DOCKER_RUN`
+    fi
   fi
 }
 
@@ -148,8 +163,9 @@ function dockerContainers() {
 
   cat_file=`cat $SETUP_DIR/main.json`
 
-  # TODO change NUMBER_CONTAINERS for len of containers
+  #TODO: change NUMBER_CONTAINERS for len of containers
   for i in `seq 0 $NUMBER_CONTAINERS`; do
+
     search_string=".network.containers[$i].docker_name"
       docker_name=`echo $cat_file | $BIN_DIR/jq $search_string`
       docker_name=`echo ${docker_name:1:-1}` # strip first and last
@@ -159,11 +175,15 @@ function dockerContainers() {
     search_string=".network.containers[$i].enable"
       enable=`echo $cat_file | $BIN_DIR/jq $search_string`
       enable=`echo ${enable:1:-1}`
-    #echo -e "\tINFO: $docker_name \t: $docker_image"
+    search_string=".network.containers[$i].docker_run"
+      docker_run=`echo $cat_file | $BIN_DIR/jq $search_string`
+      docker_run=`echo ${docker_run:1:-1}`
 
     export DOCKER_NAME=$docker_name
     export DOCKER_IMAGE=$docker_image
-    #export INTERACTIVE=false
+    export DOCKER_RUN=$docker_run
+    #TODO: export INTERACTIVE=false
+
     if [ "$enable" == "true" ]; then
       if [ "$1" == "start" ]; then
         startDockerContainer
@@ -174,14 +194,19 @@ function dockerContainers() {
   done
 }
 
+function dockerNetworkInspectBridge() {
+  echo -e "\tINFO: Inspect Bridge, outpu JSON; https://docs.docker.com/engine/userguide/networking/ "
+  docker network inspect bridge
+}
+
 function runCmdOnKaliDocker() {
-    container_id=$(docker ps -aqf "name=$DOCKER_NAME")
-    echo -e "\tINFO: Run command on '$container_id'"
-    echo -n -e "\tEnter commands and press [ENTER]: "
-    read commands
-    docker start $DOCKER_NAME
-    docker exec $container_id script /dev/null -c "$commands"
-    docker stop $DOCKER_NAME
+  container_id=$(docker ps -aqf "name=$DOCKER_NAME")
+  echo -e "\tINFO: Run command on '$container_id'"
+  echo -n -e "\tEnter commands and press [ENTER]: "
+  read commands
+  docker start $DOCKER_NAME
+  docker exec $container_id script /dev/null -c "$commands"
+  docker stop $DOCKER_NAME
 }
 
 function kaliNetHunter() {
@@ -201,7 +226,7 @@ function installKaliLinux() {
   wget http://cdimage.kali.org/current/SHA1SUMS
   wget http://cdimage.kali.org/current/SHA1SUMS.gpg
   gpg --verify SHA1SUMS.gpg SHA1SUMS
-    # If you don’t get that “Good signature” message or if the key ID doesn’t match, then you should stop the process and review whether you downloaded the images from a legitimate Kali mirror.
+  # If you don’t get that “Good signature” message or if the key ID doesn’t match, then you should stop the process and review whether you downloaded the images from a legitimate Kali mirror.
 
   # VERIFY SHA1
   verify_iso_sha1=`sha1sum $KALI_ISO`
@@ -243,8 +268,8 @@ function installKaliLinux() {
 # https://docs.docker.com/engine/reference/run/
 
 function serviceNginxStart() {
-  echo -e "\tINFO: TODO json service nginx starting ..."
-  docker run -d -p 80:80 my_image service nginx start
+  echo -e "\tINFO: run cmd from <docker_run> param ..."
+  #docker run -d -p 80:80 nginx_proxy service nginx start
 }
 
 #------------------------------------------------------------------------------
@@ -366,7 +391,6 @@ function downloadJsonBashParser() {
   fi
 }
 
-
 function readJson2 {
   UNAMESTR=`uname`
   if [[ "$UNAMESTR" == 'Linux' ]]; then
@@ -386,7 +410,6 @@ function readJson2 {
 }
 #[VAR]=readJson2 [filename] [key] || exit [code]
 
-
 #------------------------------------------------------------------------------
 # LINUX
 #------------------------------------------------------------------------------
@@ -396,7 +419,6 @@ linuxAddToEtcHosts() {
     $string >> $file
 }
 #------------------------------------------------------------------------------
-
 
 while test $# -gt 0; do
   case "$1" in
@@ -423,6 +445,7 @@ while test $# -gt 0; do
       echo -e "\t-dciu |--docker_cleanup          Remove Unused Images, exited Containers"
       echo -e "\t-dci  |--docker_container_ips    Get IPs of Containers"
       echo -e "\t-dcu  |--docker_containers_up    Get IP of the <container_ids>"
+      echo -e "\t-dec  |--docker_exec_container   Start Container in interactive mode"
       echo -e "\t-drc  |--docker_remove_container          Remove one Container"
       echo -e "\t-drec |--docker_remove_exited_containers  Remove exited dockers"
       echo -e "\t-dsr  |--docker_search_repos     Search <string> in docker repos"
@@ -469,7 +492,10 @@ while test $# -gt 0; do
       getDockerContainerIps
       ;;
     -dcu|--docker_containers_up)
-      checkDockerContainerUp ansible_centos7
+      checkDockerContainerUp
+      ;;
+    -dec|--docker_exec_container)
+      execDockerContainer
       ;;
     -drc|--docker_remove_container)
       removeOneContainer
@@ -483,6 +509,7 @@ while test $# -gt 0; do
     -sdn|--start_docker_network)
       dockerContainers start
       dockerInfo
+      getDockerContainerIps
       ;;
     -stdn|--stop_docker_network)
       dockerContainers stop
@@ -511,7 +538,7 @@ while test $# -gt 0; do
       ;;
     -rad|--run_ansible_docker)
       echo -e "\tINFO: https://hub.docker.com/r/williamyeh/ansible/"
-      export DOCKER_NAME='ansible_centos'
+      export DOCKER_NAME='ansible_centos7'
       echo -e "\tTODO: add os versions"
       export DOCKER_IMAGE=williamyeh/ansible:centos7
       runImageDocker

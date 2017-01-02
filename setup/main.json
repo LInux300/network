@@ -9,18 +9,18 @@
     "containers": [{
         "docker_name": "ansible_centos7",
         "docker_image": "williamyeh/ansible:centos7",
-        "docker_description": "",
-        "docker_run": "",
-        "docker_web": "",
-        "enable": "false",
+        "docker_description": "Docker images for Ansible software, installed in a selected Linux distributions (Debian/Ubuntu/CentOS/Alpine).",
+        "docker_run": "default",
+        "docker_web": "https://github.com/William-Yeh/docker-ansible",
+        "enable": "true",
         "interactive": "false"
 
     },{
         "docker_name": "ansible_debian8",
         "docker_image": "williamyeh/ansible:debian8",
-        "docker_description": "",
-        "docker_run": "",
-        "docker_web": "",
+        "docker_description": "Docker images for Ansible software, installed in a selected Linux distributions (Debian/Ubuntu/CentOS/Alpine).",
+        "docker_run": "default",
+        "docker_web": "https://github.com/William-Yeh/docker-ansible",
         "enable": "false",
         "interactive": "false"
     },{
@@ -44,14 +44,14 @@
         "docker_image": "wurstmeister/kafka",
         "docker_description": "",
         "docker_run": "",
-        "docker_web": "",
+        "docker_web": "false",
         "enable": "false",
         "interactive": "false"
     },{
         "docker_name": "kali_linux",
         "docker_image": "kalilinux/kali-linux-docker",
         "docker_description": "",
-        "docker_run": "",
+        "docker_run": "default",
         "docker_web": "",
         "enable": "true",
         "interactive": "false"
@@ -60,16 +60,16 @@
         "docker_image": "scollazo/naxsi-waf-with-ui",
         "docker_description": "Ubuntu based naxsi web application firewall. Includes naxsi-ui",
         "docker_run": "",
-        "docker_web": "",
+        "docker_web": "https://github.com/jwilder/nginx-proxy",
         "enable": "false",
         "interactive": "false"
     },{
         "docker_name": "nginx_proxy",
         "docker_image": "jwilder/nginx-proxy",
         "docker_description": "",
-        "docker_run": "docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy",
+        "docker_run": "docker run --name nginx_proxy -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy",
         "docker_web": "",
-        "enable": "false",
+        "enable": "true",
         "interactive": "false"
     },{
         "docker_name": "rails_alpine",
