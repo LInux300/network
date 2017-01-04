@@ -27,25 +27,25 @@
         "docker_name": "apache_debian",
         "docker_image": "eboraas/apache",
         "docker_description": "Apache (with SSL support), built on Debian",
-        "docker_run": "",
+        "docker_run": "default",
         "docker_web": "",
-        "enable": "false",
+        "enable": "true",
         "interactive": "false"
     },{
         "docker_name": "centos",
         "docker_image": "jdeathe/centos-ssh",
         "docker_description": "",
-        "docker_run": "",
+        "docker_run": "default",
         "docker_web": "",
-        "enable": "false",
+        "enable": "true",
         "interactive": "false"
     },{
         "docker_name": "kafka",
         "docker_image": "wurstmeister/kafka",
         "docker_description": "",
-        "docker_run": "",
-        "docker_web": "false",
-        "enable": "false",
+        "docker_run": "default",
+        "docker_web": "",
+        "enable": "true",
         "interactive": "false"
     },{
         "docker_name": "kali_linux",
@@ -79,6 +79,22 @@
         "docker_web": "https://github.com/jwilder/nginx-proxy",
         "enable": "false",
         "interactive": "false"
+    }],
+    "dockerFiles": [{
+        "docker_image_name": "klicko/centos:stable",
+        "docker_file_name": "centos-1",
+        "docker_file_description": "Custom Centos Stable",
+        "enable" : "true"
+    },{
+        "docker_image_name": "klicko/project:master",
+        "docker_file_name": "DockerFile_master",
+        "docker_file_description": "Custom Master",
+        "enable" : "true"
+    },{
+        "docker_image_name": "klicko/tor:v1",
+        "docker_file_name": "tor.df",
+        "docker_file_description": "Tor Browser",
+        "enable" : "true"
     }],
     "text": {
         "data": "Click Here",

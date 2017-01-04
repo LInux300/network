@@ -1,0 +1,3 @@
+# all markdown files except README.md are excluded fromthe context
+*.md
+!README.md

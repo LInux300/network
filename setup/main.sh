@@ -1,8 +1,8 @@
 #!/bin/bash
-#DIR_NAME=$(dirname $(readlink -f $0))
-#. $DIR_NAME/setenvs
-#source $DIR_NAME/setenvs
-source ~/code/network/setenvs
+# main.sh
+#
+# From users, gets "real name" from /etc/passwd.
+
 #------------------------------------------------------------------------------
 # Browser in terminal
 #------------------------------------------------------------------------------
@@ -36,7 +36,8 @@ function installDocker() {
 
 function dockerInfo() {
   echo -e "\tINFO: Docker Images"
-  docker images
+  #docker images
+  dockerCheckDigest
   echo -e "\tINFO: Docker Containers Overview"
   docker ps -a
   #echo -e "\tINFO: Running Containers"
@@ -124,6 +125,104 @@ function runImageDocker() {
   fi
 }
 
+function dockerCheckDigest() {
+  echo -e "\tINFO: Checking digest 'sha256' for local DockerImages..."
+  docker images --digests | head
+}
+
+# function returns params
+function nameYourDockerImage() {
+  echo -n -e "\tINFO: Name your New image [ENTER]: "
+  read $ARR_DOCKER["name_your_image"]
+  echo -n -e "\tINFO: Image Tag <stable|latest|master|...> [ENTER]: "
+  read tag
+  echo -n -e "\tINFO: <docker_user|user> [ENTER]: "
+  read user
+  echo -n -e "\tINFO: Name your <DockerFile>...> [ENTER]: "
+  read docker_file
+  echo "$ARR_DOCKER['name_your_image']|$tag|$user"
+}
+#ret="$(nameYourDockerImage)"
+#IFS="|"
+#set -- $ret
+#echo "Your Docker Name: $1"
+#echo "Image Tag: $2"
+#echo "Docker User|User: $3"
+
+function dockerBuildImagesFromFiles() {
+  echo -e "\tINFO: reading from json['dockerFiles']..."
+
+  mkdir -p $DOCKER_FILES_DIR
+  cd $DOCKER_FILES_DIR
+
+  #TODO: change NUMBER_CONTAINERS for len of containers
+  for i in `seq 0 $NUMBER_CONTAINERS`; do
+    s=".network.dockerFiles[$i].docker_file_name"
+      docker_file_name=`echo $CAT_FILE | $BIN_DIR/jq $s`
+      docker_file_name=`echo ${docker_file_name:1:-1}`
+    s=".network.dockerFiles[$i].enable"
+      e=`echo $CAT_FILE | $BIN_DIR/jq $s`
+      e=`echo ${e:1:-1}`
+
+    if [ "$e" == "true" ]; then
+      file=$DOCKER_FILES_DIR/$docker_file_name
+      if [ -e $file ]; then
+        echo -e "\tINFO: DockerFile exists '$file'"
+        #nohup cat $file  2>1 &
+        cat $file
+      else
+        echo -e "\tINFO: Enter [yes] to edit '$file' with default DockerFile setting..."
+        read answer
+        echo -e "\tINFO: Answer was: '$answer'"
+
+          cat << 'EOF' >> $file
+# Header: Minimal DockerFile
+# User: Klicko
+# Version: 0.0.2
+#------------------------------------------------------------------------------
+FROM centos:centos7
+MAINTAINER The Custom CentOS <user@example.com>
+
+RUN yum -y update; yum clean all
+RUN yum -y install openssh-server passwd; yum clean all
+ADD ./start.sh /start.sh
+RUN mkdir /var/run/sshd
+
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' 
+
+RUN chmod 755 /start.sh
+# EXPOSE 22
+RUN ./start.sh
+ENTRYPOINT ["/usr/sbin/sshd", "-D"]
+EOF
+
+        if [ "$answer" == "yes" ]; then
+          echo -e "\tINFO: created default DockerFile: '$file'..."
+        else
+          echo -e "\tINFO: created new empty file '$file'"
+          vi $file  
+        fi
+      fi   # file ends
+      #docker build --build-arg user=what_user Dockerfile
+      docker build -t $user/$name_your_image:$tag -f $file .
+    fi
+  done
+}
+
+function dockerCommitCreate() {
+  echo -n -e "\tINFO: Commit changes on <container> and [ENTER]: "
+  read container
+  echo -n -e "\tINFO: Name your New image [ENTER]: "
+  read name_your_image
+  echo -n -e "\tINFO: Image Tag <stable|latest|master|...> [ENTER]: "
+  read tag
+  echo -n -e "\tINFO: Commit message [ENTER]: "
+  read commit_msg
+  echo -n -e "\tINFO: <docker_user|user> [ENTER]: "
+  read user
+  docker commit -m "$commit_msg" -a "$user" $container $user/name_your_image:tag
+}
+
 function execDockerContainer() {
   dockerInfo
   echo -n -e "\tINFO: Exec <container> interactive and press [ENTER]: "
@@ -132,18 +231,18 @@ function execDockerContainer() {
 }
 
 function startDockerContainer() {
-  echo -e "\tINFO: Booting '$DOCKER_IMAGE' container ..."
+  echo -e "\tINFO: Booting '$DOCKER_IMAGE' container..."
   docker pull $DOCKER_IMAGE
   DOCKER_NAME_EXIST=$(docker ps -a --format={{.Names}} -f name=$DOCKER_NAME)
   
   if [ "$DOCKER_NAME" == "$DOCKER_NAME_EXIST" ]; then
-    echo -e "\tINFO: Starting existing '$DOCKER_NAME' container ..."
+    echo -e "\tINFO: Starting existing '$DOCKER_NAME' container..."
     docker start $DOCKER_NAME
   else
     sleep 1
     echo -e "\tINFO: Starting new '$DOCKER_NAME' container in background..."
     if [ "$DOCKER_RUN" == "default" ]; then
-      echo -e "\tINFO: 'NO Json Run param';\trunning as daemon with default setting ... "
+      echo -e "\tINFO: 'NO Json Run param';\trunning as daemon with default setting... "
       docker run --name $DOCKER_NAME --tty --detach $DOCKER_IMAGE /bin/bash
     else
       echo -e "\tINFO: run cmd:\t\n\t$DOCKER_RUN"
@@ -153,38 +252,38 @@ function startDockerContainer() {
 }
 
 function stopDockerContainer() {
-  echo -e "\tINFO Stopping '$DOCKER_NAME' Container ... "
+  echo -e "\tINFO Stopping '$DOCKER_NAME' container... "
   docker stop $DOCKER_NAME
 }
 
 function dockerContainers() {
-  
-  downloadJsonBashParser
-
-  cat_file=`cat $SETUP_DIR/main.json`
+  echo -e "\tINFO: read json['containers']; initial docker network"
 
   #TODO: change NUMBER_CONTAINERS for len of containers
   for i in `seq 0 $NUMBER_CONTAINERS`; do
-
     search_string=".network.containers[$i].docker_name"
-      docker_name=`echo $cat_file | $BIN_DIR/jq $search_string`
+      docker_name=`echo $CAT_FILE | $BIN_DIR/jq $search_string`
       docker_name=`echo ${docker_name:1:-1}` # strip first and last
     search_string=".network.containers[$i].docker_image"
-      docker_image=`echo $cat_file | $BIN_DIR/jq $search_string`
+      docker_image=`echo $CAT_FILE | $BIN_DIR/jq $search_string`
       docker_image=`echo ${docker_image:1:-1}`
     search_string=".network.containers[$i].enable"
-      enable=`echo $cat_file | $BIN_DIR/jq $search_string`
-      enable=`echo ${enable:1:-1}`
+      e=`echo $CAT_FILE | $BIN_DIR/jq $search_string`
+      e=`echo ${e:1:-1}`
     search_string=".network.containers[$i].docker_run"
-      docker_run=`echo $cat_file | $BIN_DIR/jq $search_string`
+      docker_run=`echo $CAT_FILE | $BIN_DIR/jq $search_string`
       docker_run=`echo ${docker_run:1:-1}`
+
+    ARR_DOCKER["docker_name_$i"]=$docker_name
+    ARR_DOCKER["docker_image_$i"]=$docker_image
+    ARR_DOCKER["docker_run_$i"]=$docker_run
 
     export DOCKER_NAME=$docker_name
     export DOCKER_IMAGE=$docker_image
     export DOCKER_RUN=$docker_run
     #TODO: export INTERACTIVE=false
 
-    if [ "$enable" == "true" ]; then
+    if [ "$e" == "true" ]; then
       if [ "$1" == "start" ]; then
         startDockerContainer
       elif [ "$1" == "stop" ]; then
@@ -405,7 +504,7 @@ function readJson2 {
     echo "Error: Cannot find \"${2}\" in ${1}" >&2;
     exit 1;
   else
-    echo $VALUE ;
+    echo $VALUE
   fi;
 }
 #[VAR]=readJson2 [filename] [key] || exit [code]
@@ -420,60 +519,69 @@ linuxAddToEtcHosts() {
 }
 #------------------------------------------------------------------------------
 
+source ~/code/network/setenvs
+declare -a ARR_DOCKER
+declare -r CAT_FILE=`cat $SETUP_DIR/main.json`         # read only
+downloadJsonBashParser
+
+#declare -f                                             # lists the function above;
+#declare -i integer_variable
+#declare -x OUTPUT="output of the current file"
+
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
       echo "#--------------------------------------------------------------------"
-      echo "#  App: $APP_NAME"
+      echo "#  APP: $APP_NAME"
       echo "#--------------------------------------------------------------------"
-      echo "# OPTIONS:"
-      echo -e "\t-h|--help                 help"
+      echo -e "\t-h|--help                       Help"
       echo ""
-      echo "# START|STOP SERVICES:"
+      echo "# START|STOP SERVICE:"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t-sdn |--start_docker_network       Start network of containers"
-      echo -e "\t-stdn|--stop_docker_network        Stop network of containers"
+      echo -e "\t-sdn |--start_docker_network    Start network of containers"
+      echo -e "\t-stdn|--stop_docker_network     Stop network of containers"
       echo ""
-      echo "# ANSIBLE:"
+      echo "# DOCKER"
+      echo "#--------------------------------------------------------------------"
+      echo -e "\t-di  |--docker_info             Local Info"
+      echo -e "\t-dbi |--docker_build_images     Build; configuration stored in json under ['dockerFiles']"
+      echo -e "\t-dciu|--docker_cleanup          Remove Unused Images, exited Containers"
+      echo -e "\t-dci |--docker_container_ips    Get IPs of Containers"
+      echo -e "\t-dcu |--docker_containers_up    Get IP of the <container_ids>"
+      echo -e "\t-dcc |--docker_commit_create    Commit changes on container and create new image of it"
+      echo -e "\t-dec |--docker_exec_container   Start Container in interactive mode"
+      echo -e "\t-drc |--docker_remove_container          Remove one Container"
+      echo -e "\t-drec|--docker_remove_exited_containers  Remove exited dockers"
+      echo -e "\t-dsr |--docker_search_repos     Search <string> in docker repos"
+      echo ""
+      echo "# RUN"
       echo "#--------------------------------------------------------------------"
       echo -e "\t-rad |--run_ansible_docker      run ansible docker centos ia"
       echo -e "\t-radd|--run_ansible_docker_deb8 run ansible doc deb interactive"
-      echo ""
-      echo "# DOCKER:"
-      echo "#--------------------------------------------------------------------"
-      echo -e "\t-di   |--docker_info             Local Info"
-      echo -e "\t-dciu |--docker_cleanup          Remove Unused Images, exited Containers"
-      echo -e "\t-dci  |--docker_container_ips    Get IPs of Containers"
-      echo -e "\t-dcu  |--docker_containers_up    Get IP of the <container_ids>"
-      echo -e "\t-dec  |--docker_exec_container   Start Container in interactive mode"
-      echo -e "\t-drc  |--docker_remove_container          Remove one Container"
-      echo -e "\t-drec |--docker_remove_exited_containers  Remove exited dockers"
-      echo -e "\t-dsr  |--docker_search_repos     Search <string> in docker repos"
-      echo ""
-      echo "# KALI LINUX:"
-      echo "#--------------------------------------------------------------------"
-      echo -e "\t-ik  |--install_kali             download & install Kali"
-      echo ""
-      echo "# KALI DOCKER:"
-      echo "#--------------------------------------------------------------------"
-      echo -e "\t-rkd  |--run_kali_docker         run kali docker interactive"
-      echo -e "\t-rckd |--run_cmd_on_kali_docker  run command on kali docker"
-      echo ""
-      echo "# KAFKA:"
-      echo "#--------------------------------------------------------------------"
       echo -e "\t-rka |--run_kafka_docker        run kafka docker interactive"
+      echo -e "\t-rkd |--run_kali_docker         run kali docker interactive"
+      echo -e "\t-rckd|--run_cmd_on_kali_docker  run command on kali docker"
+      #echo -e "\t-rt  |--run_tails       TODO run linux distro tails for privacy"
+      #echo -e "\t-rp  |--run_parrot      TODO run linux security disto tails"
       echo ""
-      echo "# PARROT & TAILS:"
+      echo "# GIT & INSTALL"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t-rt |--run_tails       Run linux distro tails for privacy"
-      echo -e "\t-rp |--run_parrot      Run linux security disto tails"
-      echo ""
-      echo "# RASPBERRY:"
-      echo "#--------------------------------------------------------------------"
-      echo -e "\t-msdr |--micro_sd_raspberry      download and do image on microSD"
+      echo -e "\t-iku |--install_kali_usb        download $ verify sha1 $ install Kali on usb drive"
+      echo -e "\t-iss |--install_raspberry_sd    download and do image on microSD"
+      echo -e "\t-gi  |--git_info                git info about current repo"
       echo ""
       echo "#--------------------------------------------------------------------"
       exit 0
+      ;;
+    -gi|--git_info)
+      echo -e "\tINFO: Revisiting Commits"
+      git log --pretty=format:"%h - %an, %ar : %s"
+      echo -e "\tINFO: about last commit"
+      git log -1
+      echo -e "\tINFO: stats about last commit"
+      git diff --stat HEAD
+      echo -e "\tINFO: Show detail changes for last commit"
+      git log -p -2
       ;;
     -rp|--run_parrot)
       installParrot
@@ -485,6 +593,9 @@ while test $# -gt 0; do
       dockerInfo
       getDockerContainerIps
       ;;
+    -dbi|--docker_build_images)
+      dockerBuildImagesFromFiles
+      ;;
     -dsr|--docker_search_repos)
       searchDockerRepos
       ;;
@@ -493,6 +604,9 @@ while test $# -gt 0; do
       ;;
     -dcu|--docker_containers_up)
       checkDockerContainerUp
+      ;;
+    -dcc|--docker_commit_create)
+      dockerCommitCreate
       ;;
     -dec|--docker_exec_container)
       execDockerContainer
@@ -515,8 +629,11 @@ while test $# -gt 0; do
       dockerContainers stop
       dockerInfo
       ;;
-    -is|--install_kali)
+    -isu|--install_kali_usb)
       installKaliLinux
+      ;;
+    -iss|--install_raspberry_sd)
+      microSdRaspberry
       ;;
     -rkd|--run_kali_docker)
       echo -e "\tINFO: https://hub.docker.com/r/kalilinux/kali-linux-docker/"
@@ -546,9 +663,6 @@ while test $# -gt 0; do
     -rckd|--run_cmd_on_kali_docker)
       runCmdOnKaliDocker
       ;;
-    -msdr|--micro_sd_raspberry)
-      microSdRaspberry
-      ;;
     --test)
       for i in `seq 0 $XY`; do
         echo "test: $i"
@@ -560,4 +674,3 @@ while test $# -gt 0; do
   esac
   exit 0
 done
-
