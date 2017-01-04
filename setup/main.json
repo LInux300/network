@@ -80,6 +80,22 @@
         "enable": "false",
         "interactive": "false"
     }],
+    "dockerFiles": [{
+        "docker_image_name": "klicko/minimal:stable",
+        "docker_file_name": "centos-1",
+        "docker_file_description": "Custom Centos Stable",
+        "enable" : "true"
+    },{
+        "docker_image_name": "klicko/project:master",
+        "docker_file_name": "DockerFile_master",
+        "docker_file_description": "Custom Master",
+        "enable" : "true"
+    },{
+        "docker_image_name": "klicko/project:dev",
+        "docker_file_name": "DockerFile_01_new",
+        "docker_file_description": "Devel",
+        "enable" : "true"
+    }],
     "text": {
         "data": "Click Here",
         "size": 36,

@@ -1,4 +1,8 @@
-export SETUP_DIR=~/code/network/setup
-export TMP_DIR=~/code/network/tmp
-export BIN_DIR=~/code/network/bin
-export NUMBER_CONTAINERS=13
+export APP_NAME=Network
+
+export HOME_DIR=~/code/network
+export DOCKER_FILES_DIR=$HOME_DIR/docker/DockerFiles
+export SETUP_DIR=$HOME_DIR/setup
+export TMP_DIR=$HOME_DIR/tmp
+export BIN_DIR=$HOME_DIR/bin
+export NUMBER_CONTAINERS=5
