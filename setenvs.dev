@@ -5,4 +5,4 @@ export DOCKER_FILES_DIR=$HOME_DIR/docker/DockerFiles
 export SETUP_DIR=$HOME_DIR/setup
 export TMP_DIR=$HOME_DIR/tmp
 export BIN_DIR=$HOME_DIR/bin
-export NUMBER_CONTAINERS=5
+export NUMBER_CONTAINERS=10

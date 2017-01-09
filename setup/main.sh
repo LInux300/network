@@ -180,20 +180,20 @@ function dockerBuildImagesFromFiles() {
 # User: Klicko
 # Version: 0.0.2
 #------------------------------------------------------------------------------
-FROM centos:centos7$
-MAINTAINER The Custom CentOS <user@example.com>$
+FROM centos:centos7
+MAINTAINER The Custom CentOS <user@example.com>
 
-RUN yum -y update; yum clean all$
-RUN yum -y install openssh-server passwd; yum clean all$
-ADD ./start.sh /start.sh$
-RUN mkdir /var/run/sshd$
-$
-RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' $
-$
-RUN chmod 755 /start.sh$
-# EXPOSE 22$
-RUN ./start.sh$
-ENTRYPOINT ["/usr/sbin/sshd", "-D"]$
+RUN yum -y update; yum clean all
+RUN yum -y install openssh-server passwd; yum clean all
+ADD ./start.sh /start.sh
+RUN mkdir /var/run/sshd
+
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' 
+
+RUN chmod 755 /start.sh
+# EXPOSE 22
+RUN ./start.sh
+ENTRYPOINT ["/usr/sbin/sshd", "-D"]
 EOF
 
         if [ "$answer" == "yes" ]; then
@@ -203,7 +203,7 @@ EOF
           vi $file  
         fi
       fi   # file ends
-      docker build --build-arg user=what_user Dockerfile
+      #docker build --build-arg user=what_user Dockerfile
       docker build -t $user/$name_your_image:$tag -f $file .
     fi
   done
@@ -292,6 +292,149 @@ function dockerContainers() {
     fi
   done
 }
+
+function dockerNetworkCreate() {
+  `docker network create -d overlay \
+  --subnet=192.168.0.0/16 \
+  --subnet=192.170.0.0/16 \
+  --gateway=192.168.0.100 \
+  --gateway=192.170.0.100 \
+  --ip-range=192.168.1.0/24 \
+  --aux-address="my-router=192.168.1.5" --aux-address="my-switch=192.168.1.6" \
+  --aux-address="my-printer=192.170.1.5" --aux-address="my-nas=192.170.1.6" \
+  my-multihost-network`
+}
+#dockerNetworkCreate
+
+function dockerRails() {
+  compose_dir=~/docker/tests/rails
+  mkdir -p $compose_dir && cd $compose_dir
+  file=Dockerfile
+  cat << 'EOF' > $file
+FROM ruby:2.3.3
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
+RUN mkdir /myapp
+WORKDIR /myapp
+ADD Gemfile /myapp/Gemfile
+ADD Gemfile.lock /myapp/Gemfile.lock
+RUN bundle install
+ADD . /myapp
+EOF
+  file=Gemfile
+  cat << 'EOF' > $file
+source 'https://rubygems.org'
+gem 'rails', '5.0.0.1'
+EOF
+  touch Gemfile.lock
+  file=docker-compose.yml
+  cat << 'EOF' > $file
+version: '2'
+services:
+  db:
+    image: postgres
+  web:
+    build: .
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+EOF
+    echo -e "\tINFO: From '`pwd`', start up your application."
+    #~/docker/bin/docker-compose up
+    ~/docker/bin/docker-compose run web rails new . --force --database=postgresql --skip-bundle
+    ~/docker/bin/docker-compose build
+    ~/docker/bin/docker-compose up
+}
+
+
+function dockerCompose() {
+  if [ -e ~/docker/bin/docker-compose ]; then
+    echo -e "\tINFO: run docker -compose"
+    compose_dir=~/docker/tests/composetest
+    mkdir -p $compose_dir && cd $compose_dir
+    file=app.py
+    cat << 'EOF' > $file
+from flask import Flask
+from redis import Redis
+
+app = Flask(__name__)
+redis = Redis(host='redis', port=6379)
+
+@app.route('/')
+def hello():
+    count = redis.incr('hits')
+    return 'Hello World! I have been seen {} times.\n'.format(count)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=True)
+EOF
+    file=requirements.txt
+    cat << 'EOF' > $file
+flask
+redis
+EOF
+    file=Dockerfile
+    cat << 'EOF' > $file
+FROM python:3.4-alpine
+ADD . /code
+WORKDIR /code
+RUN pip install -r requirements.txt
+CMD ["python", "app.py"]
+EOF
+    file=docker-compose.yml
+    cat << 'EOF' > $file
+version: '2'
+services:
+  web:
+    build: .
+    ports:
+     - "5000:5000"
+    volumes:
+     - .:/code
+    networks:
+      - front-tier
+      - back-tier
+  redis:
+    image: redis
+    volumes:
+      - redis-data:/var/lib/redis
+    networks:
+      - back-tier
+  db:
+    image: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  redis-data:
+    driver: local
+  postgres-data: {}
+networks:
+  front-tier:
+    driver: bridge
+  back-tier:
+    driver: bridge
+EOF
+
+    echo -e "\tINFO: From '`pwd`', start up your application."
+    ~/docker/bin/docker-compose up
+    #~/docker/bin/docker-compose up -d
+    echo -e "\tINFO: from http://localhost:5000"
+    curl http://localhost:5000
+    echo -e "\tINFO: run one-off commands for your service"
+    ~/docker/bin/docker-compose run web env
+  else
+    echo -e "\tINFO: Install docker-compose locally"
+    mkdir -p ~/docker/bin
+    cd ~/docker/bin
+    curl -L https://github.com/docker/compose/releases/download/1.9.0/run.sh > ~/docker/bin/docker-compose
+    chmod +x ~/docker/bin/docker-compose
+    ~/docker/bin/docker-compose migrate-to-labels
+  fi
+}
+
 
 function dockerNetworkInspectBridge() {
   echo -e "\tINFO: Inspect Bridge, outpu JSON; https://docs.docker.com/engine/userguide/networking/ "
@@ -546,10 +689,13 @@ while test $# -gt 0; do
       echo -e "\t-di  |--docker_info             Local Info"
       echo -e "\t-dbi |--docker_build_images     Build; configuration stored in json under ['dockerFiles']"
       echo -e "\t-dciu|--docker_cleanup          Remove Unused Images, exited Containers"
+      echo -e "\t-dco |--docker_compose          Docker Compose"
       echo -e "\t-dci |--docker_container_ips    Get IPs of Containers"
       echo -e "\t-dcu |--docker_containers_up    Get IP of the <container_ids>"
       echo -e "\t-dcc |--docker_commit_create    Commit changes on container and create new image of it"
       echo -e "\t-dec |--docker_exec_container   Start Container in interactive mode"
+      echo -e "\t-dnw |--docker_networking       Create network"
+      echo -e "\t-dra |--docker_rails            Docker Rails"
       echo -e "\t-drc |--docker_remove_container          Remove one Container"
       echo -e "\t-drec|--docker_remove_exited_containers  Remove exited dockers"
       echo -e "\t-dsr |--docker_search_repos     Search <string> in docker repos"
@@ -616,6 +762,15 @@ while test $# -gt 0; do
       ;;
     -drec|--docker_remove_exited_containers)
       removeDockers exited
+      ;;
+    -dnw|--docker_networking)
+      dockerNetworkCreate
+      ;;
+    -dra|--docker_rails)
+      dockerRails
+      ;;
+    -dco|--docker_compose)
+      dockerCompose
       ;;
     -dciu|--docker_cleanup)
       dockerCleanup

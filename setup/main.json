@@ -21,31 +21,31 @@
         "docker_description": "Docker images for Ansible software, installed in a selected Linux distributions (Debian/Ubuntu/CentOS/Alpine).",
         "docker_run": "default",
         "docker_web": "https://github.com/William-Yeh/docker-ansible",
-        "enable": "false",
+        "enable": "true",
         "interactive": "false"
     },{
         "docker_name": "apache_debian",
         "docker_image": "eboraas/apache",
         "docker_description": "Apache (with SSL support), built on Debian",
-        "docker_run": "",
+        "docker_run": "default",
         "docker_web": "",
-        "enable": "false",
+        "enable": "true",
         "interactive": "false"
     },{
-        "docker_name": "centos",
-        "docker_image": "jdeathe/centos-ssh",
+        "docker_name": "custom_centos",
+        "docker_image": "jdeathe/centos-ssh:centos-7",
         "docker_description": "",
-        "docker_run": "",
+        "docker_run": "docker run -d --name custom_centos -p 2020:22 jdeathe/centos-ssh:centos-7",
         "docker_web": "",
         "enable": "false",
         "interactive": "false"
     },{
-        "docker_name": "kafka",
+        "docker_name": "custom_kafka",
         "docker_image": "wurstmeister/kafka",
         "docker_description": "",
-        "docker_run": "",
-        "docker_web": "false",
-        "enable": "false",
+        "docker_run": "default",
+        "docker_web": "",
+        "enable": "true",
         "interactive": "false"
     },{
         "docker_name": "kali_linux",
@@ -59,15 +59,15 @@
         "docker_name": "nginx_naxsi_ui",
         "docker_image": "scollazo/naxsi-waf-with-ui",
         "docker_description": "Ubuntu based naxsi web application firewall. Includes naxsi-ui",
-        "docker_run": "",
+        "docker_run": "default",
         "docker_web": "https://github.com/jwilder/nginx-proxy",
-        "enable": "false",
+        "enable": "true",
         "interactive": "false"
     },{
         "docker_name": "nginx_proxy",
         "docker_image": "jwilder/nginx-proxy",
         "docker_description": "",
-        "docker_run": "docker run --name nginx_proxy -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy",
+        "docker_run": "docker run --name nginx_proxy -t -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy",
         "docker_web": "",
         "enable": "true",
         "interactive": "false"
@@ -81,7 +81,7 @@
         "interactive": "false"
     }],
     "dockerFiles": [{
-        "docker_image_name": "klicko/minimal:stable",
+        "docker_image_name": "klicko/centos:stable",
         "docker_file_name": "centos-1",
         "docker_file_description": "Custom Centos Stable",
         "enable" : "true"
@@ -91,9 +91,9 @@
         "docker_file_description": "Custom Master",
         "enable" : "true"
     },{
-        "docker_image_name": "klicko/project:dev",
-        "docker_file_name": "DockerFile_01_new",
-        "docker_file_description": "Devel",
+        "docker_image_name": "klicko/tor:v1",
+        "docker_file_name": "tor.df",
+        "docker_file_description": "Tor Browser",
         "enable" : "true"
     }],
     "text": {
