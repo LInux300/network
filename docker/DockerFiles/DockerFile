@@ -2,7 +2,7 @@
 # User: Klicko
 # Version: 0.0.2
 #------------------------------------------------------------------------------
-FROM centos:centos7$
+FROM williamyeh/ansible:centos7
 MAINTAINER The Custom CentOS <user@example.com>$
 
 RUN yum -y update; yum clean all$

@@ -3,6 +3,7 @@
 #
 # From users, gets "real name" from /etc/passwd.
 
+
 #------------------------------------------------------------------------------
 # Browser in terminal
 #------------------------------------------------------------------------------
@@ -160,6 +161,9 @@ function dockerBuildImagesFromFiles() {
     s=".network.dockerFiles[$i].docker_file_name"
       docker_file_name=`echo $CAT_FILE | $BIN_DIR/jq $s`
       docker_file_name=`echo ${docker_file_name:1:-1}`
+    s=".network.dockerFiles[$i].docker_new_image_name"
+      new_image_name=`echo $CAT_FILE | $BIN_DIR/jq $s`
+      new_image_name=`echo ${new_image_name:1:-1}`
     s=".network.dockerFiles[$i].enable"
       e=`echo $CAT_FILE | $BIN_DIR/jq $s`
       e=`echo ${e:1:-1}`
@@ -171,16 +175,16 @@ function dockerBuildImagesFromFiles() {
         #nohup cat $file  2>1 &
         cat $file
       else
-        echo -e "\tINFO: Enter [yes] to edit '$file' with default DockerFile setting..."
-        read answer
-        echo -e "\tINFO: Answer was: '$answer'"
+        #echo -e "\tINFO: Enter [yes] to edit '$file' with default DockerFile setting..."
+        #read answer
+        #echo -e "\tINFO: Answer was: '$answer'"
 
           cat << 'EOF' >> $file
 # Header: Minimal DockerFile
 # User: Klicko
-# Version: 0.0.2
+# Version: 0.0.3
 #------------------------------------------------------------------------------
-FROM centos:centos7
+FROM williamyeh/centos:centos7
 MAINTAINER The Custom CentOS <user@example.com>
 
 RUN yum -y update; yum clean all
@@ -196,15 +200,15 @@ RUN ./start.sh
 ENTRYPOINT ["/usr/sbin/sshd", "-D"]
 EOF
 
-        if [ "$answer" == "yes" ]; then
-          echo -e "\tINFO: created default DockerFile: '$file'..."
-        else
-          echo -e "\tINFO: created new empty file '$file'"
-          vi $file  
-        fi
+        #if [ "$answer" == "yes" ]; then
+        #  echo -e "\tINFO: created default DockerFile: '$file'..."
+        #else
+        #  echo -e "\tINFO: created new empty file '$file'"
+        #  vi $file  
+        #fi
       fi   # file ends
       #docker build --build-arg user=what_user Dockerfile
-      docker build -t $user/$name_your_image:$tag -f $file .
+      docker build -t $new_image_name -f $file .
     fi
   done
 }
@@ -293,6 +297,20 @@ function dockerContainers() {
   done
 }
 
+function dockerMachine(){
+  if [ -e ~/docker/bin/docker-machine ]; then
+    echo -e "\tINFO: docker-machine"
+  else
+    echo -e "\tINFO: Installing docker-machine..."
+    curl -L https://github.com/docker/machine/releases/download/v0.9.0-rc2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine &&
+    chmod +x /tmp/docker-machine &&
+    cp /tmp/docker-machine ~/docker/bin/docker-machine
+ fi
+
+}
+#dockerMachine
+
+
 function dockerNetworkCreate() {
   `docker network create -d overlay \
   --subnet=192.168.0.0/16 \
@@ -311,41 +329,117 @@ function dockerRails() {
   mkdir -p $compose_dir && cd $compose_dir
   file=Dockerfile
   cat << 'EOF' > $file
-FROM ruby:2.3.3
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
-RUN mkdir /myapp
-WORKDIR /myapp
-ADD Gemfile /myapp/Gemfile
-ADD Gemfile.lock /myapp/Gemfile.lock
-RUN bundle install
-ADD . /myapp
+FROM ruby:2.3.1
+
+ENV APP_ROOT /app
+ENV BUNDLE_PATH /bundle
+
+RUN apt-get update -qq && \
+    apt-get install -y build-essential libpq-dev nodejs
+
+WORKDIR $APP_ROOT
+ADD . $APP_ROOT
 EOF
   file=Gemfile
   cat << 'EOF' > $file
 source 'https://rubygems.org'
-gem 'rails', '5.0.0.1'
+gem 'rails', '~> 5'
+#group :development do
+#  gem 'web-console'
+#end
 EOF
   touch Gemfile.lock
   file=docker-compose.yml
   cat << 'EOF' > $file
 version: '2'
 services:
+  store:
+    # data-only container
+    image: postgres:latest # reuse postgres container
+    volumes:
+      - /var/lib/postgresql/data
+    command: "true"
   db:
     image: postgres
+    ports:
+      - 5432:5432
+    volumes_from:
+      - store # connect postgres and the data-only container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=rails_docker_database
   web:
     build: .
-    command: bundle exec rails s -p 3000 -b '0.0.0.0'
-    volumes:
-      - .:/myapp
     ports:
-      - "3000:3000"
-    depends_on:
+      - 3000:3000
+    volumes:
+      - .:/app
+    # This tells the web container to mount the `bundle` images'
+    # /bundle volume to the `web` containers /bundle path.
+    volumes_from:
+      - bundle
+    links:
       - db
+    command: ./bin/start.sh
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=rails_docker_database
+      - DB_USER=postgres
+      - DB_PSWD=postgres
+  bundle:
+    image: busybox
+    volumes:
+      - /bundle
 EOF
+  mkdir app && cd app
+  ~/docker/bin/docker-compose run web bundle --jobs=10 --retry=5
+  ~/docker/bin/docker-compose run web bundle exec rails new . --force --database=postgresql --skip-bundle
+
+  cd config
+  file=database.yml
+  cat << 'EOF' > $file
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  username: <%= ENV['DB_USER'] %>
+  password: <%= ENV['DB_PSWD'] %>
+  host: <%= ENV['DB_HOST'] %>
+  # For details on connection pooling, see rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: <%= ENV['DB_NAME'] %>
+
+test:
+  <<: *default
+  database: app_test
+EOF
+  cd ..
+  mkdir bin && cd bin
+  file='start.sh'
+  cat << 'EOF' > $file
+#!/bin/bash
+
+bundle check || bundle install
+
+if [ -f tmp/pids/server.pid ]; then
+  rm -f tmp/pids/server.pid
+fi
+
+bundle exec rails s -p $PORT -b 0.0.0.0
+EOF
+
     echo -e "\tINFO: From '`pwd`', start up your application."
     #~/docker/bin/docker-compose up
-    ~/docker/bin/docker-compose run web rails new . --force --database=postgresql --skip-bundle
-    ~/docker/bin/docker-compose build
+    ~/docker/bin/docker-compose run web bin/setup
+
+    chmod +x start.sh
+    cd ..
     ~/docker/bin/docker-compose up
 }
 
@@ -441,14 +535,32 @@ function dockerNetworkInspectBridge() {
   docker network inspect bridge
 }
 
-function runCmdOnKaliDocker() {
+function runCmdOnDocker() {
+
+  echo -e "\tINFO: Run CMD on '$DOCKER_IMAGE'"
+  echo -n -e "\tEnter commands and press [ENTER]: "
+  read commands
+
+  DOCKER_NAME_EXIST=$(docker ps -a --format={{.Names}} -f name=$DOCKER_NAME)
+  container_id=$(docker ps -aqf "name=$DOCKER_NAME")
+  if [ "$DOCKER_NAME" == "$DOCKER_NAME_EXIST" ]; then
+    echo -e "\tINFO: Container '$DOCKER_NAME' already exists"
+    docker ps -a | grep $DOCKER_NAME
+    docker start $DOCKER_NAME
+  else
+    echo -e "\tINFO: Run container interactive for '$DOCKER_NAME'"
+    docker run --name $DOCKER_NAME --tty --detach $DOCKER_IMAGE /bin/bash
+  fi
+  docker exec $container_id script /dev/null -c "$commands"
+
+  exit
   container_id=$(docker ps -aqf "name=$DOCKER_NAME")
   echo -e "\tINFO: Run command on '$container_id'"
   echo -n -e "\tEnter commands and press [ENTER]: "
   read commands
-  docker start $DOCKER_NAME
+  #docker start $DOCKER_NAME
   docker exec $container_id script /dev/null -c "$commands"
-  docker stop $DOCKER_NAME
+  #docker stop $DOCKER_NAME
 }
 
 function kaliNetHunter() {
@@ -700,13 +812,14 @@ while test $# -gt 0; do
       echo -e "\t-drec|--docker_remove_exited_containers  Remove exited dockers"
       echo -e "\t-dsr |--docker_search_repos     Search <string> in docker repos"
       echo ""
-      echo "# RUN"
+      echo "# RUN Container"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t-rad |--run_ansible_docker      run ansible docker centos ia"
-      echo -e "\t-radd|--run_ansible_docker_deb8 run ansible doc deb interactive"
-      echo -e "\t-rka |--run_kafka_docker        run kafka docker interactive"
-      echo -e "\t-rkd |--run_kali_docker         run kali docker interactive"
-      echo -e "\t-rckd|--run_cmd_on_kali_docker  run command on kali docker"
+      echo -e "\t-rdoc|--run_docker              docker interactive"
+      echo -e "\t-rcd |--run_cmd_on_docker       run command on docker"
+      echo -e ""
+      echo -e "\t-rad |--run_ansible_docker      ansible docker centos ia"
+      echo -e "\t-radd|--run_ansible_docker_deb8 ansible doc deb interactive"
+      echo -e "\t-rkd |--run_kali_docker         kali interactive"
       #echo -e "\t-rt  |--run_tails       TODO run linux distro tails for privacy"
       #echo -e "\t-rp  |--run_parrot      TODO run linux security disto tails"
       echo ""
@@ -796,10 +909,15 @@ while test $# -gt 0; do
       export DOCKER_IMAGE=kalilinux/kali-linux-docker
       runImageDocker
       ;;
-    -rka|--run_kafka_docker)
-      echo -e "\tINFO: https://hub.docker.com/r/wurstmeister/kafka"
-      export DOCKER_NAME='kafka'
-      export DOCKER_IMAGE=wurstmeister/kafka
+    -rdoc|--run_docker)
+      dockerInfo
+      #echo -e "\tINFO: https://hub.docker.com/r/wurstmeister/kafka"
+      echo -n "Enter <container_name>|<container_id> to run [ENTER]: "
+      read container_name
+      echo -n "Enter <image> to run [ENTER]: "
+      read container_image
+      export DOCKER_NAME="$container_name"
+      export DOCKER_IMAGE="$container_image"
       runImageDocker
       ;;
     -radd|--run_ansible_docker_debian8)
@@ -815,8 +933,13 @@ while test $# -gt 0; do
       export DOCKER_IMAGE=williamyeh/ansible:centos7
       runImageDocker
       ;;
-    -rckd|--run_cmd_on_kali_docker)
-      runCmdOnKaliDocker
+    -rcd|--run_cmd_on_docker)
+      dockerInfo
+      echo -e "\tINFO: https://hub.docker.com/r/williamyeh/ansible/"
+      echo -n "Enter <container_name>|<container_id> to run [ENTER]: "
+      read container_name
+      export DOCKER_NAME="$container_name"
+      runCmdOnDocker
       ;;
     --test)
       for i in `seq 0 $XY`; do

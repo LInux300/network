@@ -81,17 +81,17 @@
         "interactive": "false"
     }],
     "dockerFiles": [{
-        "docker_image_name": "klicko/centos:stable",
+        "docker_new_image_name": "klicko/centos:stable",
         "docker_file_name": "centos-1",
         "docker_file_description": "Custom Centos Stable",
         "enable" : "true"
     },{
-        "docker_image_name": "klicko/project:master",
+        "docker_new_image_name": "klicko/project:master",
         "docker_file_name": "DockerFile_master",
         "docker_file_description": "Custom Master",
         "enable" : "true"
     },{
-        "docker_image_name": "klicko/tor:v1",
+        "docker_new_image_name": "klicko/tor:v1",
         "docker_file_name": "tor.df",
         "docker_file_description": "Tor Browser",
         "enable" : "true"
