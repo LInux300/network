@@ -29,9 +29,16 @@ function kaliTop10InBrowser() {
 # DOCKER
 #------------------------------------------------------------------------------
 function installDocker() {
-    echo "# INFO: https://docs.docker.com/linux/step_one/"
-    which curl
-    curl -fsSL https://get.docker.com/ | sh
+    mkdir ~/src && cd ~/src
+    wget https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz
+    tar -xvzf docker-latest.tgz
+    mkdir -p ~/docker/bin
+    mv docker/* ~/docker/bin
+    ~/docker/bin/dockerd &
+
+    #echo "# INFO: https://docs.docker.com/linux/step_one/"
+    #which curl
+    #curl -fsSL https://get.docker.com/ | sh
     #   $ curl -fsSL https://get.docker.com/gpg | sudo apt-key add -
 }
 
@@ -825,6 +832,7 @@ while test $# -gt 0; do
       echo ""
       echo "# GIT & INSTALL"
       echo "#--------------------------------------------------------------------"
+      echo -e "\t-id  |--install_docker          install docker as local user"
       echo -e "\t-iku |--install_kali_usb        download $ verify sha1 $ install Kali on usb drive"
       echo -e "\t-iss |--install_raspberry_sd    download and do image on microSD"
       echo -e "\t-gi  |--git_info                git info about current repo"
@@ -896,6 +904,9 @@ while test $# -gt 0; do
     -stdn|--stop_docker_network)
       dockerContainers stop
       dockerInfo
+      ;;
+    -id|--install_docker)
+      installDocker
       ;;
     -isu|--install_kali_usb)
       installKaliLinux

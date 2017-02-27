@@ -192,6 +192,12 @@ function metasploit() {
   esac
 }
 
+
+SSH_PORTS=( 22 )
+HTTP_PORTS=( 443 80 )
+PORTS="-100,200-1024,T:2000-14000,U:60000-"
+DOMAINS=( 192.168.1.95 192.168.1.191 192.168.1.1 )
+
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
@@ -203,6 +209,12 @@ while test $# -gt 0; do
       echo -e "\t-h|--help           help"
       echo -e "\t--pass_ripper       password generators; john the ripper"
       echo ""
+      echo "# GET"
+      echo "#--------------------------------------------------------------------"
+      echo -e "\t-1|--nmap          nmap -p 21,80 <dommain>"
+      echo -e "\t-2|--nc            ssh,http; nc -v <serv> write: HEAD / HTTP/1.0"
+      echo ""
+      echo -e "\t--harvester        gathering e-mail, suddomain, ports .."
       echo "# GET INFOS:"
       echo "#--------------------------------------------------------------------"
       echo -e "\t--harvester        gathering e-mail, suddomain, ports .."
@@ -222,6 +234,23 @@ while test $# -gt 0; do
       echo ""
       echo "#--------------------------------------------------------------------"
       exit 0
+      ;;
+    -1|--nmap)
+      for i in ${DOMAINS[@]}; do
+        nmap -p $PORTS $i
+      done
+      ;;
+    -2|--nc)
+      for i in ${DOMAINS[@]}; do
+        for j in ${HTTP_PORTS[@]}; do
+          echo -e "INFO: write: HEAD / HTTP/1.0"
+          nc -v $i $j
+        done
+        for j in ${SSH_PORTS[@]}; do
+          echo -e "INFO: ssh "
+          nc -vzw 1 $i $j
+        done
+      done
       ;;
     --pass_ripper)
       passwordRipper

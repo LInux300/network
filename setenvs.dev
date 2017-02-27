@@ -1,8 +1,17 @@
 export APP_NAME=Network
 
-export HOME_DIR=~/code/network
+export HOME_DIR=/home/xp/code/network
 export DOCKER_FILES_DIR=$HOME_DIR/docker/DockerFiles
 export SETUP_DIR=$HOME_DIR/setup
 export TMP_DIR=$HOME_DIR/tmp
 export BIN_DIR=$HOME_DIR/bin
 export NUMBER_CONTAINERS=10
+
+export PATH=$HOME/python/Python-2.7.13/:$PATH
+export PYTHONPATH=$HOME/python/Python-2.7.13
+export PATH=$PATH:$HOME/.local/bin
+
+
+PATH=$PATH:/home/xp/code/docker
+#sudo ~/code/docker/dockerd &
+

