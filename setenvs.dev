@@ -15,3 +15,7 @@ export PATH=$PATH:$HOME/.local/bin
 PATH=$PATH:/home/xp/code/docker
 #sudo ~/code/docker/dockerd &
 
+export GOROOT=$HOME/go/go1.8
+export GOPATH=$HOME/go/work
+export GOBIN=$GOROOT/bin
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin

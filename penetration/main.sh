@@ -209,6 +209,7 @@ while test $# -gt 0; do
       echo -e "\t-h|--help           help"
       echo -e "\t--pass_ripper       password generators; john the ripper"
       echo ""
+      echo -e "\t-s1|--ssh_tunel     "
       echo "# GET"
       echo "#--------------------------------------------------------------------"
       echo -e "\t-1|--nmap          nmap -p 21,80 <dommain>"
