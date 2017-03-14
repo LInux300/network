@@ -1,0 +1,19 @@
+mkdir $HOME/code/network/ansible
+
+#ansible
+#    all|web - Use all defined servers from the inventory file
+#    -m ping - Use the "ping" module, which simply runs the ping command and returns the results
+#    -m apt  - Use the apt module
+#    -a 'pkg=nginx state=installed update_cache=true' - Provide the arguments for the apt module, including the package name, our desired end state and whether to update the package repository cache or not
+#    -s - Use "sudo" to run the commands
+#    -k - Ask for a password rather than use key-based authentication
+#    -u vagrant - Log into servers using user vagrant
+
+
+# ping [web] in hosts
+ansible web -m ping -u xp
+# execute local cmd on [web] in hosts
+ansible web -u xp -m shell -a "ls -la"
+
+# run playbook as sudo -s
+ansible-playbook -s playbooks/nginx.yml -u pi
