@@ -31,13 +31,16 @@ testZooKeeper() {
 }
 
 installKafka() {
-  # download and extract binaries
-  mkdir -p ~/Downloads
-  #wget "http://mirror.cc.columbia.edu/pub/software/apache/kafka/0.8.2.1/kafka_2.11-0.8.2.1.tgz" -O ~/Downloads/kafka.tgz
-  wget "http://apache.miloslavbrada.cz/kafka/0.10.1.0/kafka-0.10.1.0-src.tgz" -O ~/Downloads/kafka.tgz
-  mkdir -p ~/kafka && cd ~/kafka
-  tar -xvzf ~/Downloads/kafka.tgz --strip 1
-
+  echo -e "\tINFO: Kafka install: 'https://kafka.apache.org/quickstart'"
+  mkdir -p $HOME/kafka && cd $HOME/kafka
+  kafka_file="kafka_2.11-$KAFKA_VERSION.tgz"
+  #wget "http://www-eu.apache.org/dist/kafka/$KAFKA_VERSION/$kafka_file"
+  #wget "http://mirror.dkm.cz/apache/kafka/$KAFKA_VERSION/$kafka_file"
+  tar -xvzf $kafka_file
+  rm current
+  ln -s ${kafka_file::-4} current
+  echo -e "\tINFO: current version: ${kafka_file::-4}"
+  ls -la ~/kafka/current/
 }
 
 configureKafka() {
@@ -102,24 +105,26 @@ restrictKafkaUser() {
 }
 
 
+KAFKA_VERSION="0.10.2.0"
 while test $# -gt 0; do
-    case "$1" in
-        -h|--help)
-            echo "#------------------------------------------------------------------------"
-            echo "#  Kafka"
-            echo "#------------------------------------------------------------------------"
-            echo "options:"
-            echo "-c,  --check                check kafka"
-            echo "-h,  --help                 show help"
-            exit 0
-            ;;
-        -r|--check)
-            ;;
-        *)
-            break
-            ;;
-    esac
-    exit 0
+  case "$1" in
+    -h|--help)
+      echo "#------------------------------------------------------------------------"
+      echo "#  Kafka"
+      echo "#------------------------------------------------------------------------"
+      echo -e "\t-c  |--check                check kafka"
+      echo -e "\t-ik |--install_kafka        intall Kafka"
+      echo -e "\t-h  |--help                 show help"
+      exit 0
+      ;;
+    -ik|--install_kafka)
+      installKafka
+      ;;
+    *)
+      break
+      ;;
+  esac
+  exit 0
 done
 
 

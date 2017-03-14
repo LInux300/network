@@ -1,5 +1,15 @@
 #!/bin/bash
 
+function sshKeygenAgentAdd() {
+  ssh-keygen -t rsa -b 4096 -C "rudolfvavra@gmail.com" -f $MY_KEY
+  eval "$(ssh-agent -s)"
+  ssh-add $MY_KEY
+}
+function sshCopyID() {
+  echo -e "\tINFO: Copy ssh pub key on <myuser@myserver>"
+  ssh-copy-id -i $MY_KEY $MY_USER@$MY_SERVER
+}
+
 function installGo() {
   mkdir -p $HOME/go/work
   mkdir -p $HOME/go && cd $HOME/go
@@ -123,6 +133,10 @@ GO_VERSION="1.8"
 RUBY_VERSION="2.4"
 RUBY_VERSION_SUB="0"
 
+MY_KEY = $HOME/.ssh/id_mykey01
+MY_SERVER="192.168.1.95"
+MY_USER="xp"
+
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
@@ -138,8 +152,14 @@ while test $# -gt 0; do
       echo -e "\t-ip |--install_python_pip    Install Python&Pip as Local User"
       echo -e "\t-ir |--install_ruby_sinatra  Install Ruby as Local User"
       echo -e "\t-sr |--source_ruby_sinatra   Source Ruby as Local User"
+      echo ""
+      echo -e "\t-sci|--ssh_copy_id           Copy MY_KEY on <MY_USER@MY_SERVER>"
       echo "#--------------------------------------------------------------------"
       exit 0
+      ;;
+    -sci|--ssh_copy_id)
+      #sshKeygenAgentAdd
+      sshCopyID;
       ;;
     -ig|--install_go)
       installGo;
