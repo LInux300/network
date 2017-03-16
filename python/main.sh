@@ -1,5 +1,127 @@
 #!/bin/bash
 
+function ldapSearch() {
+  # http://www.flatmtn.com/article/setting-ldap-back-sql
+  ldapsearch -x -b 'dc=example,dc=com' 'objectclass=*'
+  ldapsearch -x -b 'o=samba,dc=example,dc=com' 'objectclass=sambaAccount'
+
+  # Search everything from tree base down with login as cn=manager and prompt for password:
+  ldapsearch -x -b 'dc=example,dc=com' \
+  'objectclass=*' -D 'cn=manager,dc=example,dc=com' -W
+}
+
+#------------------------------------------------------------------------------
+function createRootCertificate() {
+  APP_DIR=$HOME/certificates/root_certificate
+  mkdir -p $APP_DIR && cd $APP_DIR
+  mkdir sslcert
+  chmod 0700 sslcert
+  cd sslcert
+  mkdir certs private
+
+  #  Create a database to keep track of each certificate signed
+  echo '100001' >serial
+  touch certindex.txt
+
+  echo -e "\tINFO: create the openssl.cnf file"
+
+  openssl req -new -x509 -extensions v3_ca -keyout \
+  private/cakey.pem -out cacert.pem -days 365 -config ./openssl.cnf
+}
+function createPkcs12Certificates() {
+      echo -e "\tINFO: forEachPersonCreateKeyAndSigningRequest"
+  openssl req -new -nodes -out req.pem -keyout key.pem -days 365 -config ./openssl.cnf
+      echo -e "\tINFO: Sign each request"
+  openssl ca -out cert.pem -days 365 -config ./openssl.cnf -infiles req.pem
+
+      echo -e "\tINFO: Create the PKCS12"
+      echo -e "\t      key.pem' is the private key and should be guarded"
+      echo -e "\t      cert.pem is the public certificate"
+      echo -e "\t      cert.p12 is The cert.p12 file is the one to give the person. ( user manually copies to browser"
+  openssl pkcs12 -export -in cert.pem -inkey key.pem -certfile cacert.pem -name "[friendly name]" -out cert.p12
+}
+#------------------------------------------------------------------------------
+
+function whereAreStoredCA() {
+  echo -e "\tINFO: Red Hat: /usr/share/ssl/misc/CA"
+}
+
+function createSelfSignedSSLCertificate() {
+  echo -e "\tINFO: create files: server.crt|csr|key|key.org"
+  APP_DIR=$HOME/certificates/self_signed
+  mkdir -p $APP_DIR && cd $APP_DIR
+  openssl genrsa -des3 -out server.key 1024 #generate a Private Key
+  openssl req -new -key server.key -out server.csr #generate a CSR
+
+  cp server.key server.key.org
+  openssl rsa -in server.key.org -out server.key #remove Passphrase from Key;
+  openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt #generate a Self-Signed Certificate
+
+  copySSLCertToNginx;
+}
+function copySSLCertToNginx() {
+  mkdir -p $HOME/nginx/conf/ssl.crt
+  mkdir -p $HOME/nginx/conf/ssl.key
+  cp server.crt $HOME/nginx/conf/ssl.crt
+  cp server.key $HOME/nginx/conf/ssl.key
+  #addCertificateAndPrivateKeyToNginx
+  #restartNginx
+
+  #cp server.crt /usr/local/apache/conf/ssl.crt #installing the private and certificate
+  #cp server.key /usr/local/apache/conf/ssl.key
+  #addCertificateAndPrivateKeyToApache
+  #restartApache
+
+  pwd
+  ls -la
+  less server.crt
+}
+
+function addCertificateAndPrivateKeyToApache() {
+  echo -e "\tTODO"
+  exit 1
+  SSLEngine on
+  SSLCertificateFile /usr/local/apache/conf/ssl.crt/server.crt
+  SSLCertificateKeyFile /usr/local/apache/conf/ssl.key/server.key
+  SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown
+  CustomLog logs/ssl_request_log \
+  "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+}
+
+function generateCertificateRequest() {
+  mkdir -p $HOME/certificates && cd $HOME/certificates
+  openssl req -new -newkey rsa:4096 -nodes -keyout key.pem -out req.pem
+  ls -lat
+}
+
+function generateSelfSignedKey() {
+  echo -e "\tINFO: Generate Self Signed Key: cert.pem, key.pem"
+  # keyout is private key
+  mkdir -p $HOME/certificates && cd $HOME/certificates
+  openssl req -x509 -days 365 -nodes -newkey rsa:4096 \
+              -keyout key.pem -out cert.pem
+  ls -lat
+}
+
+function showServerCertificate() {
+
+  openssl s_client -connect $1:443 -showcerts
+}
+
+function createUserCertificateP12File() {
+  echo -e "INFO: Create User's certificate "
+  mkdir -p $HOME/certificates && cd $HOME/certificates
+  NAME="John Eape"
+  EMAIL="john.eape@email.com"
+  FILE=${EMAIL/@/_}
+  ssh-keygen -f $FILE
+  openssl req -x509 subj "/C=DK/ST=Interstate/L=Capital/O=Acme/QU=IT/CN=$NAME/emailAdress=$EMAIL" -out $FILE.pem
+  openssl pkcs12 -export -in $FILE.pem -inkey $FILE -out $FILE.p12
+  pwd
+  ls -la
+  cat $FILE
+}
+
 function sshKeygenAgentAdd() {
   ssh-keygen -t rsa -b 4096 -C "rudolfvavra@gmail.com" -f $MY_KEY
   eval "$(ssh-agent -s)"
@@ -133,7 +255,7 @@ GO_VERSION="1.8"
 RUBY_VERSION="2.4"
 RUBY_VERSION_SUB="0"
 
-MY_KEY = $HOME/.ssh/id_mykey01
+MY_KEY=$HOME/.ssh/id_mykey01
 MY_SERVER="192.168.1.95"
 MY_USER="xp"
 
@@ -144,8 +266,17 @@ while test $# -gt 0; do
       echo "#  APP: $APP_NAME"
       echo "#--------------------------------------------------------------------"
       echo -e "\t-h|--help                       Help"
-      echo ""
       echo "#--------------------------------------------------------------------"
+      echo -e "\t-cuc |--create_user_certificate   TODO: User certificate for browser"
+      echo -e "\t-cssk|--create_self_signed_key    create: cert.pem, key.pem"
+      echo -e "\t-cssc|--create_self_signed_cert   create: server.crt|csr|key|key.org"
+      echo ""
+      echo -e "\t-crc |--create_root_certificate   create: cacert.pem,"
+      echo -e "\t-cpu |--create_p12_user           create: cert.p12 "
+      echo ""
+      echo -e "\t-ls |--ldap_search"
+      echo -e "\t-ssc|--show_server_certificates"
+      echo ''
       echo -e "\t-ia |--install_ansible       Install Ansible as Local User"
       echo -e "\t-ig |--install_go            Install Ansible as Local User"
       echo -e "\t-ipp|--install_pip_package   Install package via pip"
@@ -156,6 +287,21 @@ while test $# -gt 0; do
       echo -e "\t-sci|--ssh_copy_id           Copy MY_KEY on <MY_USER@MY_SERVER>"
       echo "#--------------------------------------------------------------------"
       exit 0
+      ;;
+    -ssc|--show_server_certificates)
+      showServerCertificate
+      ;;
+    -ls|--ldap_search)
+      ldapSearch
+      ;;
+    -cssk|--create_self_signed_key)
+      generateSelfSignedKey
+      ;;
+    -cssc|--create_self_signed_cert)
+      createSelfSignedSSLCertificate;
+      ;;
+    -cuc|--create_user_certificate)
+      createUserCertificateP12File;
       ;;
     -sci|--ssh_copy_id)
       #sshKeygenAgentAdd
