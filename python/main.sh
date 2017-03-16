@@ -1,5 +1,10 @@
 #!/bin/bash
 
+function rsyncRemoteFolderToLocal() {
+  echo -e "\tINFO: Will copy all files '$1@$2:$3/' to your computer's '$3/'"
+  rsync -avz -e ssh $1@$2:$3/ $3/
+}
+
 function ldapSearch() {
   # http://www.flatmtn.com/article/setting-ldap-back-sql
   ldapsearch -x -b 'dc=example,dc=com' 'objectclass=*'
@@ -12,33 +17,53 @@ function ldapSearch() {
 
 #------------------------------------------------------------------------------
 function createRootCertificate() {
-  APP_DIR=$HOME/certificates/root_certificate
-  mkdir -p $APP_DIR && cd $APP_DIR
-  mkdir sslcert
-  chmod 0700 sslcert
-  cd sslcert
+  APP_DIR=$HOME/certificates/sslcert
+  echo -e "\tINFO Dir: $APP_NAME"
+  mkdir -p $APP_DIR && cp $HOME/code/network/python/openssl.cnf $APP_DIR && cd $APP_DIR
+  echo -e "INFO: run from place where openssl.cnf is stored"
+  echo -e "\tINFO: Create ROOT certificate in '$APP_DIR'"
+  mkdir -p $APP_DIR &&  chmod 0700 $APP_DIR && cd $APP_DIR
   mkdir certs private
 
-  #  Create a database to keep track of each certificate signed
+  echo -e "\tINFO: Create a database to keep track of each certificate signed: certindex.txt"
   echo '100001' >serial
   touch certindex.txt
 
   echo -e "\tINFO: create the openssl.cnf file"
 
-  openssl req -new -x509 -extensions v3_ca -keyout \
-  private/cakey.pem -out cacert.pem -days 365 -config ./openssl.cnf
+  openssl req -new -sha256 -newkey rsa:4096 -x509 -extensions v3_ca -keyout \
+  private/cakey.pem -out cacert.pem -days 365 -config $HOME/code/network/python/openssl.cnf
+  ls -lat
 }
 function createPkcs12Certificates() {
-      echo -e "\tINFO: forEachPersonCreateKeyAndSigningRequest"
-  openssl req -new -nodes -out req.pem -keyout key.pem -days 365 -config ./openssl.cnf
-      echo -e "\tINFO: Sign each request"
-  openssl ca -out cert.pem -days 365 -config ./openssl.cnf -infiles req.pem
+  APP_DIR=$HOME/certificates/sslcert
+  mkdir -p $APP_DIR && cd $APP_DIR
+  NAME="John Eape11"
+  EMAIL="john.eape11@email.com"
+  FILE=${EMAIL/@/_}
+  echo -e "\tINFO: forEachPersonCreateKeyAndSigningRequest"
+  echo -e "\tINFO: in directory: '$APP_DIR'"
+  openssl req -new -sha256 -nodes -out $FILE.req.pem \
+    -keyout $FILE.key.pem -days 365 -config $HOME/code/network/python/openssl.cnf
+  echo -e "\tINFO: Sign each request"
+  openssl ca -out $FILE.cert.pem -days 365 -config $HOME/code/network/python/openssl.cnf -infiles $FILE.req.pem
 
-      echo -e "\tINFO: Create the PKCS12"
-      echo -e "\t      key.pem' is the private key and should be guarded"
-      echo -e "\t      cert.pem is the public certificate"
-      echo -e "\t      cert.p12 is The cert.p12 file is the one to give the person. ( user manually copies to browser"
-  openssl pkcs12 -export -in cert.pem -inkey key.pem -certfile cacert.pem -name "[friendly name]" -out cert.p12
+  echo -e "\tINFO: Create the PKCS12"
+  echo -e "\t      $FILE.key.pem' is the private key and should be guarded"
+  echo -e "\t      $FILE.cert.pem is the public certificate"
+  echo -e "\t      $FILE.cert.p12 is The $FILE,cert.p12 file is the one to give the person. ( user manually copies to browser"
+  openssl pkcs12 -export -in $FILE.cert.pem \
+    -out $FILE.cert.p12 \
+    -inkey $FILE.key.pem -certfile cacert.pem -name "[friendly name]"
+  ls -lat
+  less certindex.txt
+}
+
+function createPfx() {
+  TODO
+  # https://www.ssl.com/how-to/create-a-pfx-p12-certificate-file-using-openssl/
+  openssl pkcs12 -export -out cert.pfx -inkey key.key -in cert.crt -certfile cert2.crt
+  #openssl pkcs7 -print_certs -in cert.p7b -out cert.crt
 }
 #------------------------------------------------------------------------------
 
@@ -50,18 +75,33 @@ function createSelfSignedSSLCertificate() {
   echo -e "\tINFO: create files: server.crt|csr|key|key.org"
   APP_DIR=$HOME/certificates/self_signed
   mkdir -p $APP_DIR && cd $APP_DIR
-  openssl genrsa -des3 -out server.key 1024 #generate a Private Key
-  openssl req -new -key server.key -out server.csr #generate a CSR
+  openssl genrsa -des3 -out server.key 4096 #generate a Private Key, using DES3 cipher
+  openssl req -new -sha256 -key server.key -out server.csr #generate a CSR
 
   cp server.key server.key.org
   openssl rsa -in server.key.org -out server.key #remove Passphrase from Key;
-  openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt #generate a Self-Signed Certificate
+  openssl x509 -req -sha256 \
+    -out server.crt \
+    -days 365 \
+    -in server.csr \
+    -signkey server.key
 
+  #User puts p12
+  openssl pkcs12 -export \
+        -out server_bundle.p12 \
+        -in server.crt -inkey server.key
+  #      -certfile cacert.crt
+  ls -lta
+  pwd
+  echo -e "\tINFO: TODO: Copy SSL Cert To Nginx"
+  exit 1
   copySSLCertToNginx;
 }
 function copySSLCertToNginx() {
   mkdir -p $HOME/nginx/conf/ssl.crt
   mkdir -p $HOME/nginx/conf/ssl.key
+  echo -e "\tINFO: copying server.crt into $HOME/nginx/conf/ssl.crt"
+  echo -e "\tINFO: copying server.key into $HOME/nginx/conf/ssl.key"
   cp server.crt $HOME/nginx/conf/ssl.crt
   cp server.key $HOME/nginx/conf/ssl.key
   #addCertificateAndPrivateKeyToNginx
@@ -90,7 +130,7 @@ function addCertificateAndPrivateKeyToApache() {
 
 function generateCertificateRequest() {
   mkdir -p $HOME/certificates && cd $HOME/certificates
-  openssl req -new -newkey rsa:4096 -nodes -keyout key.pem -out req.pem
+  openssl req -new -sha256 -newkey rsa:4096 -nodes -keyout key.pem -out req.pem
   ls -lat
 }
 
@@ -98,30 +138,16 @@ function generateSelfSignedKey() {
   echo -e "\tINFO: Generate Self Signed Key: cert.pem, key.pem"
   # keyout is private key
   mkdir -p $HOME/certificates && cd $HOME/certificates
-  openssl req -x509 -days 365 -nodes -newkey rsa:4096 \
+  openssl req -sha256 -x509 -days 365 -nodes -newkey rsa:4096 \
               -keyout key.pem -out cert.pem
   ls -lat
 }
 
 function showServerCertificate() {
-
   openssl s_client -connect $1:443 -showcerts
 }
 
-function createUserCertificateP12File() {
-  echo -e "INFO: Create User's certificate "
-  mkdir -p $HOME/certificates && cd $HOME/certificates
-  NAME="John Eape"
-  EMAIL="john.eape@email.com"
-  FILE=${EMAIL/@/_}
-  ssh-keygen -f $FILE
-  openssl req -x509 subj "/C=DK/ST=Interstate/L=Capital/O=Acme/QU=IT/CN=$NAME/emailAdress=$EMAIL" -out $FILE.pem
-  openssl pkcs12 -export -in $FILE.pem -inkey $FILE -out $FILE.p12
-  pwd
-  ls -la
-  cat $FILE
-}
-
+#------------------------------------------------------------------------------
 function sshKeygenAgentAdd() {
   ssh-keygen -t rsa -b 4096 -C "rudolfvavra@gmail.com" -f $MY_KEY
   eval "$(ssh-agent -s)"
@@ -267,15 +293,15 @@ while test $# -gt 0; do
       echo "#--------------------------------------------------------------------"
       echo -e "\t-h|--help                       Help"
       echo "#--------------------------------------------------------------------"
-      echo -e "\t-cuc |--create_user_certificate   TODO: User certificate for browser"
       echo -e "\t-cssk|--create_self_signed_key    create: cert.pem, key.pem"
       echo -e "\t-cssc|--create_self_signed_cert   create: server.crt|csr|key|key.org"
+      echo -e "\t\t it's for local proxy with Nginx"
       echo ""
-      echo -e "\t-crc |--create_root_certificate   create: cacert.pem,"
-      echo -e "\t-cpu |--create_p12_user           create: cert.p12 "
+      echo -e "\t-crc |--create_root_certificate   create: ROOT Certificate"
+      echo -e "\t-cp12|--create_p12_certificate    create: cert.p12 associated to ROOT"
       echo ""
-      echo -e "\t-ls |--ldap_search"
-      echo -e "\t-ssc|--show_server_certificates"
+      echo -e "\t-ls |--ldap_search                TODO"
+      echo -e "\t-ssc|--show_server_certificates   Enter <test-domain.org>"
       echo ''
       echo -e "\t-ia |--install_ansible       Install Ansible as Local User"
       echo -e "\t-ig |--install_go            Install Ansible as Local User"
@@ -284,12 +310,30 @@ while test $# -gt 0; do
       echo -e "\t-ir |--install_ruby_sinatra  Install Ruby as Local User"
       echo -e "\t-sr |--source_ruby_sinatra   Source Ruby as Local User"
       echo ""
+      echo -e "\t-rs |--rsync                 Copy from <remote_server>:<directory>"
       echo -e "\t-sci|--ssh_copy_id           Copy MY_KEY on <MY_USER@MY_SERVER>"
       echo "#--------------------------------------------------------------------"
       exit 0
       ;;
+    -rs|--rsync)
+      echo -n "User: "
+      read user
+      echo -n "Hostname: "
+      read hostname
+      echo -n "Directory: "
+      read directory
+      rsyncRemoteFolderToLocal $user $hostname $directory
+      ;;
+    -cp12|--create_p12_certificate)
+      createPkcs12Certificates
+      ;;
+    -crc|--create_root_certificate)
+      createRootCertificate
+      ;;
     -ssc|--show_server_certificates)
-      showServerCertificate
+      echo -n "Write <domain.org>: "
+      read domain
+      showServerCertificate $domain
       ;;
     -ls|--ldap_search)
       ldapSearch
@@ -299,9 +343,6 @@ while test $# -gt 0; do
       ;;
     -cssc|--create_self_signed_cert)
       createSelfSignedSSLCertificate;
-      ;;
-    -cuc|--create_user_certificate)
-      createUserCertificateP12File;
       ;;
     -sci|--ssh_copy_id)
       #sshKeygenAgentAdd
