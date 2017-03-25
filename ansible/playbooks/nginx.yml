@@ -1,5 +1,5 @@
 # run: ansible-playbook -s playbooks/nginx.yml -u pi
----
+
 - hosts: web
   vars:
    - docroot: /var/www/192.168.1.95/public
@@ -22,6 +22,9 @@
       - Reload Nginx
 
   handlers:
+   - name: Stop Nginx
+     service: name=nginx state=stopped
+
    - name: Start Nginx
      service: name=nginx state=started
 

@@ -17,3 +17,4 @@ ansible web -u xp -m shell -a "ls -la"
 
 # run playbook as sudo -s
 ansible-playbook -s playbooks/nginx.yml -u pi
+ansible-playbook -s Roles/nginx/myproxy.yml 
