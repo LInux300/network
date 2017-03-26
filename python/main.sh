@@ -1,5 +1,50 @@
 #!/bin/bash
 
+function installTmux() {
+  APP_DIR=$HOME/tmux
+  mkdir -p $APP_DIR && cd $APP_DIR
+  echo -e "\tINFO: PreInstall of libevent library for Tmux"
+  echo -e "\tINFO: Current dir: '$APP_DIR'"
+  wget https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz
+  tar xvf libevent-2.0.22-stable.tar.gz
+  cd libevent-2.0.22-stable
+  ./configure --prefix=$APP_DIR
+  make # use make -j 8 to speed it up if your machine is capable
+  make install
+
+  echo -e "\tINFO: Install Tmux"
+  wget https://github.com/tmux/tmux/releases/download/2.2/tmux-2.2.tar.gz
+  tar xvf tmux-2.2
+  ./configure --prefix=$APP_DIR CFLAGS="-I$APP_DIR/include" LDFLAGS="-L$APP_DIR/lib"
+  make
+  make install
+
+  sourceTmux
+}
+
+function sourceTmux() {
+  APP_DIR=$HOME/tmux
+  file=$SETENVS_FILE
+  echo -e "\tINFO: Add into $file"
+  if [ ! -e "$file" ] ; then
+    touch "$file"
+  fi
+  if [ ! -w "$file" ] ; then
+    echo -e "\tINFO: cannot write to $file"
+    exit 1
+  fi
+
+  declare -a LINES=(
+    'export PATH='$APP_DIR'/bin:$PATH'
+  )
+  for line in "${LINES[@]}"; do
+    if ! grep -qF "$line" $file ; then echo "$line" >> $file ; echo -e "\tINFO: '$line' added into '$file'"; fi
+  done
+  echo -e "\tINFO: cat $file"
+  cat $file
+  echo -e "\tINFO: version is: '`tmux -V`'"
+}
+
 function rsyncRemoteFolderToLocal() {
   echo -e "\tINFO: Will copy all files '$1@$2:$3/' to your computer's '$3/'"
   rsync -avz -e ssh $1@$2:$3/ $3/
@@ -309,11 +354,15 @@ while test $# -gt 0; do
       echo -e "\t-ip |--install_python_pip    Install Python&Pip as Local User"
       echo -e "\t-ir |--install_ruby_sinatra  Install Ruby as Local User"
       echo -e "\t-sr |--source_ruby_sinatra   Source Ruby as Local User"
+      echo -e "\t-it |--install_tmux          Install Tmux as Local User"
       echo ""
       echo -e "\t-rs |--rsync                 Copy from <remote_server>:<directory>"
       echo -e "\t-sci|--ssh_copy_id           Copy MY_KEY on <MY_USER@MY_SERVER>"
       echo "#--------------------------------------------------------------------"
       exit 0
+      ;;
+    -it|--install_tmux)
+      installTmux
       ;;
     -rs|--rsync)
       echo -n "User: "
