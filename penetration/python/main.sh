@@ -10,7 +10,6 @@ function macChanger() {
 function basicSniffer() {
   echo -e "\tINFO: show how Sniffer works"
   less BasicSniffer.py
-
 } 
 
 function bruteForce() {
@@ -61,7 +60,7 @@ function tcpSniffer() {
 }
 
 function scanNetwork() {
-  nmap -sS 192.168.1.0/24
+  nmap -sS -A 192.168.1.0/24
 }
 
 function scapySniffer() {
@@ -89,47 +88,46 @@ while test $# -gt 0; do
       echo "#--------------------------------------------------------------------"
       echo "#  App: $APP_NAME"
       echo "#--------------------------------------------------------------------"
-      echo "Options:"
       echo ""
-      echo -e "\t-h|--help           help"
-      echo -e "\t--basic-sniffer     cat|show how sniffer works"
-      echo -e "\t--brute-force       FTP by bruto force with passwords.txt"
-      echo -e "\t--mac-changer       change mac address"
-      echo -e "\t--port-scanner      Port Scanner"
-      echo -e "\t--start-tcp-server  Start TCP Server"
-      echo -e "\t--start-udp-server  Start UDP Server"
-      echo -e "\t--tcp-sniffer       TCP Sniffer"
-      echo -e "\t--scan-network      scan network"
-      echo -e "\t--scapy-sniffer     more advance TCP Sniffer"
+      echo -e "\t-h  |--help              help"
+      echo -e "\t-bs |--basic-sniffer     cat|show how sniffer works"
+      echo -e "\t-bf |--brute-force       FTP by bruto force with passwords.txt"
+      echo -e "\t-mc |--mac-changer       change mac address"
+      echo -e "\t-ps |--port-scanner      Port Scanner"
+      echo -e "\t-sts|--start-tcp-server  Start TCP Server"
+      echo -e "\t-sus|--start-udp-server  Start UDP Server"
+      echo -e "\t-ts |--tcp-sniffer       TCP Sniffer"
+      echo -e "\t-sn |--scan-network      scan network"
+      echo -e "\t-ss |--scapy-sniffer     more advance TCP Sniffer"
       echo ""
       echo "#--------------------------------------------------------------------"
       exit 0
       ;;
-    --mac-changer)
+    -mc|--mac-changer)
       macChanger
       ;;
-    --basic-sniffer)
+    -bs|--basic-sniffer)
       basicSniffer
       ;;
-    --brute-force)
+    -bf|--brute-force)
       bruteForce
       ;;
-    --port-scanner)
+    -ps|--port-scanner)
       portScanner
       ;;
-    --start-tcp-server)
+    -sts|--start-tcp-server)
       startTcpServer
       ;;
-    --start-udp-server)
+    -sus|--start-udp-server)
       startUdpServer
       ;;
-    --tcp-sniffer)
+    -tc|--tcp-sniffer)
       tcpSniffer
       ;;
-    --scan-network)
+    -sn|--scan-network)
       scanNetwork
       ;;
-    --scapy-sniffer)
+    -ss|--scapy-sniffer)
       scapySniffer
       ;;
     *)
@@ -138,5 +136,4 @@ while test $# -gt 0; do
   esac
   exit 0
 done
-
 

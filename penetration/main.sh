@@ -8,7 +8,7 @@ DIR_NAME=$(dirname $(readlink -f $0))
 function harvester() {
   APP_NAME='harvester'
   mkdir -p $DIR_NAME/$APP_NAME && cd $DIR_NAME/$APP_NAME
-  echo -en "\tEnter: 'install' 'README' 'USAGE' 'run|*': $APP_NAME: "
+  echo -en "\tEnter: <install|README|USAGE|run|*>: for '$APP_NAME': "
   read option
   case "$option" in
     "install")
@@ -21,11 +21,11 @@ function harvester() {
       less $readme
       echo -e "\tINFO SOURCE: $readme"
     ;;
-    "usage")
+    "USAGE")
       cd $DIR_NAME/$APP_NAME/theHarvester-master
       ./theHarvester.py	–h
     ;;
-    *)
+    run|*)
       echo -e "\tINFO Harvester"
       echo -en "\tEnter target domain: "
       read target_domain
@@ -172,26 +172,24 @@ function medusa() {
 function metasploit() {
   echo -e "\tINFO: https://www.metasploit.com/"
   APP_NAME='msfconsole'
-  echo -en "\tEnter: 'install' 'run|*': for $APP_NAME: "
+  echo -en "\tEnter: '-d|--download' '-rc|--run|*': for '$APP_NAME': "
   read option
   case "$option" in
-    "install")
-      echo -e "\tINFO:"
+    "-d|--download")
+      echo -e "\tINFO: $DIR_NAME/$APP_NAME"
       mkdir -p $DIR_NAME/$APP_NAME && cd $DIR_NAME/$APP_NAME
-      #wget http://downloads.metasploit.com/data/releases/metasploit-latest-linux-x64-installer.run
+      wget http://downloads.metasploit.com/data/releases/metasploit-latest-linux-x64-installer.run
       chmod +x metasploit-latest-linux-x64-installer.run
       ./metasploit-latest-linux-x64-installer.run
       curl localhost:3790
-      
     ;;
-    *)
+    -run|*)
       echo -e "\tINFO:"
       cd $DIR_NAME/$APP_NAME
       msfconsole
     ;;
   esac
 }
-
 
 SSH_PORTS=( 22 )
 HTTP_PORTS=( 443 80 )
@@ -215,7 +213,6 @@ while test $# -gt 0; do
       echo -e "\t-1|--nmap          nmap -p 21,80 <dommain>"
       echo -e "\t-2|--nc            ssh,http; nc -v <serv> write: HEAD / HTTP/1.0"
       echo ""
-      echo -e "\t--harvester        gathering e-mail, suddomain, ports .."
       echo "# GET INFOS:"
       echo "#--------------------------------------------------------------------"
       echo -e "\t--harvester        gathering e-mail, suddomain, ports .."

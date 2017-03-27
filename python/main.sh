@@ -52,10 +52,13 @@ function rsyncRemoteFolderToLocal() {
 
 function ldapSearch() {
   # http://www.flatmtn.com/article/setting-ldap-back-sql
-  ldapsearch -x -b 'dc=example,dc=com' 'objectclass=*'
-  ldapsearch -x -b 'o=samba,dc=example,dc=com' 'objectclass=sambaAccount'
-
-  # Search everything from tree base down with login as cn=manager and prompt for password:
+  echo -e "\tINFO: <ldapsearch -x -b 'dc=example,dc=com' 'objectclass=*'|\
+    ldapsearch -x -b 'o=samba,dc=example,dc=com' 'objectclass=sambaAccount>'"
+  echo -e "\tINFO: Search everything from tree base down \
+    with login as cn=manager and prompt for password:"
+  echo -n "Enter ldap search:"
+  exit 1
+  read ldap_search
   ldapsearch -x -b 'dc=example,dc=com' \
   'objectclass=*' -D 'cn=manager,dc=example,dc=com' -W
 }
