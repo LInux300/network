@@ -19,3 +19,4 @@ export GOROOT=$HOME/go/go1.8
 export GOPATH=$HOME/go/work
 export GOBIN=$GOROOT/bin
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+export PATH=/home/xp/tmux/bin:$PATH
