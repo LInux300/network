@@ -198,4 +198,3 @@ class C
   undef method_name
 end
 
-
